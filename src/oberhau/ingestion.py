@@ -6,6 +6,7 @@ import os
 import shutil
 import stat
 import tempfile
+import time
 import zipfile
 from pathlib import Path
 from threading import Event
@@ -42,6 +43,7 @@ LANGUAGES = {
 def file_index(root: Path, limits: Limits, cancel: Event) -> dict[str, str]:
     result: dict[str, str] = {}
     total = 0
+    deadline = time.monotonic() + limits.timeout
     for directory, dirs, files in os.walk(root, followlinks=False):
         dirs[:] = sorted(
             d
@@ -53,6 +55,8 @@ def file_index(root: Path, limits: Limits, cancel: Event) -> dict[str, str]:
         for name in sorted(files):
             if cancel.is_set():
                 raise Cancelled()
+            if time.monotonic() > deadline:
+                raise OberhauError("Source indexing deadline exceeded")
             path = Path(directory) / name
             relative = path.relative_to(root).as_posix()
             confined(root, relative)

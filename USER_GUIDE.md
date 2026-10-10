@@ -1,10 +1,15 @@
 # User guide
 
-Development 0.5.0 includes **Pesquisa contextual / Research**. Choose a project on Scanner, run
+Version 1.0 includes **Pesquisa contextual / Research**. Choose a project on Scanner, run
 contextual research, inspect provisional paths/control evidence and use existing finding review
 and report tools. AI investigation and disposable synthetic HTTP regressions are separate explicit
 actions. Offline schedules accept the research profile; source refresh remains explicit.
 [RESEARCH.md](RESEARCH.md) documents commands, the measured benchmark and precise coverage limits.
+
+The Research tabs use filterable, paginated rows with expandable evidence and readable details.
+Use **View evidence source** to open a hash-verified, redacted snapshot excerpt. **Technical JSON**
+is optional. **Automation Control** provides research/storage limits and unreferenced-cache preview
+and cleanup. Completed evidence and human review history are never automatically deleted.
 
 1. Launch portable `Oberhau.exe`, or `Launch-Oberhau.cmd` after source installation. Complete first-run resource setup; optionally import the labeled lab.
 2. Add a program under Programs if applicable. Record the official policy URL and exact scope

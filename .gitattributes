@@ -1,0 +1,3 @@
+# Preserve the byte hashes of frozen evaluation data across Windows checkouts.
+evaluation/*.json text eol=lf
+src/oberhau/assets/research_benchmark.json text eol=lf

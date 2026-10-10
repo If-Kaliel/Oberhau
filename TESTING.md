@@ -1,5 +1,20 @@
 # Verification
 
+The scoped 1.0 acceptance suite is documented in [RELEASE_1_0.md](RELEASE_1_0.md).
+`scripts/prepare_external_evaluation.py` explicitly downloads 24 original source/license/expectation
+files at fixed commits; subsequent preparation rejects changed hashes. `scripts/evaluate_external.py`
+scores 60 frozen Bandit/WebGoat cases, retains misses/unlabelled predictions and separately observes
+the unlabelled Prisma subset. The baseline is versioned; final improvements used this dataset and
+are not a blind score. Taxonomy's full 188-file source snapshot and manual counterevidence notes
+are recorded in `evaluation/taxonomy-application.json`. External source is never executed.
+
+`scripts/stress_release.py` verifies ten repeated 1,501-file runs, complete-cache reuse, cancellation
+without partial contextual findings, owned process loss and startup recovery. Retention regressions
+prove historical symbols and human decisions survive cleanup and budgets stop new research writes.
+Qt regressions verify pagination/filtering, verified source navigation, altered-source rejection and
+JSON opt-in. `scripts/verify_windows.py` verifies the actual extracted ZIP and old-package upgrades
+in a restricted fresh environment on the current host. A clean OS/VM is not claimed as tested.
+
 Parser regressions use real owned child processes to verify worker reuse, non-execution of source,
 crash containment, cancellation during a blocked large pipe write, malformed/identity-mismatched
 protocol responses, failed-run publication and Windows allocation denial above the memory ceiling.

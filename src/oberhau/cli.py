@@ -29,6 +29,10 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("diagnostics")
     commands.add_parser("projects")
     commands.add_parser("metrics")
+    maintenance = commands.add_parser(
+        "maintenance", help="Preview orphan research cache cleanup; preserve all evidence history"
+    )
+    maintenance.add_argument("--apply", action="store_true")
     commands.add_parser(
         "benchmark", help="Evaluate trusted synthetic positive/negative cases independently"
     )
@@ -199,6 +203,10 @@ def main(argv: list[str] | None = None) -> int:
             output = db.query("SELECT id,name,origin,demo,created FROM projects")
         elif args.command == "metrics":
             output = db.metrics()
+        elif args.command == "maintenance":
+            from oberhau.maintenance import maintain
+
+            output = maintain(engine, args.apply, cancel)
         elif args.command == "benchmark":
             from oberhau.benchmark import evaluate
 

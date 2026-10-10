@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0 — scoped offline investigation workbench
+
+- Explicit release scope and acceptance evidence in RELEASE_1_0.md; Directive 002 remains broader.
+- Structured/filterable research tabs, paginated rows, expandable evidence, verified historical source excerpts and optional JSON; pt-BR investigation labels and consistent tree styling.
+- Configurable logical cache/history/run admission limits, conservative unreferenced-cache preview/cleanup and startup recovery for abandoned jobs. Completed evidence and human review history are preserved.
+- 60 frozen external cases from Bandit/WebGoat, baseline plus measured fixes; real Prisma/Taxonomy source observations and 1,501-file repeated-run/cancellation/process-loss QA.
+- Python SQL formatting calls and implicit/literal-truthy shell boundaries gain explicit warning coverage with negative controls.
+- Source indexing deadline and explicit SQLite backup/restore connection cleanup on Windows.
+- Portable release QA from the actual extracted ZIP, fresh restricted environment, manifest checks and previous-package data upgrades. The existing Windows host is verified; a clean OS/VM is not claimed.
+
 ## 0.5.1 — parser hardening and recognizable brand
 
 - Black minimalist skull with descending sword; vector sidebar/window icon and generated Windows EXE icons.

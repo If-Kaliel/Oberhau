@@ -398,6 +398,9 @@ def run_research(
         "SELECT manifest,data FROM research_runs WHERE project_id=? AND status='completed' ORDER BY id DESC LIMIT 1",
         (project["id"],),
     )
+    from oberhau.maintenance import reserve
+
+    storage_budget = reserve(db, history=len(json.dumps(manifest).encode()), project=project["id"])
     run_id = db.execute(
         "INSERT INTO research_runs(project_id,scan_id,status,started,commit_hash,manifest) VALUES(?,?,'running',?,?,?)",
         (project["id"], scan_id, now(), metadata.get("commit"), json.dumps(manifest)),
@@ -436,6 +439,7 @@ def run_research(
                 # Cache contains redacted observations, no executable trees or raw source.
                 summary = FileSummary.model_validate(sanitize(summary.model_dump()))
                 parsed += 1
+                reserve(db, cache=len(summary.model_dump_json().encode()), current=storage_budget)
                 db.execute(
                     "INSERT OR REPLACE INTO research_files VALUES(?,?,?,?,?)",
                     (project["id"], path, digest, PARSER_VERSION, summary.model_dump_json()),
@@ -553,6 +557,7 @@ def run_research(
             )
             findings.append(finding)
         result = sanitize(result)
+        reserve(db, history=len(json.dumps(result).encode()), current=storage_budget)
         with db.connect() as connection:
             for finding in findings:
                 checkpoint(cancel, deadline)

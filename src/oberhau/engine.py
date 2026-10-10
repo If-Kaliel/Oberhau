@@ -91,6 +91,14 @@ class Engine:
         home.mkdir(parents=True, exist_ok=True)
         with store_lock(home):
             self.db = Database(home / "oberhau.sqlite3")
+            # The exclusive store lock proves no cooperating scan/import/backup is alive.
+            # Surface recovery on startup, even before another scan of the same project.
+            with self.db.connect() as connection:
+                for table in ("research_runs", "scanner_runs", "scans"):
+                    connection.execute(
+                        f"UPDATE {table} SET status='interrupted',finished=? WHERE status IN ('running','pending')",
+                        (now(),),
+                    )
             self.limits = Limits.model_validate(self.db.setting("limits", {}))
             self.ingestion = Ingestion(self.db, home, self.limits)
         self.registry = Registry()

@@ -1,6 +1,13 @@
 # Architecture
 
-0.5.1 extends the domain-only [research subsystem](RESEARCH.md): `framework_analysis` indexes
+`maintenance` measures logical research JSON, enforces admission budgets and removes only cache
+summaries unreferenced by completed historical runs under the cooperative storage lock. It preserves
+source snapshots, findings, observations, reviews and reports. Startup recovery holds that same lock
+before marking abandoned jobs interrupted. Research assistance also holds the lock while reserving
+and publishing history. `desktop/research_results` renders filterable/paginated rows and plain text;
+source navigation delegates to the hash-checked, confined ResearchTools excerpt API.
+
+1.0 extends the domain-only [research subsystem](RESEARCH.md): `framework_analysis` indexes
 Tree-sitter/Python syntax, `research_models` validates bounded evidence and `research` constructs
 graphs/hypotheses, reuses per-file cache and ranks the queue. `git_intelligence` compares retained
 observations; `research_assistant` exposes typed read tools to existing Ollama. `local_validation`

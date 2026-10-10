@@ -1,12 +1,12 @@
 # Roadmap against the master specification
 
-Directive 002 on `testes` reaches 0.5.1: selected framework syntax profiles, evidence graph,
+The scoped 1.0 on `testes` includes selected framework syntax profiles, evidence graph,
 provisional authorization research, direct-call dependencies, queue, typed Qwen/fallback, retained
-security deltas, two HTTP labs, a 12-case evaluation and a backend-connected Research page.
+security deltas, two HTTP labs, a 12-case synthetic benchmark, external evaluation and a structured Research page.
 [RESEARCH.md](RESEARCH.md) records exact subsets and acceptance status. Broad capabilities below
 remain pending; general automatic auth/IDOR detection is broader than the narrow new review signals.
 Next: Java/C# service/DI bindings, global policy applicability, stronger identity/filter/branch analysis,
-externally curated evaluation, cache retention, global OS quotas, checkpoints,
+broader blind external evaluation, whole-store retention, global OS quotas, checkpoints,
 optional source monitoring and notifications. No active target executor/disclosure was introduced.
 
 Version 0.4.0 delivers a usable native workbench for authorized source research. The roadmap
@@ -22,13 +22,15 @@ Windows x64 portable GUI/CLI EXEs with dynamic Qt, complete library sources/noti
 Remaining implementation order:
 
 1. Harden Windows filesystem reparse/TOCTOU handling, trusted executable configuration/signatures,
-   OS CPU/RAM/disk quotas, retention controls and signed/encrypted research archives.
+   OS CPU/RAM/disk quotas, whole-store retention and signed/encrypted research archives.
+   Logical research admission limits and history-preserving orphan cache maintenance ship in 1.0.
 2. More ecosystems and Java advisory cache setup; freshness policy, trusted custom rule management,
    broader framework coverage, semantic fingerprints, branch/interprocedural analysis and checkpoints.
 3. Token-aware Qwen chunking, evidence citations, additional claim checks and explicit retry policy.
    Current source slices and ten Semgrep rules are bounded review signals, not broad semantic proof.
 4. More trusted validation recipes and isolated local HTTP/Docker labs. Never run arbitrary imported
-   source automatically. Current reproduction is restricted to the checksum-matched SQL fixture.
+   source automatically. Current reproduction uses the checksum-matched SQL fixture and two fixed
+   synthetic loopback HTTP recipes, never an imported application.
 5. Full policy/authorization lifecycle, eligibility/range/prohibition editors and reviewed local
    active executors. External ZAP/Nuclei would require URL/DNS/redirect/port/category/budget controls.
 6. Scheduler source-change checks, explicit advisory-refresh schedules, persisted notifications,

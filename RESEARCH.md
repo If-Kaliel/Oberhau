@@ -1,8 +1,21 @@
 # Contextual research / Directive 002
 
-Development 0.5.1 continues the bounded research workflow introduced in 0.5.0. The entire
+Version 1.0 continues the bounded research workflow introduced in 0.5.0. The entire
 directive is not complete. Imported source remains data: parsing never loads its dependencies,
 starts applications, builds a project or executes its functions. Main retains the stable release.
+
+[RELEASE_1_0.md](RELEASE_1_0.md) defines the scoped release and external evaluation results.
+The Research tabs now use readable/filterable lists, expandable evidence and 200-row pagination;
+the filter searches all rows, not just the current page. Select an evidence row and use **View evidence
+source / Ver código da evidência** to read a hash-verified historical excerpt. Technical JSON is opt-in.
+Failed, cancelled and interrupted research runs are visible; they contain no completed contextual
+verdict. Startup recovery marks abandoned jobs interrupted before another project scan is required.
+
+**Automation Control / Controle de automação** also exposes configurable logical storage limits:
+64 MB cache, 256 MB research/assistant JSON and 500 runs/project by default. At capacity, research
+admission stops with a recovery instruction. Preview/apply cleanup removes only cache records unused
+by completed historical runs. Human decisions, run evidence and source snapshots are preserved.
+These limits cover research JSON, not total SQLite/WAL, scanner history, snapshots or an OS disk quota.
 
 Select an authorized project on Scanner, then use **Pesquisa contextual / Research**, or run:
 
@@ -115,7 +128,8 @@ before source is sent: a configurable committed-memory ceiling (512 MiB default,
 and kill-on-job-close cleanup apply to the worker. Attachment failure fails the run. This is not
 a filesystem/network/token sandbox; startup before job attachment and parent graph/SQLite work
 remain outside that memory ceiling. Other platforms retain worker/deadline isolation without this
-Windows quota. Cache retention, fair queues, resumable checkpoints, global CPU/RAM/disk quotas
+Windows quota. Research JSON admission limits and conservative orphan-cache cleanup are available;
+whole-store retention, fair queues, resumable checkpoints, global CPU/RAM/disk quotas
 and optional GPU auto-pause remain pending.
 
 The separate benchmark has 12 original MIT synthetic code cases: six expected signals and six
@@ -124,7 +138,10 @@ analyzer tests; no blinded or external independent curation is claimed. Dataset 
 evaluations. Reports retain expected/detected/missed signals, false positives, precision, recall,
 time, parent Python allocation/Windows working set and parser Job Object peak committed memory,
 with distinct scope caveats. This small dataset is
-not representative; no zero-day/production detection claim follows. An external licensed corpus is pending.
+not representative; no zero-day/production detection claim follows. The additional 1.0 evaluation
+uses 60 fixed Bandit/WebGoat cases and records all misses, plus unlabelled real application
+observations. [RELEASE_1_0.md](RELEASE_1_0.md) distinguishes baseline, subsequent fixes and scope.
+A broader blind/representative real-world evaluation remains future work.
 
 | Directive criteria | Demonstrated subset / limitations |
 |---|---|
@@ -137,7 +154,7 @@ not representative; no zero-day/production detection claim follows. An external 
 | 10–12 | SQL and synthetic HTTP regressions, fixed static controls; imported applications never executed |
 | 13 | File cache plus full contextual rebuild and retained security deltas; remote monitoring pending |
 | 14 | Existing Markdown/HTML/JSON/SARIF exports include hypotheses and cross-file integrity |
-| 15 | Real measurements on small separate synthetic dataset; externally curated realistic benchmark pending |
+| 15 | Original synthetic benchmark plus 60 upstream-source-labelled cases and real application observations; broader blind/representative evaluation pending |
 
 Broader dataflow/business-logic proof, frontend/backend boundaries, service dispatch, full policy
 applicability, unattended multi-stage refresh/AI/lab automation, notifications, expanded lab classes,

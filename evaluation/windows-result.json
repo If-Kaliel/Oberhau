@@ -1,0 +1,360 @@
+{
+  "system_only_path": true,
+  "extracted_release": "Oberhau-1.0.0-windows-x64.zip",
+  "fresh_environment": true,
+  "manifest_files_verified": 421,
+  "limitations": "Fresh extraction, application data and restricted environment on the existing Windows host; not a newly installed OS or clean virtual machine.",
+  "seconds": 57.23400000000038,
+  "project": 1,
+  "scan": 1,
+  "research": {
+    "status": "completed",
+    "index": {
+      "parsed": 2,
+      "reused": 0,
+      "bytes": 2293,
+      "version": "contextual-2",
+      "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+      "parser_timeout_seconds": 10,
+      "parser_memory": {
+        "enforced": true,
+        "limit_committed_bytes": 536870912,
+        "peak_committed_bytes": 29220864,
+        "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
+      }
+    },
+    "hypotheses": 1
+  },
+  "assistant": "deterministic",
+  "export_controls": [
+    {
+      "case": "wrapped callback",
+      "hypotheses": 0,
+      "status": "completed"
+    },
+    {
+      "case": "named function expression",
+      "hypotheses": 1,
+      "status": "completed"
+    }
+  ],
+  "minified_routes": 2,
+  "benchmark": {
+    "dataset": "Oberhau contextual authorization evaluation v1",
+    "sha256": "36787d3b9694b089ed6f3a806aeda6e9c2b5e3d0c7bc145d8c66d02d72a7ecb6",
+    "cases": [
+      {
+        "id": "next-document-lookup",
+        "framework": "next-node",
+        "expected": [
+          "resource-authorization-context"
+        ],
+        "detected": [
+          "resource-authorization-context"
+        ],
+        "missed": [],
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.625
+      },
+      {
+        "id": "next-owner-filter",
+        "framework": "next-node",
+        "expected": [],
+        "detected": [],
+        "missed": [],
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.01599999999962165
+      },
+      {
+        "id": "next-published-catalog",
+        "framework": "next-node",
+        "expected": [],
+        "detected": [],
+        "missed": [],
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.014999999999417923
+      },
+      {
+        "id": "next-imported-document",
+        "framework": "next-node",
+        "expected": [
+          "resource-authorization-context"
+        ],
+        "detected": [
+          "resource-authorization-context"
+        ],
+        "missed": [],
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.01599999999962165
+      },
+      {
+        "id": "next-fixed-constant",
+        "framework": "next-node",
+        "expected": [],
+        "detected": [],
+        "missed": [],
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.014999999999417923
+      },
+      {
+        "id": "spring-account-resource",
+        "framework": "spring",
+        "expected": [
+          "resource-authorization-context"
+        ],
+        "detected": [
+          "resource-authorization-context"
+        ],
+        "missed": [],
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.0
+      },
+      {
+        "id": "spring-resource-policy",
+        "framework": "spring",
+        "expected": [],
+        "detected": [],
+        "missed": [],
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.01600000000325963
+      },
+      {
+        "id": "spring-peer-policy-difference",
+        "framework": "spring",
+        "expected": [
+          "access-policy-inconsistency"
+        ],
+        "detected": [
+          "access-policy-inconsistency"
+        ],
+        "missed": [],
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.0
+      },
+      {
+        "id": "spring-peer-policies-equal",
+        "framework": "spring",
+        "expected": [],
+        "detected": [],
+        "missed": [],
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.01599999999962165
+      },
+      {
+        "id": "aspnet-invoice-resource",
+        "framework": "aspnet",
+        "expected": [
+          "resource-authorization-context"
+        ],
+        "detected": [
+          "resource-authorization-context"
+        ],
+        "missed": [],
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.0
+      },
+      {
+        "id": "aspnet-invoice-owner",
+        "framework": "aspnet",
+        "expected": [],
+        "detected": [],
+        "missed": [],
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.014999999999417923
+      },
+      {
+        "id": "aspnet-anonymous-override",
+        "framework": "aspnet",
+        "expected": [
+          "access-policy-inconsistency"
+        ],
+        "detected": [
+          "access-policy-inconsistency"
+        ],
+        "missed": [],
+        "true_positives": 1,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "seconds": 0.01599999999962165
+      }
+    ],
+    "true_positives": 6,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "seconds": 0.75,
+    "peak_python_bytes": 259810,
+    "process_memory": {
+      "available": true,
+      "working_set_bytes": 53383168,
+      "peak_working_set_bytes": 53383168,
+      "private_commit_bytes": 32264192,
+      "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+    },
+    "parser_memory": {
+      "enforced": true,
+      "limit_committed_bytes": 536870912,
+      "peak_committed_bytes": 29515776,
+      "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
+    },
+    "memory_limitations": "tracemalloc and process_memory observe the parent only. parser_memory measures separate Windows job committed memory, not parser RSS or GPU. A pre-existing tracer includes prior/concurrent activity.",
+    "categories": [
+      "access-policy-inconsistency",
+      "resource-authorization-context"
+    ],
+    "limitations": "Small synthetic static-code dataset; not representative of production projects or zero-day discovery. Labels describe intentionally omitted controls in fixtures, not exploit confirmation. This separate evaluation set was first executed after the initial analyzer regression tests; no independent external curator or blind evaluation is claimed."
+  },
+  "labs_passed": true,
+  "backup_restore": true,
+  "migrations": [
+    {
+      "from": "0.4.0",
+      "status": "passed",
+      "schema": 4,
+      "project_reports_reviews_evidence_preserved": true
+    },
+    {
+      "from": "0.5.1",
+      "status": "passed",
+      "schema": 4,
+      "project_reports_reviews_evidence_preserved": true
+    }
+  ],
+  "gui": {
+    "desktop": {
+      "screenshot": true,
+      "metrics": {
+        "projects": 1,
+        "scans": 1,
+        "files": 4,
+        "reports": 0,
+        "findings": [
+          {
+            "status": "Detected",
+            "n": 6
+          }
+        ],
+        "rewards": {
+          "amount": 0,
+          "hours": 0
+        },
+        "scanners": [
+          {
+            "scanner": "builtin",
+            "findings": 6,
+            "observations": 6,
+            "false_positives": 0,
+            "verified": 0
+          }
+        ],
+        "severity": [
+          {
+            "severity": "high",
+            "n": 5
+          },
+          {
+            "severity": "medium",
+            "n": 1
+          }
+        ],
+        "confidence": [
+          {
+            "confidence": "high",
+            "n": 2
+          },
+          {
+            "confidence": "medium",
+            "n": 4
+          }
+        ],
+        "manual_outcomes": [],
+        "scan_seconds": 0.10900000000037835
+      }
+    },
+    "research": {
+      "screenshot": true,
+      "metrics": {
+        "projects": 1,
+        "scans": 1,
+        "files": 2,
+        "reports": 0,
+        "findings": [
+          {
+            "status": "Suspected",
+            "n": 1
+          }
+        ],
+        "rewards": {
+          "amount": 0,
+          "hours": 0
+        },
+        "scanners": [
+          {
+            "scanner": "contextual",
+            "findings": 1,
+            "observations": 1,
+            "false_positives": 0,
+            "verified": 0
+          }
+        ],
+        "severity": [
+          {
+            "severity": "medium",
+            "n": 1
+          }
+        ],
+        "confidence": [
+          {
+            "confidence": "low",
+            "n": 1
+          }
+        ],
+        "manual_outcomes": [],
+        "scan_seconds": 0.9679999999971187
+      },
+      "research_status": "completed",
+      "index": {
+        "parsed": 2,
+        "reused": 0,
+        "bytes": 2686,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": true,
+          "limit_committed_bytes": 536870912,
+          "peak_committed_bytes": 29593600,
+          "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
+        }
+      },
+      "hypotheses": 1
+    }
+  },
+  "executables": {
+    "Oberhau.exe": "8dfca3b1973a050bb52d5c89f8df124fe5885090d5ebdfd78fe57c216f621569",
+    "oberhau-cli.exe": "9a20245be24b635fd42a060f2a0867bb921e930ecbbb79bc77787abf147dc7f9"
+  }
+}

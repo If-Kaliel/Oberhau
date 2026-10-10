@@ -1,6 +1,6 @@
 # Security model
 
-0.5.1 research stays offline. Tree-sitter/Python AST parse imported source as data in a separate
+1.0 research stays offline. Tree-sitter/Python AST parse imported source as data in a separate
 killable worker. Per-file wall deadlines, cancellation and bounded JSON are parent-enforced.
 On Windows the worker joins a private Job Object before receiving source, with committed-memory
 ceiling and kill-on-close cleanup. The ceiling covers committed virtual memory, not RSS, GPU or
@@ -15,7 +15,7 @@ does not prove prose truth. AI cannot execute commands, refresh networks or chan
 Disposable HTTP recipes serve fixed synthetic data on random loopback ports, accept no targets,
 and are deliberately unassociated with imported findings. See RESEARCH.md for remaining controls.
 
-Offline Research is the only project execution mode available in 0.4.0. There is no external active scanner,
+Offline Research is the only project execution mode available in 1.0. There is no external active scanner,
 credential validation, destructive test, report submission or arbitrary target execution feature.
 The policy validator rejects ambiguous scope, excludes hosts, requires exact lowercase hosts,
 reviewed revision, category/automation permission and explicit approval. It is preparatory logic,
@@ -68,7 +68,10 @@ research tasks have auditable persisted results; rotating logs avoid unlimited g
 jobs are offline and opt-in. Shutdown cancels workers and external process trees.
 
 Limits do not enforce OS-level CPU/RAM quotas. Plugins execute as the current Windows user and must
-be trusted. Source snapshots and old history are retained until an operator manages retention.
+be trusted. Research JSON has configurable cache/history/run admission limits; unreferenced cache
+cleanup preserves completed evidence and human decisions. These logical budgets do not cap total
+SQLite/WAL, snapshots, scanner history or disk use. Source snapshots and old history are retained
+until an operator archives them using complete backup and a separate data directory.
 
 Public Git import accepts credential-free HTTPS GitHub/GitLab/Codeberg URLs and explicit branch/tag
 selection. A shallow no-checkout clone runs with isolated configuration, empty templates, disabled

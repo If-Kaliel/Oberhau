@@ -1,0 +1,541 @@
+{
+  "method": "Frozen before initial evaluation. Upstream-authored sources and comments; mapping to Oberhau categories by this release reviewer, not a blind third-party audit. Risky syntax is a review signal, not exploit proof.",
+  "cases": [
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 4,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 5,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 6,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 7,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 8,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 9,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 12,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 13,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 14,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 17,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 18,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 19,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 20,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 21,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 23,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 24,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 25,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 28,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 29,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 30,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 31,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 32,
+      "positive": true,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 35,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 36,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 37,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 38,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 39,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL execution",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 50,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/sql_statements.py",
+      "line": 51,
+      "positive": false,
+      "rule": "python-sql-format",
+      "scope": "SQL construction / false-positive control",
+      "basis": "Upstream #bad, #good and #real world false positives sections"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 11,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 12,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 14,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 15,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 16,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 18,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 21,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 23,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 24,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 26,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 27,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 28,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 30,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 31,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 33,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 34,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 36,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 37,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 38,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 41,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 43,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 49,
+      "positive": true,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 56,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 57,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 60,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/subprocess_shell.py",
+      "line": 51,
+      "positive": false,
+      "rule": "python-shell",
+      "scope": "Shell syntax boundary",
+      "basis": "Upstream subprocess fixture; explicit true/false/absent shell, unconditional shell helpers; local Popen is a negative control"
+    },
+    {
+      "project": "bandit",
+      "path": "examples/exec.py",
+      "line": 1,
+      "positive": true,
+      "rule": "python-dynamic-code",
+      "scope": "Dynamic execution boundary",
+      "basis": "Upstream exec fixture"
+    },
+    {
+      "project": "webgoat",
+      "path": "src/main/java/org/owasp/webgoat/lessons/idor/IDORViewOtherProfile.java",
+      "method": "completed",
+      "positive": true,
+      "scope": "Authorization lesson",
+      "basis": "Upstream deliberately vulnerable lesson and explicitly named admin-fix control; custom session/domain logic exceeds current detector patterns"
+    },
+    {
+      "project": "webgoat",
+      "path": "src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfile.java",
+      "method": "completed",
+      "positive": true,
+      "scope": "Authorization lesson",
+      "basis": "Upstream deliberately vulnerable lesson and explicitly named admin-fix control; custom session/domain logic exceeds current detector patterns"
+    },
+    {
+      "project": "webgoat",
+      "path": "src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+      "method": "usersService",
+      "positive": true,
+      "scope": "Authorization lesson",
+      "basis": "Upstream deliberately vulnerable lesson and explicitly named admin-fix control; custom session/domain logic exceeds current detector patterns"
+    },
+    {
+      "project": "webgoat",
+      "path": "src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+      "method": "usersFixed",
+      "positive": false,
+      "scope": "Authorization lesson",
+      "basis": "Upstream deliberately vulnerable lesson and explicitly named admin-fix control; custom session/domain logic exceeds current detector patterns"
+    }
+  ]
+}

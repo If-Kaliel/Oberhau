@@ -2,16 +2,16 @@
 
 **Security Research Workbench · Windows · local-first · no paid runtime services**
 
-Development on `testes` is **0.5.1**: [contextual research](RESEARCH.md) adds selected framework
-syntax profiles, evidence graphs, provisional authorization hypotheses, review queue, typed local
-Qwen investigation, security deltas, synthetic HTTP labs and a small measured detection benchmark.
-Select **Pesquisa contextual / Research** or use `scan ID --profile research`. The stable 0.4.0
-release and `main` are preserved; the complete Directive 002 remains broader than this milestone.
+**1.0.0** is a native desktop and CLI for authorized offline source investigation, with a bounded
+release scope described in [RELEASE_1_0.md](RELEASE_1_0.md). Selected framework syntax profiles,
+evidence graphs and authorization review hypotheses support human investigation. The Research page
+has filterable rows, expandable evidence, verified source navigation and optional technical JSON.
+Research storage limits and conservative cache cleanup preserve completed history and human decisions.
+External evaluation records both detected and missed cases; it does not establish field precision.
+The complete Directive 002 remains broader than 1.0. Development stays on `testes`; `main` and
+the previous 0.4.0 release are preserved until a separate merge/publication.
 
-0.5.1 adds a recognizable black skull/sword emblem, killable parser workers with Windows memory
-ceilings and relative default/namespace JS imports with explicit export checks.
-
-Oberhau 0.4.0 is a working native desktop and CLI for authorized offline source research.
+Select **Pesquisa contextual / Research** or use `scan ID --profile research`.
 Import a folder, source file, ZIP or public HTTPS Git repository; scan a managed snapshot; investigate normalized warnings;
 record human decisions; reproduce the bundled SQL laboratory; generate and export review drafts.
 
@@ -45,14 +45,16 @@ Normal storage is `%LOCALAPPDATA%\Oberhau`; `OBERHAU_HOME` or `--home` changes i
 | Source investigation | Redacted excerpt, checksum check, bounded Python assignment slice and same-name caller references, history and review questions |
 | Qwen JSON drafts | Actual qwen3.5:4b inference verified; schema/claim guards, cancellable HTTP, Windows process coordination, bounded JSON and fallback |
 | Reports | Editable history and evidence-completeness checks; Markdown / escaped HTML / JSON / SARIF exports |
-| Laboratory | Bundled SQL fixture only; disposable SQLite and corrected regression |
+| Laboratory | Bundled SQL plus two trusted synthetic loopback HTTP recipes; imported applications are never executed |
+| Contextual investigation | Selected Next.js/Spring/ASP.NET syntax; provisional hypotheses, evidence tables, source verification and explicit coverage gaps |
+| Research retention | Configurable logical cache/history/run limits; preview and cleanup of unreferenced cache; no automatic deletion of evidence or review decisions |
 | In-app offline schedules | Persisted intervals, opt-in, run while GUI is open and idle |
 | Metrics and manual rewards/time | Persisted counts; no bounty predictions |
 | Portable Windows build / resource diagnostics | GUI + CLI EXEs, dynamic Qt, complete upstream sources/notices; actual RAM/NVIDIA probes |
 | External active testing | Unavailable; blocked in engine boundary |
 | Localization | English / pt-BR navigation and common controls; detailed technical messages remain English |
 
-This is a usable research release; broader master-specification capabilities remain on the roadmap.
+This is a scoped investigation release; broader master-specification capabilities remain on the roadmap.
 [ROADMAP.md](ROADMAP.md) records remaining capabilities and [WORKLOG.md](WORKLOG.md) records verification.
 Static warnings never prove reachability, exploitability, novelty or bounty eligibility.
 

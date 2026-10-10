@@ -16,6 +16,7 @@ from oberhau.framework_analysis import checkpoint
 from oberhau.ollama import Ollama, generation_lock, validate_claims
 from oberhau.research_models import EvidenceGraph, FileSummary
 from oberhau.security import confined, redact_source, sanitize
+from oberhau.storage import storage_operation
 
 
 class ResearchQuery(BaseModel):
@@ -166,6 +167,7 @@ class ResearchTools:
         return FileSummary.model_validate_json(rows[0]["data"])
 
 
+@storage_operation
 def assist(
     engine, run_id: int, ai=False, cancel: Event | None = None, iterations=3, client=None
 ) -> dict:
@@ -272,6 +274,9 @@ def assist(
             result["limitations"].append(str(error))
     result = sanitize(result)
     checkpoint(cancel, deadline)
+    from oberhau.maintenance import reserve
+
+    reserve(engine.db, history=len(json.dumps(result).encode()))
     engine.db.execute(
         "INSERT INTO research_assistance(run_id,status,data,created) VALUES(?,?,?,?)",
         (run_id, result["status"], json.dumps(result), now()),

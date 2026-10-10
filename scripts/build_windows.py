@@ -134,6 +134,11 @@ def main():
 
         windows_icon(ROOT / "build/emblem.ico")
         environment = os.environ.copy()
+        cache = (ROOT / ".oberhau/pyinstaller-cache").resolve()
+        work = (ROOT / "build/frozen").resolve()
+        if not cache.is_relative_to(ROOT.resolve()) or not work.is_relative_to(ROOT.resolve()):
+            raise RuntimeError("Build cache and work directory must remain within the workspace")
+        environment["PYINSTALLER_CONFIG_DIR"] = str(cache)
         environment["PATH"] = os.pathsep.join(
             [
                 str(Path(sys.executable).parent),
@@ -146,6 +151,7 @@ def main():
                 sys.executable,
                 "-m",
                 "PyInstaller",
+                "--clean",
                 "--noconfirm",
                 "--distpath",
                 str(ROOT / "dist"),
@@ -167,6 +173,10 @@ def main():
     notices(bundle, archives)
     for document in [ROOT / "LICENSE", *ROOT.glob("*.md")]:
         shutil.copyfile(document, bundle / document.name)
+    evidence = bundle / "evaluation"
+    evidence.mkdir(exist_ok=True)
+    for document in sorted((ROOT / "evaluation").glob("*.json")):
+        shutil.copyfile(document, evidence / document.name)
     files = {
         path.relative_to(bundle).as_posix(): {
             "sha256": checksum(path),

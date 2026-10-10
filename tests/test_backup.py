@@ -10,7 +10,7 @@ from threading import Event, Thread
 
 import pytest
 
-from oberhau.backup import BackupLimits, create_backup, restore_backup
+from oberhau.backup import BackupLimits, create_backup, publish_restore, restore_backup
 from oberhau.cli import main
 from oberhau.core import Cancelled, OberhauError, Status, now
 from oberhau.engine import ASSETS, Engine
@@ -83,7 +83,9 @@ def test_portable_research_round_trip_including_historical_evidence(engine, tmp_
         )
     # Prove recovery does not depend on the original home, including historical evidence.
     moved = tmp_path / "original-unavailable"
-    engine.home.rename(moved)
+    # Keep the original-home-unavailable assertion, allowing bounded Windows sharing
+    # contention in the setup rename just as the production restore publication does.
+    publish_restore(engine.home, moved, Event())
     recovered_home = tmp_path / "recovered"
     restore_backup(target, recovered_home)
     recovered = Engine(recovered_home)

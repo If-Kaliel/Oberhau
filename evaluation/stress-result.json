@@ -1,0 +1,297 @@
+{
+  "seconds": 380.46900000000096,
+  "source_files": 1501,
+  "completed_iterations": [
+    {
+      "iteration": 1,
+      "seconds": 32.31199999999808,
+      "index": {
+        "parsed": 1501,
+        "reused": 0,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": true,
+          "limit_committed_bytes": 536870912,
+          "peak_committed_bytes": 20246528,
+          "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 61726720,
+        "peak_working_set_bytes": 68964352,
+        "private_commit_bytes": 49340416,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 2,
+      "seconds": 16.71900000000096,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 65241088,
+        "peak_working_set_bytes": 83087360,
+        "private_commit_bytes": 52477952,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 3,
+      "seconds": 17.235000000000582,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 65961984,
+        "peak_working_set_bytes": 83087360,
+        "private_commit_bytes": 54771712,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 4,
+      "seconds": 15.625,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 68792320,
+        "peak_working_set_bytes": 83087360,
+        "private_commit_bytes": 56819712,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 5,
+      "seconds": 14.109000000000378,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 72130560,
+        "peak_working_set_bytes": 83865600,
+        "private_commit_bytes": 59830272,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 6,
+      "seconds": 20.5,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 73621504,
+        "peak_working_set_bytes": 85815296,
+        "private_commit_bytes": 61243392,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 7,
+      "seconds": 20.95300000000134,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 73986048,
+        "peak_working_set_bytes": 87281664,
+        "private_commit_bytes": 60481536,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 8,
+      "seconds": 21.48399999999674,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 74305536,
+        "peak_working_set_bytes": 89305088,
+        "private_commit_bytes": 62115840,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 9,
+      "seconds": 18.03200000000288,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 74432512,
+        "peak_working_set_bytes": 90173440,
+        "private_commit_bytes": 61648896,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    },
+    {
+      "iteration": 10,
+      "seconds": 16.625,
+      "index": {
+        "parsed": 0,
+        "reused": 1501,
+        "bytes": 841618,
+        "version": "contextual-2",
+        "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+        "parser_timeout_seconds": 10,
+        "parser_memory": {
+          "enforced": false,
+          "reason": "No Windows parser job was started"
+        }
+      },
+      "nodes": 3009,
+      "memory": {
+        "available": true,
+        "working_set_bytes": 74153984,
+        "peak_working_set_bytes": 90566656,
+        "private_commit_bytes": 61140992,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
+      }
+    }
+  ],
+  "cancellation": {
+    "cached_files": 49,
+    "resumed_index": {
+      "parsed": 1452,
+      "reused": 49,
+      "bytes": 841618,
+      "version": "contextual-2",
+      "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+      "parser_timeout_seconds": 10,
+      "parser_memory": {
+        "enforced": true,
+        "limit_committed_bytes": 536870912,
+        "peak_committed_bytes": 20058112,
+        "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
+      }
+    },
+    "partial_findings": 0
+  },
+  "process_loss": {
+    "startup_status": "interrupted",
+    "resumed_index": {
+      "parsed": 1452,
+      "reused": 49,
+      "bytes": 841618,
+      "version": "contextual-2",
+      "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+      "parser_timeout_seconds": 10,
+      "parser_memory": {
+        "enforced": true,
+        "limit_committed_bytes": 536870912,
+        "peak_committed_bytes": 20221952,
+        "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
+      }
+    }
+  },
+  "storage": {
+    "cache_bytes": 2524854,
+    "history_bytes": 14282095,
+    "cache_records": 4503,
+    "runs": 14,
+    "limits": {
+      "cache_bytes": 64000000,
+      "history_bytes": 256000000,
+      "runs_per_project": 500
+    },
+    "scope": "Logical research JSON bytes, not an OS disk quota. Snapshots, scanner history, reports and human decisions are preserved."
+  },
+  "maintenance_preview": 0,
+  "limitations": "Owned synthetic stress corpus and same host. Not representative of every large repository, not an OS quota or a clean VM test. No imported code executed."
+}

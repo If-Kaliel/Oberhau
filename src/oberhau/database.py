@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections.abc import Iterator
-from contextlib import contextmanager, nullcontext
+from contextlib import closing, contextmanager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -303,7 +303,7 @@ class Database:
         if destination.resolve() == self.path.resolve() or destination.exists():
             raise OberhauError("Backup destination must be a new file")
         destination.parent.mkdir(parents=True, exist_ok=True)
-        with self.connect() as source, sqlite3.connect(destination) as target:
+        with self.connect() as source, closing(sqlite3.connect(destination)) as target, target:
             source.backup(target)
         self.audit("database.backup", {"destination": str(destination)})
 
@@ -319,7 +319,7 @@ class Database:
         try:
             version = validate_database(connection)
             destination.parent.mkdir(parents=True, exist_ok=True)
-            with sqlite3.connect(destination) as target:
+            with closing(sqlite3.connect(destination)) as target, target:
                 connection.backup(target)
                 upgrade_database(target, version)
         finally:

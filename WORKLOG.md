@@ -1,5 +1,99 @@
 # Worklog — 2026-10-10
 
+## 1.0.0 — four scoped acceptance areas
+
+User accepted the 1.0 scope as an offline investigation workbench and requested completion of
+external evaluation, investigation usability, long-operation/retention validation and distribution.
+Implemented within `testes`; `main` remains `13f65bb6fbd31a36e3703e77b49adb8405aac605`. No release
+publication, push or merge was performed. RELEASE_1_0.md defines the supported scope and limitations.
+
+External evaluation downloaded 24 public original files/licenses at fixed commits. Sixty labels
+were frozen before the initial detector execution; source and label hashes are versioned. Initial
+score: 23 TP / 0 FP / 20 TN / 17 FN. Five explicit Python SQL/shell coverage corrections brought
+the same set to 28 TP / 0 FP / 20 TN / 12 FN, with three unlabelled predictions retained separately.
+SQL execution: 13 TP / 5 TN; shell boundary: 14 TP / 12 TN; dynamic execution: 1 TP. Nine SQL
+construction-only misses and three custom WebGoat authorization misses remain. Final scores used
+the dataset for development; no blind holdout or representative field-precision claim is made.
+The original 12-case synthetic contextual benchmark was not changed.
+
+Prisma's 14-file Next.js example subset indexed six symbols and zero supported exported entry
+points. Its zero hypotheses are not a security verdict. A full raw-blob Taxonomy snapshot at
+`298a8857c7128a0d121e7f699dfd729f23b3966d` imported 188 files, indexed 129 syntax files/121 symbols,
+found eight endpoints and four provisional signals. Manual review recorded access-helper, session
+identity and signed-webhook counterevidence; no vulnerability or false-positive verdict without
+domain/runtime review was assigned. Neither unlabelled app contributes to the confusion matrix.
+The optional Git `--ref` importer accepts branch/tag, not a raw commit: the first SHA-ref attempt
+was rejected by Git. The subsequent ordinary public clone resolved to the expected full SHA, which
+was verified before recording application results. No imported code, build or package script ran.
+
+Research tabs now use readable/filterable rows, 200-row pagination, expandable evidence, plain-text
+details and explicit JSON opt-in. Evidence navigation verifies the historical snapshot checksum and
+redacts recognized secrets. Pt-BR field labels, hypothesis titles and confirmation questions are
+translated; raw identifiers and detailed technical limitations may remain English. Native screenshots
+were reviewed and tree styling adjusted for consistent dark rows/selection. Qt tests exercise actual
+source dialogs, tamper rejection, filtering across pages, worker/lab flows and first-run setup/demo
+followed by reopening with preserved choices.
+
+Default logical research admission budgets: 64 MB syntax cache, 256 MB run/assistant JSON and
+500 runs/project, configurable through GUI settings. Storage-lock-protected maintenance previews or
+deletes only summaries unreferenced by completed historical runs, including preservation of recorded
+analyzer versions. No snapshots, hypotheses, human notes/statuses, observations or reports are erased.
+Cache/history/run-budget tests and cancellation regressions passed. This is not an OS disk quota;
+other data/store metadata can grow. Source indexing has a cooperative deadline. Startup under the
+exclusive storage lock marks abandoned pending/running jobs interrupted, preserving completed runs.
+Assistant reservations/publication also use this lock. SQLite-only backup/restore closes target
+connections explicitly; immediate Windows rename/reopen regression passed.
+
+The 1,501-file owned synthetic stress corpus passed ten consecutive complete runs, one hypothesis
+each: first indexing 32.31 s; later cache runs 14.11–21.48 s under concurrent host QA. Cancellation
+left no partial contextual findings and reused 49 cached files on the next completed run. A separately
+owned real process was terminated during indexing; startup marked its run interrupted and the next
+run reused 49 cached summaries. End-to-end stress QA: 380.469 s, cache 2,524,854 logical bytes and
+history 14,282,095 bytes; temporary data was removed. It is a synthetic stress test on this host,
+not a benchmark representative of arbitrary repositories or an OS quota test.
+
+Portable ZIP QA extracts the real archive and verifies its manifest, uses fresh user/application/temp
+directories, a clean working directory and system-only PATH with no Python/Git/scanner/Ollama paths.
+Both GUI modes, default import research, private parser memory enforcement, export controls, same-line
+route identities, deterministic assistant, unchanged benchmark, both loopback labs, maintenance and
+complete backup/restore passed. Actual 0.4.0 and 0.5.1 EXEs created legacy project/review/report data;
+the 1.0 CLI upgraded/preserved it with schema 4 and verified source integrity. QA: 57.328 s; 414 files
+in the then-current manifest. Final documentation/evaluation metadata is refreshed separately without
+changing tested EXEs. Windows 11 build 26200 is the tested host. Windows Sandbox/another clean VM is
+unavailable; a freshly installed Windows OS is not claimed as verified. Distribution remains unsigned.
+
+An intermediate full run had 257 passes and one failure in a test-setup rename of the original data
+directory (Windows error 5), while isolated backup tests passed. The handle owner/cause is unknown.
+The test now uses the same bounded sharing/access retry helper as production restoration, retaining
+the requirement that the original home become unavailable. A subsequent complete suite passed
+258 tests / 6 optional skips in 107.11 s with process exit zero. The additional first-launch regression
+then passed with all 12 release-readiness cases. The final complete suite including first launch
+passed **259 tests / 6 optional skips in 115.80 s, process exit zero**. Lint/format/compile checks
+passed; wheel build used an explicit workspace temp
+directory after the restricted sandbox temp denied pip's build tracker. No downloads were needed.
+
+Versioned evidence: `evaluation/external-sources.json`, `external-labels.json`, baseline/final reports,
+`taxonomy-application.json`, `stress-result.json`, `windows-result.json`. Final binary/wheel integrity
+also compares embedded application instructions/constants in both EXEs with current source, verifies
+every archive member and checks documents/evaluation metadata against the workspace.
+
+The final embedded-code comparison detected a stale `oberhau.database` in the cached PyInstaller
+PYZ despite a rebuild/version 1.0.0. The artifact was withheld. Build now always uses `--clean`
+with cache/work paths checked to remain inside the workspace. Clean reconstruction, complete
+module comparison and a repeated extracted-ZIP/native compatibility run replace that intermediate
+artifact. The final receipt is `artifacts/oberhau-1.0-integrity.json`; final archive SHA-256 stays
+in its external `.sha256` file rather than creating a circular checksum inside packaged documents.
+
+Final clean-build extracted-ZIP QA passed again in **57.234 s**, with 421 manifest files verified,
+both GUI modes, all CLI flows and both actual legacy upgrades preserved. Embedded-code comparison
+passed for all **42 application modules in both executables**; instruction/exception tables,
+constants, argument metadata and stack sizes match current source. The wheel contains current
+module bytes and passed CRC checks. Final metadata-only packaging retains those tested executable
+hashes and includes all seven evaluation JSON receipts; archive/manifest/document/source-archive
+integrity is rechecked after that refresh. Final full-suite result remains 259 passes, six optional
+skips, exit zero. Live optional scanner/Qwen inference was not rerun for 1.0; previous live evidence
+and current adapter/assistant guard/fallback regressions are distinguished above and in TESTING.md.
+
 ## 0.5.1 — recognizable brand and unfinished foundation hardening
 
 User requested a recognizable minimal black cyberpunk skull with a descending sword, then further

@@ -132,12 +132,17 @@ class BuiltinScanner:
                                 "CWE-95",
                                 "high",
                             )
-                        elif name in {"os.system", "os.popen"} or (
+                        elif name in {
+                            "os.system",
+                            "os.popen",
+                            "subprocess.getoutput",
+                            "subprocess.getstatusoutput",
+                        } or (
                             name.startswith("subprocess.")
                             and any(
                                 k.arg == "shell"
                                 and isinstance(k.value, ast.Constant)
-                                and k.value.value is True
+                                and bool(k.value.value)
                                 for k in node.keywords
                             )
                         ):
@@ -171,7 +176,15 @@ class BuiltinScanner:
                         elif (
                             name.endswith((".execute", ".executemany"))
                             and node.args
-                            and isinstance(node.args[0], (ast.JoinedStr, ast.BinOp))
+                            and (
+                                isinstance(node.args[0], (ast.JoinedStr, ast.BinOp))
+                                or isinstance(node.args[0], ast.Call)
+                                and isinstance(node.args[0].func, ast.Attribute)
+                                and node.args[0].func.attr in {"format", "replace"}
+                                and isinstance(node.args[0].func.value, ast.Constant)
+                                and isinstance(node.args[0].func.value.value, str)
+                                and bool(node.args[0].args or node.args[0].keywords)
+                            )
                         ):
                             add(
                                 "python-sql-format",

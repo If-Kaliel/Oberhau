@@ -1,0 +1,221 @@
+{
+  "method": "Original upstream bytes. Explicit opt-in download; no install, imports, application execution or target requests.",
+  "files": [
+    {
+      "project": "bandit",
+      "repository": "PyCQA/bandit",
+      "revision": "68ebe11ef79263be27ec223184b94a4fc394a622",
+      "path": "LICENSE",
+      "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b",
+      "bytes": 10142,
+      "url": "https://raw.githubusercontent.com/PyCQA/bandit/68ebe11ef79263be27ec223184b94a4fc394a622/LICENSE"
+    },
+    {
+      "project": "bandit",
+      "repository": "PyCQA/bandit",
+      "revision": "68ebe11ef79263be27ec223184b94a4fc394a622",
+      "path": "examples/sql_statements.py",
+      "sha256": "4f0f942b6d774451745e7cfdf978ffa9420e4c075f587f6d6381b1b346ce79f7",
+      "bytes": 2080,
+      "url": "https://raw.githubusercontent.com/PyCQA/bandit/68ebe11ef79263be27ec223184b94a4fc394a622/examples/sql_statements.py"
+    },
+    {
+      "project": "bandit",
+      "repository": "PyCQA/bandit",
+      "revision": "68ebe11ef79263be27ec223184b94a4fc394a622",
+      "path": "examples/subprocess_shell.py",
+      "sha256": "e57fa980c54aff45b49883db2ebc4b6ddbe6fa85cee9d860cf826b0feaa2ad2c",
+      "bytes": 1699,
+      "url": "https://raw.githubusercontent.com/PyCQA/bandit/68ebe11ef79263be27ec223184b94a4fc394a622/examples/subprocess_shell.py"
+    },
+    {
+      "project": "bandit",
+      "repository": "PyCQA/bandit",
+      "revision": "68ebe11ef79263be27ec223184b94a4fc394a622",
+      "path": "examples/exec.py",
+      "sha256": "8d14d882cd1b5112992f6ec0341a2fc658167672332206d661493fa57f43c59c",
+      "bytes": 16,
+      "url": "https://raw.githubusercontent.com/PyCQA/bandit/68ebe11ef79263be27ec223184b94a4fc394a622/examples/exec.py"
+    },
+    {
+      "project": "bandit",
+      "repository": "PyCQA/bandit",
+      "revision": "68ebe11ef79263be27ec223184b94a4fc394a622",
+      "path": "tests/functional/test_functional.py",
+      "sha256": "9d5a2b7ec5ec7cf3140c5895c288a9ba8e662c22547039f36e6786e9bba8a882",
+      "bytes": 36318,
+      "url": "https://raw.githubusercontent.com/PyCQA/bandit/68ebe11ef79263be27ec223184b94a4fc394a622/tests/functional/test_functional.py"
+    },
+    {
+      "project": "webgoat",
+      "repository": "WebGoat/WebGoat",
+      "revision": "044948d057b249735be2bfc14eccc9e3dc2eac34",
+      "path": "LICENSE.txt",
+      "sha256": "2fea812568866fdb6ff99671ad70465bfc25ab77f86129795d08d961c30d2ca1",
+      "bytes": 1092,
+      "url": "https://raw.githubusercontent.com/WebGoat/WebGoat/044948d057b249735be2bfc14eccc9e3dc2eac34/LICENSE.txt"
+    },
+    {
+      "project": "webgoat",
+      "repository": "WebGoat/WebGoat",
+      "revision": "044948d057b249735be2bfc14eccc9e3dc2eac34",
+      "path": "src/main/java/org/owasp/webgoat/lessons/idor/IDORViewOtherProfile.java",
+      "sha256": "305cb5c0fc8d63a0b8bb4f48f4ebc6982ee332bc11c7f1dcc0ad248a3f6ac3e6",
+      "bytes": 2605,
+      "url": "https://raw.githubusercontent.com/WebGoat/WebGoat/044948d057b249735be2bfc14eccc9e3dc2eac34/src/main/java/org/owasp/webgoat/lessons/idor/IDORViewOtherProfile.java"
+    },
+    {
+      "project": "webgoat",
+      "repository": "WebGoat/WebGoat",
+      "revision": "044948d057b249735be2bfc14eccc9e3dc2eac34",
+      "path": "src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfile.java",
+      "sha256": "f0093cfbfa91c8a6b1c3e708bf8a22bf1a523899fd561ed18dcdd7b98f5ddeb1",
+      "bytes": 4227,
+      "url": "https://raw.githubusercontent.com/WebGoat/WebGoat/044948d057b249735be2bfc14eccc9e3dc2eac34/src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfile.java"
+    },
+    {
+      "project": "webgoat",
+      "repository": "WebGoat/WebGoat",
+      "revision": "044948d057b249735be2bfc14eccc9e3dc2eac34",
+      "path": "src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+      "sha256": "2bac907b67bcb750446c8ac10b916ebd119da01c76b9bea10e2bf760a0b627b9",
+      "bytes": 3321,
+      "url": "https://raw.githubusercontent.com/WebGoat/WebGoat/044948d057b249735be2bfc14eccc9e3dc2eac34/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "bytes": 11357,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/LICENSE"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/README.md",
+      "sha256": "f82a76ed128da2d372f08f65323f09cbeedb92fef4e27ba09026bb11d5bb4bcf",
+      "bytes": 9060,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/README.md"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/app/layout.tsx",
+      "sha256": "e65025ca7842d1b3ec1fcb41768f974cfbb9c5ca85abb2fb2ace6dfa4ac4f860",
+      "bytes": 689,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/app/layout.tsx"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/app/page.tsx",
+      "sha256": "bef4d57473053c0539f7d4a999c4a9f5b8956a89fb91d302e4cc4da2639d4e0e",
+      "bytes": 610,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/app/page.tsx"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/app/posts/[id]/page.tsx",
+      "sha256": "96bca1305b8299a9c2c5d65c3be0d4718ce30c2a8b385ab193602caa4479069d",
+      "bytes": 869,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/app/posts/[id]/page.tsx"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/app/posts/new/page.tsx",
+      "sha256": "5b356d4faaf4a22afcfe4ae8c516d8219cf130b43b3a739af1e8f9ecca12e879",
+      "bytes": 1661,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/app/posts/new/page.tsx"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/app/posts/page.tsx",
+      "sha256": "202fbf6dfd850311598b88960c01a0f9ab79584828428817fc1d705c807b3ca0",
+      "bytes": 787,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/app/posts/page.tsx"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/lib/prisma.ts",
+      "sha256": "81d4543467121b3bc85ba35ddab326cd0b675e0e73cba13536642dfcb9a496f5",
+      "bytes": 402,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/lib/prisma.ts"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/next.config.ts",
+      "sha256": "614bce25b089c3f19b1e17a6346c74b858034040154c6621e7d35303004767cc",
+      "bytes": 133,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/next.config.ts"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/package.json",
+      "sha256": "fc842be40ebcedcd2373d0968706341c286d08dd95c20aa0fd13995b3e91d3b9",
+      "bytes": 769,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/package.json"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/prisma.config.ts",
+      "sha256": "17aa69f51f1e67ffc5d2444894f49793b77c2f2cec8c45a60d4b5e5ee8dc6b72",
+      "bytes": 302,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/prisma.config.ts"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/prisma/schema.prisma",
+      "sha256": "37e446f8fd2bd2375fca7387163e7a95c4b1f944d1ace2191a0aa84ae3e87c95",
+      "bytes": 676,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/prisma/schema.prisma"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/prisma/seed.ts",
+      "sha256": "6788805c2df5b27a7d62bb9edc000f307ade8bc0ecccc1147a1c13709d165a93",
+      "bytes": 985,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/prisma/seed.ts"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/tailwind.config.ts",
+      "sha256": "5a5503b802d230cd4761a1a47866a8690b7c2c93e8a9bc754c755b73fb493b9e",
+      "bytes": 381,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/tailwind.config.ts"
+    },
+    {
+      "project": "prisma",
+      "repository": "prisma/prisma-examples",
+      "revision": "caa902a819be2e8fe1e0b0ec2f543e9220cf69cc",
+      "path": "orm/nextjs/tsconfig.json",
+      "sha256": "ed2bc19510589ae5c0940b5e4504c6c0413ba285ae35a3d4ad9db5f5d3a8eb51",
+      "bytes": 598,
+      "url": "https://raw.githubusercontent.com/prisma/prisma-examples/caa902a819be2e8fe1e0b0ec2f543e9220cf69cc/orm/nextjs/tsconfig.json"
+    }
+  ]
+}

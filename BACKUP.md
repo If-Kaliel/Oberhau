@@ -4,7 +4,7 @@ Schema 4 preserves contextual graphs, syntax caches, provisional AI histories an
 validation records. Run snapshots use portable relative references; finding paths are remapped
 as before. Restored stale research jobs become interrupted and schedules remain paused.
 
-Oberhau 0.4.0 provides a portable `.oberhau.zip` research bundle. Settings runs backup and restore
+Oberhau provides a portable `.oberhau.zip` research bundle. Settings runs backup and restore
 in a cancellable background worker. The CLI uses the same service; Ctrl+C requests cancellation.
 
 ```powershell
@@ -64,6 +64,11 @@ cooperative: external programs can still alter files. Detected source changes ab
 Default limits: 100,000 snapshot file/directory entries, 20 MB per source file, 1 GB database,
 4 GB total uncompressed research, and 24 MB manifest. Retained snapshots accumulate; there is no
 automatic deletion policy. Restore requires the declared expanded size plus 100 MB of free disk.
+
+Separate configurable 1.0 research limits cap new logical cache/history JSON and runs per project.
+They do not delete snapshots or review history and do not cap total disk usage. Preview/apply cache
+maintenance removes only indices unused by completed historical research. At history capacity,
+make a complete backup and continue in a new data directory or explicitly raise the limit.
 Backup stages a complete archive beside its destination and copies it to a newly created file,
 so allow room for both staged and final copies. Failed/cancelled work cleans its temporary files.
 

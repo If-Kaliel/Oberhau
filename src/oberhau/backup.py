@@ -185,6 +185,14 @@ def remap_database(
             connection.execute(
                 f"UPDATE {table} SET data=? WHERE id=?", (finding.model_dump_json(), row_id)
             )
+    # A completed run can have no findings. Its historical source must still be
+    # present in the portable archive; research snapshot references stay relative.
+    for _, status, payload in database_rows(connection, "research_runs", "status,data", cancel):
+        if status == "completed":
+            data = json.loads(payload)
+            if not isinstance(data, dict):
+                raise OberhauError("Malformed research run data")
+            snapshot_reference(data.get("snapshot"), None, snapshots)
     if destination_home:
         connection.execute("DELETE FROM settings WHERE key='last_diagnostics'")
         connection.execute("INSERT OR REPLACE INTO settings VALUES('schedules_enabled','false')")

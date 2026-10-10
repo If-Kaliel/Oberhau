@@ -9,6 +9,7 @@
 - Python SQL formatting calls and implicit/literal-truthy shell boundaries gain explicit warning coverage with negative controls.
 - Source indexing deadline and explicit SQLite backup/restore connection cleanup on Windows.
 - Portable release QA from the actual extracted ZIP, fresh restricted environment, manifest checks and previous-package data upgrades. The existing Windows host is verified; a clean OS/VM is not claimed.
+- Pre-publication review: cache-maintenance results survive automatic GUI refresh; portable backup and restore validate completed research snapshot references even when the run has no findings.
 
 ## 0.5.1 — parser hardening and recognizable brand
 

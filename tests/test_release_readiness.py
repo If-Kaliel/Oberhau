@@ -261,3 +261,85 @@ def test_first_launch_setup_demo_and_reopen_preserve_user_choices(engine):
     finally:
         reopened.close()
         app.processEvents()
+
+
+def test_cache_preview_survives_worker_completion_and_refresh(engine, tmp_path):
+    import os
+
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PySide6.QtWidgets import QApplication
+
+    from oberhau.desktop.app import Window
+    from tests.test_gui import wait_for_worker
+
+    project = engine.ingestion.add(research_source(tmp_path), "Cache preview")
+    engine.db.execute(
+        "INSERT INTO research_files VALUES(?,?,?,?,?)",
+        (project, "orphan.ts", "unused", "old", "{}"),
+    )
+    app = QApplication.instance() or QApplication([])
+    window = Window(engine, first_run=False)
+    try:
+        wait_for_worker(app, window)
+        page = window.research_page
+        page.maintenance(False)
+        wait_for_worker(app, window)
+        page.refresh()
+        displayed = json.loads(page.views["Automation Control"].toPlainText())
+        assert displayed["last_cache_maintenance"]["eligible_records"] == 1
+        assert displayed["last_cache_maintenance"]["applied"] is False
+        assert usage(engine.db)["cache_records"] == 1
+        page.maintenance(True)
+        wait_for_worker(app, window)
+        displayed = json.loads(page.views["Automation Control"].toPlainText())
+        assert displayed["last_cache_maintenance"]["applied"] is True
+        assert displayed["last_cache_maintenance"]["after"]["cache_records"] == 0
+    finally:
+        wait_for_worker(app, window)
+        window.close()
+        app.processEvents()
+
+
+@pytest.mark.parametrize("operation", ["backup", "restore"])
+def test_portable_backup_rejects_missing_research_snapshot_without_findings(
+    engine, tmp_path, operation
+):
+    import sqlite3
+    from contextlib import closing
+
+    from oberhau.backup import create_backup, restore_backup
+    from tests.test_backup import rewrite_bundle
+
+    source = research_source(tmp_path)
+    (source / "route.ts").write_text("export function GET() { return 1; }")
+    project = engine.ingestion.add(source, "No warnings")
+    engine.scan(project, "research")
+    run = engine.db.query("SELECT id,data,status FROM research_runs")[0]
+    assert run["status"] == "completed"
+    assert not engine.db.query("SELECT id FROM findings")
+    data = json.loads(run["data"])
+    data["snapshot"] = "projects/missing-historical"
+    archive = tmp_path / "research.zip"
+    if operation == "backup":
+        engine.db.execute("UPDATE research_runs SET data=?", (json.dumps(data),))
+        with pytest.raises(OberhauError, match="snapshot.*missing|Snapshot.*missing"):
+            create_backup(engine.db, engine.home, archive)
+        assert not archive.exists()
+    else:
+        create_backup(engine.db, engine.home, archive)
+
+        def missing_snapshot(files, manifest):
+            database = tmp_path / "changed.sqlite3"
+            database.write_bytes(files["oberhau.sqlite3"])
+            with closing(sqlite3.connect(database)) as connection, connection:
+                connection.execute("UPDATE research_runs SET data=?", (json.dumps(data),))
+            content = database.read_bytes()
+            files["oberhau.sqlite3"] = content
+            manifest["files"]["oberhau.sqlite3"]["sha256"] = hashlib.sha256(content).hexdigest()
+            manifest["files"]["oberhau.sqlite3"]["size"] = len(content)
+
+        invalid = rewrite_bundle(archive, tmp_path / "missing.zip", missing_snapshot)
+        destination = tmp_path / "recovered"
+        with pytest.raises(OberhauError, match="snapshot.*missing|Snapshot.*missing"):
+            restore_backup(invalid, destination)
+        assert not destination.exists()

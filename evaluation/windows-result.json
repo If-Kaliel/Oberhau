@@ -4,7 +4,7 @@
   "fresh_environment": true,
   "manifest_files_verified": 421,
   "limitations": "Fresh extraction, application data and restricted environment on the existing Windows host; not a newly installed OS or clean virtual machine.",
-  "seconds": 57.23400000000038,
+  "seconds": 55.23500000000058,
   "project": 1,
   "scan": 1,
   "research": {
@@ -19,7 +19,7 @@
       "parser_memory": {
         "enforced": true,
         "limit_committed_bytes": 536870912,
-        "peak_committed_bytes": 29220864,
+        "peak_committed_bytes": 29626368,
         "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
       }
     },
@@ -56,7 +56,7 @@
         "true_positives": 1,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.625
+        "seconds": 0.5779999999977008
       },
       {
         "id": "next-owner-filter",
@@ -67,7 +67,7 @@
         "true_positives": 0,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.01599999999962165
+        "seconds": 0.0
       },
       {
         "id": "next-published-catalog",
@@ -78,7 +78,7 @@
         "true_positives": 0,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.014999999999417923
+        "seconds": 0.01600000000325963
       },
       {
         "id": "next-imported-document",
@@ -104,7 +104,7 @@
         "true_positives": 0,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.014999999999417923
+        "seconds": 0.0
       },
       {
         "id": "spring-account-resource",
@@ -119,7 +119,7 @@
         "true_positives": 1,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.0
+        "seconds": 0.014999999999417923
       },
       {
         "id": "spring-resource-policy",
@@ -130,7 +130,7 @@
         "true_positives": 0,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.01600000000325963
+        "seconds": 0.0
       },
       {
         "id": "spring-peer-policy-difference",
@@ -145,7 +145,7 @@
         "true_positives": 1,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.0
+        "seconds": 0.01599999999962165
       },
       {
         "id": "spring-peer-policies-equal",
@@ -197,7 +197,7 @@
         "true_positives": 1,
         "false_positives": 0,
         "false_negatives": 0,
-        "seconds": 0.01599999999962165
+        "seconds": 0.0
       }
     ],
     "true_positives": 6,
@@ -205,19 +205,19 @@
     "false_negatives": 0,
     "precision": 1.0,
     "recall": 1.0,
-    "seconds": 0.75,
-    "peak_python_bytes": 259810,
+    "seconds": 0.6719999999986612,
+    "peak_python_bytes": 259708,
     "process_memory": {
       "available": true,
-      "working_set_bytes": 53383168,
-      "peak_working_set_bytes": 53383168,
-      "private_commit_bytes": 32264192,
+      "working_set_bytes": 53207040,
+      "peak_working_set_bytes": 53207040,
+      "private_commit_bytes": 32129024,
       "scope": "Whole process including native allocations; peak includes earlier and concurrent work"
     },
     "parser_memory": {
       "enforced": true,
       "limit_committed_bytes": 536870912,
-      "peak_committed_bytes": 29515776,
+      "peak_committed_bytes": 29401088,
       "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
     },
     "memory_limitations": "tracemalloc and process_memory observe the parent only. parser_memory measures separate Windows job committed memory, not parser RSS or GPU. A pre-existing tracer includes prior/concurrent activity.",
@@ -291,7 +291,7 @@
           }
         ],
         "manual_outcomes": [],
-        "scan_seconds": 0.10900000000037835
+        "scan_seconds": 0.15700000000288128
       }
     },
     "research": {
@@ -333,7 +333,7 @@
           }
         ],
         "manual_outcomes": [],
-        "scan_seconds": 0.9679999999971187
+        "scan_seconds": 0.9060000000026776
       },
       "research_status": "completed",
       "index": {
@@ -346,7 +346,7 @@
         "parser_memory": {
           "enforced": true,
           "limit_committed_bytes": 536870912,
-          "peak_committed_bytes": 29593600,
+          "peak_committed_bytes": 29503488,
           "scope": "Windows parser job only; committed virtual memory, not RSS or GPU"
         }
       },
@@ -354,7 +354,7 @@
     }
   },
   "executables": {
-    "Oberhau.exe": "8dfca3b1973a050bb52d5c89f8df124fe5885090d5ebdfd78fe57c216f621569",
-    "oberhau-cli.exe": "9a20245be24b635fd42a060f2a0867bb921e930ecbbb79bc77787abf147dc7f9"
+    "Oberhau.exe": "d47806a3206ae179f843eeb0d0c1ca4fdde83448958a06b0d0c199e53ca26e26",
+    "oberhau-cli.exe": "acf2ae8e8973c333a1f93069f78f86460c022c0c42270ea2bd3df050e968e6d0"
   }
 }

@@ -33,6 +33,7 @@ class ResearchPage(QWidget):
         super().__init__()
         self.window = window
         self.engine = window.engine
+        self.last_cache_maintenance = None
         layout = QVBoxLayout(self)
         note = QLabel(
             "Pesquisa contextual offline · Hipóteses provisórias · Revisão humana obrigatória"
@@ -156,9 +157,12 @@ class ResearchPage(QWidget):
     def maintenance(self, apply):
         from oberhau.maintenance import maintain
 
+        def done(result):
+            self.last_cache_maintenance = result
+
         self.window.start(
             lambda cancel, progress: maintain(self.engine, apply, cancel),
-            lambda result: self.display("Automation Control", result),
+            done,
         )
 
     def open_evidence(self, node):
@@ -401,6 +405,7 @@ class ResearchPage(QWidget):
                 "schedules_enabled": self.engine.db.setting("schedules_enabled", False),
                 "limits_note": "Parser runs in a separate process with a per-file deadline and a Windows committed-memory ceiling. Parent graph budgets are cooperative; global CPU/RAM quotas and GPU auto-pause are pending",
                 "storage": usage(self.engine.db),
+                "last_cache_maintenance": self.last_cache_maintenance,
             },
         )
 

@@ -8,16 +8,17 @@ evidence graphs and authorization review hypotheses support human investigation.
 has filterable rows, expandable evidence, verified source navigation and optional technical JSON.
 Research storage limits and conservative cache cleanup preserve completed history and human decisions.
 External evaluation records both detected and missed cases; it does not establish field precision.
-The complete Directive 002 remains broader than 1.0. Development stays on `testes`; `main` and
-the previous 0.4.0 release are preserved until a separate merge/publication.
+The complete Directive 002 remains broader than 1.0. Development stays on `testes`;
+validated changes are integrated into `main` after review. The previous 0.4.0 release remains available.
 
 Select **Pesquisa contextual / Research** or use `scan ID --profile research`.
 Import a folder, source file, ZIP or public HTTPS Git repository; scan a managed snapshot; investigate normalized warnings;
 record human decisions; reproduce the bundled SQL laboratory; generate and export review drafts.
 
-Download the portable Windows ZIP from [Releases](https://github.com/If-Kaliel/Oberhau/releases),
-extract the entire folder and open **Oberhau.exe**; Python is included. For source installation,
-follow [INSTALLATION.md](INSTALLATION.md), then open **Launch-Oberhau.cmd**.
+Published portable Windows builds are available in [Releases](https://github.com/If-Kaliel/Oberhau/releases);
+check the release version before downloading. Extract the entire folder and open **Oberhau.exe**;
+Python is included. To install the current `main` version from source, follow
+[INSTALLATION.md](INSTALLATION.md), then open **Launch-Oberhau.cmd**.
 Portuguese quick start: [GUIA_RAPIDO_PT_BR.md](GUIA_RAPIDO_PT_BR.md).
 
 Public repository: [If-Kaliel/Oberhau](https://github.com/If-Kaliel/Oberhau).

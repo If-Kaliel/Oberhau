@@ -1,5 +1,35 @@
 # Worklog — 2026-10-10
 
+## 1.0.0 — review before integration into main
+
+The user explicitly authorized a bug review and publication to `main`. Reviewed the five
+development commits since `13f65bb`, including parser lifecycle, atomic research publication,
+retention, historical evidence, backup migration and desktop worker completion.
+
+Two issues were reproduced with three failing regressions before correction:
+
+- Cache-maintenance preview/application results were immediately replaced by the desktop's
+  worker-finished refresh. The Research page now retains the last result for its window lifetime
+  and includes it when rebuilding Automation Control, so counts and preservation details remain visible.
+- Portable backup/restore validated finding snapshots but not completed research snapshots.
+  A run with zero findings could reference a missing snapshot and still pass. Both operations now
+  validate the relative snapshot of every completed run against the archive snapshot inventory;
+  invalid backup output and restore directories are never published.
+
+The regressions exercise actual desktop workers and a checksum-correct archive with a changed
+SQLite research reference. After the fixes: **262 passed, 6 skipped in 91.52 seconds**, exit 0;
+Ruff lint/format, compileall and diff whitespace checks passed. The previous baseline was
+259 passed / 6 skipped. README and roadmap now describe reviewed integration into main.
+Release EXEs, wheel and ZIP are rebuilt from these corrected sources before publication.
+
+The corrected native ZIP passed fresh-extraction/restricted-environment QA in **55.235 seconds**:
+421 manifest files, both GUI modes, parser quotas, assistant fallback, labs, maintenance,
+backup/restore and migrations from 0.4.0/0.5.1. The embedded code signatures of all 42 application
+modules match corrected sources in both EXEs; wheel source bytes and Qt sources/licenses match.
+Native screenshots were visually inspected. The updated native receipt is in
+`evaluation/windows-result.json`; final package checksums remain separate from packaged documents.
+These native checks still use the existing Windows host, rather than a newly installed OS/VM.
+
 ## 1.0.0 — four scoped acceptance areas
 
 User accepted the 1.0 scope as an offline investigation workbench and requested completion of

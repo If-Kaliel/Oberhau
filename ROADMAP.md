@@ -1,6 +1,6 @@
 # Roadmap against the master specification
 
-The scoped 1.0 on `testes` includes selected framework syntax profiles, evidence graph,
+The scoped 1.0 includes selected framework syntax profiles, evidence graph,
 provisional authorization research, direct-call dependencies, queue, typed Qwen/fallback, retained
 security deltas, two HTTP labs, a 12-case synthetic benchmark, external evaluation and a structured Research page.
 [RESEARCH.md](RESEARCH.md) records exact subsets and acceptance status. Broad capabilities below

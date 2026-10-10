@@ -293,9 +293,24 @@ Verification before publication:
 - Actual resource probe: **32 GB RAM**, **RTX 4060 / 8 GB VRAM**, valid driver/utilization/temperature.
 - Native Projects and Settings captured/inspected at **1060×760**; source/details/diff/scanner histories
   are actual records. Ruff and formatting passed; final suite currently collects **188 tests**.
-- Wheel: `oberhau-0.4.0-py3-none-any.whl`, **88,441 bytes**, SHA-256
-  `1cf9f7372c81130ea1dbc9a3734742702f4d82568e04d4f25afeccdb55b72cc5`; required modules, rules, fixture assets and license notice verified.
+- Wheel: `oberhau-0.4.0-py3-none-any.whl`, **88,393 bytes**, SHA-256
+  `af2c1b4d67a3f2527d4f91eb837bf564de0187a0973324bcffbb5a6edd1b89bc`; required modules, rules, fixture assets and license notice verified.
 - Publication candidates: **92 files** checked with real Gitleaks, **zero secret warnings**.
 - First frozen CLI demo/metrics/report succeeded with Python absent from PATH. Frozen GUI QA exposed a Qt DLL startup conflict; release publication is held until the corrected native EXE passes.
 - Frozen Qt startup root cause: PyInstaller selected an unrelated ICU DLL from the developer PATH, whose versioned exports do not satisfy Qt's Windows ICU API. Excluding that accidental binary restored native Qt startup (**GUI exit 0**, real screenshot with no Python PATH). The build now restricts discovery paths and excludes that ICU selection; final generated-bundle QA follows.
 - GitHub Windows CI at `3a283928261b78a85f308212d538d8fcb583d1e6`: **182 passed, 6 optional skips**, **27.55 s**, lint/format and isolated wheel build passed. Run: https://github.com/If-Kaliel/Oberhau/actions/runs/38070034189 .
+- Corrected package CLI ran a real Deep scan: all **five engines completed**, with **74 OSV / 43 Trivy / zero builtin, Gitleaks and Semgrep warnings** on the dependency fixture. Public HTTPS Git export succeeded for all **59 files**. A subsequent test overlapped final distribution copying and caused a file-in-use error; all test processes were closed and the final build repeated sequentially.
+- Final application/build fix CI at `f07d0137698892c98bb15009175780b5c1995c0c`: **182 passed, 6 skipped**, **26.78 s**, lint/format/wheel passed. Run: https://github.com/If-Kaliel/Oberhau/actions/runs/38070520429 .
+- Final generated bundle passed sequential native QA: **GUI exit 0**, **six actual demo findings**,
+  CLI metrics and Git-snapshot scan completed with **Python absent from PATH**, **11.64 s**.
+  All **365** declared file hashes/sizes verified; all **three** corresponding Qt source archives,
+  GPL/LGPL texts and ZIP CRC checks passed. Corrected snapshot scanning retained **14 review warnings**
+  on the old public source; these include research code/fixtures and are not confirmed vulnerabilities.
+- Final application EXE SHA-256: `1d27f7e9fc79a351d7930004ef7de5dd3e03c471b522e67eea0b657a1a9ba7f5`;
+  CLI EXE: `08993d892c700e800b9b8273f924c91eaf68af1a9b47a392dd052c99b9eca8ad`. Package checksum is shipped separately to avoid
+  a self-referential archive hash. No further application code changes followed this verification.
+
+Remaining work follows ROADMAP.md: broader semantic/framework analysis, active/local HTTP validation
+recipes, full policy lifecycle, scheduling/change detection, quotas/retention/TOCTOU hardening,
+complete technical localization, additional feeds and signed distribution. Release 0.4.0 is ready
+for the implemented source-research workflow; the complete master specification remains broader.

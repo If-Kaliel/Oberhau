@@ -13,8 +13,7 @@ def prepare_runtime() -> None:
         return
     from ctypes import wintypes
 
-    # Resolve Qt/MSVC dependencies with the bootloader's original search order first.
-    # Resetting it before these imports can select an older system C++ runtime.
+    # Resolve the known Qt dependency set before clearing inherited DLL directories.
     from PySide6 import QtCore, QtGui, QtNetwork, QtSvg, QtWidgets  # noqa: F401
 
     root = Path(sys._MEIPASS).resolve()

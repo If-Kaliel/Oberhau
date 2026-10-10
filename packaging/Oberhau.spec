@@ -11,6 +11,12 @@ a = Analysis(
     excludes=['pytest', 'ruff', 'semgrep', 'PySide6.QtQml', 'PySide6.QtQuick',
               'PySide6.QtDesigner', 'PySide6.QtUiTools', 'PySide6.QtTest'],
 )
+# Qt's Windows codec imports the OS ICU API (unversioned exports). A developer's
+# Git/other PATH may contain an incompatible ICU DLL with suffixed symbols; never
+# redistribute that accidental selection. Windows 11 supplies the required API.
+a.binaries = [entry for entry in a.binaries
+              if Path(entry[0]).name.lower() != 'icuuc.dll'
+              and not Path(entry[0]).name.lower().startswith('icudt')]
 pyz = PYZ(a.pure)
 hooks = a.scripts[:-2]
 gui = EXE(pyz, hooks + a.scripts[-2:-1], [], exclude_binaries=True,

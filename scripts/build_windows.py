@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -118,6 +119,14 @@ def main():
         raise RuntimeError("Release build requires Windows x64")
     bundle = ROOT / "dist/Oberhau"
     if not args.skip_freeze:
+        environment = os.environ.copy()
+        environment["PATH"] = os.pathsep.join(
+            [
+                str(Path(sys.executable).parent),
+                sys.base_prefix,
+                str(Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32"),
+            ]
+        )
         subprocess.run(
             [
                 sys.executable,
@@ -131,6 +140,7 @@ def main():
                 str(ROOT / "packaging/Oberhau.spec"),
             ],
             cwd=ROOT,
+            env=environment,
             check=True,
         )
     if not (bundle / "Oberhau.exe").is_file() or not (bundle / "oberhau-cli.exe").is_file():

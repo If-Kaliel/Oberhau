@@ -1,4 +1,4 @@
-# Portable Windows x64 distribution
+# Portable Windows 11 x64 distribution
 
 The release ZIP contains **Oberhau.exe** (native desktop) and **oberhau-cli.exe**
 (console commands) with a shared Python/Qt runtime. Extract the entire `Oberhau` folder,
@@ -62,3 +62,5 @@ the replacement bindings and Python ABI. The original wheels remain obtainable f
 References: [Qt LGPL obligations](https://www.qt.io/development/open-source-lgpl-obligations),
 [Qt module licensing](https://doc.qt.io/qt-6/licensing.html),
 [PyInstaller licensing exception](https://pyinstaller.org/en/stable/license.html).
+
+Build search paths are restricted to the selected Python runtime and Windows system directory. The Qt codec uses the Windows 11 ICU API; unrelated ICU binaries discovered in a developer Git/PATH installation are excluded. Native EXE rendering is part of release QA.

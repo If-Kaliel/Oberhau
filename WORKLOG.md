@@ -293,7 +293,9 @@ Verification before publication:
 - Actual resource probe: **32 GB RAM**, **RTX 4060 / 8 GB VRAM**, valid driver/utilization/temperature.
 - Native Projects and Settings captured/inspected at **1060×760**; source/details/diff/scanner histories
   are actual records. Ruff and formatting passed; final suite currently collects **188 tests**.
-- Wheel: `oberhau-0.4.0-py3-none-any.whl`, **88,307 bytes**, SHA-256
-  `81b8372275af20db757007b0b2a3175570bd1a0e0855be6da9ac82e8496ff5a8`; required modules, rules, fixture assets and license notice verified.
+- Wheel: `oberhau-0.4.0-py3-none-any.whl`, **88,441 bytes**, SHA-256
+  `1cf9f7372c81130ea1dbc9a3734742702f4d82568e04d4f25afeccdb55b72cc5`; required modules, rules, fixture assets and license notice verified.
 - Publication candidates: **92 files** checked with real Gitleaks, **zero secret warnings**.
 - First frozen CLI demo/metrics/report succeeded with Python absent from PATH. Frozen GUI QA exposed a Qt DLL startup conflict; release publication is held until the corrected native EXE passes.
+- Frozen Qt startup root cause: PyInstaller selected an unrelated ICU DLL from the developer PATH, whose versioned exports do not satisfy Qt's Windows ICU API. Excluding that accidental binary restored native Qt startup (**GUI exit 0**, real screenshot with no Python PATH). The build now restricts discovery paths and excludes that ICU selection; final generated-bundle QA follows.
+- GitHub Windows CI at `3a283928261b78a85f308212d538d8fcb583d1e6`: **182 passed, 6 optional skips**, **27.55 s**, lint/format and isolated wheel build passed. Run: https://github.com/If-Kaliel/Oberhau/actions/runs/38070034189 .

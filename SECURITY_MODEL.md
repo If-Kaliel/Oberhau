@@ -1,6 +1,6 @@
 # Security model
 
-Offline Research is the only execution mode available in 0.1.0. There is no external active scanner,
+Offline Research is the only project execution mode available in 0.2.0. There is no external active scanner,
 credential validation, destructive test, report submission or arbitrary target execution feature.
 The policy validator rejects ambiguous scope, excludes hosts, requires exact lowercase hosts,
 reviewed revision, category/automation permission and explicit approval. It is preparatory logic,
@@ -16,8 +16,21 @@ No source hooks, build/installation scripts, dynamic imports or downloaded plugi
 External scanners use registered executable names, fixed typed argument assembly, shell=False,
 trusted configuration outside the snapshot, reduced credential/interpreter environment, timeouts,
 output limits and process-tree cancellation. Executables inside scanner working directories are
-rejected; production tool discovery currently trusts the operator's PATH. Do not put repository
-directories in PATH. Native scanners are trusted software, not sandboxed against malicious inputs.
+rejected. Managed Windows installations verify pinned official release SHA-256 values and check
+binary receipts before selection. Other tool discovery trusts the operator's PATH; do not put
+repository directories in PATH. Receipts are local integrity records, not a defense against an
+attacker who can replace both the executable and its receipt. Release signature verification and
+complete Windows reparse/TOCTOU hardening remain pending. Native scanners are trusted software,
+not sandboxed against malicious inputs.
+
+Scanner installation and advisory refresh are explicit network operations against public feeds;
+they receive no source or dependency metadata. Source scans never refresh feeds. OSV disables
+network features, resolution and call analysis. Trivy disables DB/Java/check/version updates and
+telemetry, uses an empty controlled module directory and an explicit ignore/config file, and
+disables dependency API requests. These CLI controls do not constitute an OS network sandbox.
+OSV feed hashes are checked before scans; Trivy presence/metadata is recorded, with native scanner
+validation on use. The native Trivy downloader's temporary disk use is not OS quota constrained;
+the app requires 4 GB free disk and validates the completed DB size/schema.
 
 Sensitive assignment patterns, common GitHub/AWS/JWT tokens and private-key blocks are redacted
 before normalized finding serialization and UI/log/report exposure. Gitleaks Match and Secret fields

@@ -7,6 +7,7 @@ from collections.abc import Callable
 from pathlib import Path
 from threading import Event
 
+from oberhau import __version__
 from oberhau.core import Cancelled, Finding, Limits
 from oberhau.security import confined, redact, redact_source
 
@@ -21,7 +22,7 @@ def call_name(node: ast.AST) -> str:
 
 class BuiltinScanner:
     identifier = "builtin"
-    version = "0.1.0"
+    version = __version__
     license = "MIT"
     categories = ["unsafe-code", "secrets", "configuration"]
     network = False

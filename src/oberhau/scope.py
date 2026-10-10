@@ -48,5 +48,5 @@ class Policy(BaseModel):
 
 def block_active() -> None:
     raise OberhauError(
-        "Active testing is unavailable in 0.1.0. Use offline analysis or the bundled laboratory."
+        "Active testing is unavailable. Use offline analysis or the bundled laboratory."
     )

@@ -2,7 +2,7 @@
 
 **Security Research Workbench · Windows · local-first · no paid runtime services**
 
-Oberhau 0.1.0 is a working native desktop and CLI for authorized offline source research.
+Oberhau 0.2.0 is a working native desktop and CLI for authorized offline source research.
 Import a folder, source file or ZIP; scan a managed snapshot; investigate normalized warnings;
 record human decisions; reproduce the bundled SQL laboratory; generate and export review drafts.
 
@@ -28,7 +28,7 @@ Normal storage is `%LOCALAPPDATA%\Oberhau`; `OBERHAU_HOME` or `--home` changes i
 | Projects, policy records, local snapshots, ZIP safety, SHA-256 provenance | Implemented |
 | Python AST + literal secrets + debug/privilege heuristics | Implemented; six fixture alerts, zero on corrected control |
 | Semgrep CE, explicit bundled rules | Real Windows execution verified with 1.180.0 |
-| Gitleaks / OSV v2 / Trivy | Adapters and parser tests; binaries and cached databases need setup |
+| Gitleaks / OSV v2 / Trivy | Real Windows fixture scans verified; explicit checksum-verified installation and public cache refresh |
 | Historical observations, conservative correlation, human reviews | Implemented; Python eval equivalence across bundled/Semgrep rules |
 | Source investigation | Redacted excerpt, checksum check, same-file related IDs, history, review questions |
 | Qwen JSON drafts | Local client, schema validation, bounded context and fallback implemented; live inference not verified |

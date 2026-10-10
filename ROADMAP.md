@@ -5,8 +5,10 @@ claim is made; larger unsupported capabilities remain explicit.
 
 Next implementation order:
 
-1. Live Gitleaks/OSV/Trivy tests with verified Windows binaries and cached advisory databases;
-   expose cache-health/rule-version metadata and normalized fixed-version evidence.
+1. Delivered in 0.2.0: live Gitleaks/OSV/Trivy tests, verified Windows installation, explicit public
+   advisory downloads, cache metadata, executable/rule/feed hashes and fixed-version evidence.
+   Still pending: per-scanner run timing/status records even when zero warnings, Java index refresh,
+   advisory-alias correlation, signed release verification and additional ecosystem caches.
 2. Harden file handling against Windows reparse/TOCTOU changes; trusted configurable executable
    paths/checksums; OS memory/CPU limits; complete data-directory backup/recovery portability.
 3. Git URL cloning with repository policy/provenance, safe clone/update and commit comparison;
@@ -29,4 +31,4 @@ Next implementation order:
 
 Currently unsupported: automatic auth/IDOR/business-logic detection, broad taint analysis, exploit
 generation, proof of novelty, automatic bug-bounty submission, CodeQL, ZAP/Nuclei, remote Git imports,
-general test execution, Docker, scanner cache downloads, installer EXE, OS quotas and cloud integrations.
+general test execution, Docker, Java scanner cache downloads, installer EXE, OS quotas and cloud integrations.

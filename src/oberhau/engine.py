@@ -137,7 +137,7 @@ class Engine:
                     "UPDATE scans SET file_count=?,manifest=? WHERE id=?",
                     (len(paths), json.dumps(manifest), scan_id),
                 )
-                runner = ProcessRunner(self.limits)
+                runner = ProcessRunner(self.limits, home=self.home)
                 selected = PROFILES[profile][1]
                 categories = [profile] if profile in {"secrets", "configuration"} else None
                 jobs: dict[str, Callable[[], list[Finding]]] = {}
@@ -148,10 +148,12 @@ class Engine:
                             root, paths, cancel, self.limits, scanner_progress, categories
                         )
                     elif name in runner.tools:
-                        adapter = ExternalScanner(name, runner, ASSETS / "rules.yaml")
+                        adapter = ExternalScanner(name, runner, ASSETS / "rules.yaml", profile)
                         jobs[name] = lambda a=adapter: a.scan(root, cancel)
                     else:
-                        errors.append(f"{name}: not installed; skipped")
+                        errors.append(
+                            runner.tool_errors.get(name, f"{name}: not installed; skipped")
+                        )
                         progress(errors[-1])
                 if not jobs:
                     raise OberhauError("No requested scanner is installed")

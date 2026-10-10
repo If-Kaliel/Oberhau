@@ -104,8 +104,12 @@ def local_ollama_url(url: str) -> str:
 class ProcessRunner:
     """Only registered tool binaries; no shells, repository executables, or generated commands."""
 
-    def __init__(self, limits: Limits, tools: dict[str, str] | None = None):
+    def __init__(
+        self, limits: Limits, tools: dict[str, str] | None = None, home: Path | None = None
+    ):
         self.limits = limits
+        self.home = home
+        self.tool_errors: dict[str, str] = {}
         self.tools = (
             tools
             if tools is not None
@@ -115,6 +119,13 @@ class ProcessRunner:
                 if (path := shutil.which(name))
             }
         )
+        if tools is None and home is not None:
+            from oberhau.tooling import managed_tools
+
+            managed, self.tool_errors = managed_tools(home)
+            for name in self.tool_errors:
+                self.tools.pop(name, None)
+            self.tools.update(managed)
 
     def run(
         self,
@@ -136,7 +147,7 @@ class ProcessRunner:
         env = {
             k: v
             for k, v in os.environ.items()
-            if not k.startswith(("GIT_", "SEMGREP_", "GITLEAKS_"))
+            if not k.upper().startswith(("GIT_", "SEMGREP_", "GITLEAKS_", "TRIVY_", "OSV_SCANNER_"))
         }
         # Do not pass operator credentials or interpreter injection to scanners.
         for key in list(env):
@@ -154,6 +165,8 @@ class ProcessRunner:
                 "GIT_TERMINAL_PROMPT": "0",
             }
         )
+        if self.home is not None:
+            env["OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY"] = str(self.home / "cache/osv")
         flags = (
             subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
             if os.name == "nt"

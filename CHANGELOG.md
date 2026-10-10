@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 — 2026-10-10 (testes branch)
+
+- Explicit local Windows x64 scanner installation from pinned official releases and SHA-256 checks.
+- Public OSV PyPI/npm feed and Trivy vulnerability DB refresh, separate from offline project scans.
+- Managed executable tamper detection, isolated scanner environment and cache diagnostics in the GUI.
+- Trivy configuration scans work without a vulnerability DB; updates, telemetry and external modules are disabled.
+- OSV 2.6 cache compatibility, fixed-version evidence, Trivy source lines and scanner/feed provenance.
+- Opt-in live scanner tests with vulnerable and corrected local fixtures.
+- Public GitHub repository with main/testes and verified Windows CI tests plus isolated wheel builds.
+
 ## 0.1.0 — 2026-10-10
 
 - First working native Windows GUI and shared-engine CLI.

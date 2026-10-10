@@ -43,6 +43,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from oberhau import __version__
 from oberhau.core import Cancelled, OberhauError, Status, data_home, now
 from oberhau.desktop.i18n import translate
 from oberhau.desktop.theme import THEME
@@ -53,6 +54,7 @@ from oberhau.reporting import export, generate
 from oberhau.scheduler import add_schedule, take_due
 from oberhau.scope import Policy
 from oberhau.security import local_ollama_url, redact
+from oberhau.tooling import ECOSYSTEMS, PINNED, install_tool, refresh_osv_cache, refresh_trivy_cache
 
 PAGES = [
     "Overview",
@@ -161,7 +163,7 @@ class Window(QMainWindow):
         self.navigation.setObjectName("navigation")
         self.navigation.addItems([self.tr_label(page) for page in PAGES])
         side.addWidget(self.navigation, 1)
-        side.addWidget(QLabel("v0.1.0 · LOCAL / OFFLINE"))
+        side.addWidget(QLabel(f"v{__version__} · LOCAL / OFFLINE"))
         layout.addWidget(sidebar)
         body = QWidget()
         body_layout = QVBoxLayout(body)
@@ -416,7 +418,7 @@ class Window(QMainWindow):
     def make_programs(self) -> None:
         self.note(
             "Programs",
-            "Policy records document authorization. External active testing is unavailable in v0.1.0.",
+            "Policy records document authorization. External active testing is unavailable.",
         )
         self.bar("Programs", [("Add program", self.add_program)])
         self.programs_table = self.table(
@@ -506,7 +508,66 @@ class Window(QMainWindow):
         self.pages["Scanner"].addWidget(self.profile_note)
         self.bar("Scanner", [("Run offline scan", self.run_scan), ("Stop", self.stop)])
         self.capabilities = self.table(
-            "Scanner", ["Scanner", "Installed", "Version", "License", "Network", "Executable"]
+            "Scanner",
+            [
+                "Scanner",
+                "Installed",
+                "Version",
+                "Offline cache",
+                "License",
+                "Network",
+                "Executable",
+            ],
+        )
+        setup = QHBoxLayout()
+        self.tool_choice = QComboBox()
+        self.tool_choice.addItems(PINNED)
+        self.ecosystem_choice = QComboBox()
+        self.ecosystem_choice.addItems(ECOSYSTEMS)
+        setup.addWidget(self.tool_choice)
+        install = QPushButton(self.tr_label("Download official scanner"))
+        install.clicked.connect(lambda: self.guard(self.install_scanner))
+        setup.addWidget(install)
+        setup.addWidget(self.ecosystem_choice)
+        cache = QPushButton(self.tr_label("Download OSV advisory cache"))
+        cache.clicked.connect(lambda: self.guard(self.refresh_advisories))
+        setup.addWidget(cache)
+        self.pages["Scanner"].addLayout(setup)
+        self.bar(
+            "Scanner", [("Download Trivy advisory cache (~1.5 GB)", self.refresh_trivy_advisories)]
+        )
+        note = QLabel(
+            self.tr_label(
+                "Downloads require Internet and stay in the local data directory. Project scans use cached data only."
+            )
+        )
+        note.setWordWrap(True)
+        self.pages["Scanner"].addWidget(note)
+
+    def install_scanner(self) -> None:
+        tool = self.tool_choice.currentText()
+        self.start(
+            lambda cancel, progress: install_tool(self.engine.home, tool, cancel, progress),
+            self.tool_ready,
+        )
+
+    def refresh_advisories(self) -> None:
+        ecosystem = self.ecosystem_choice.currentText()
+        self.start(
+            lambda cancel, progress: refresh_osv_cache(
+                self.engine.home, ecosystem, cancel, progress
+            ),
+            self.tool_ready,
+        )
+
+    def tool_ready(self, result) -> None:
+        self.log_message(json.dumps(result, ensure_ascii=False))
+        QTimer.singleShot(100, self.diagnostics)
+
+    def refresh_trivy_advisories(self) -> None:
+        self.start(
+            lambda cancel, progress: refresh_trivy_cache(self.engine.home, cancel, progress),
+            self.tool_ready,
         )
 
     def scan_selected(self) -> None:
@@ -816,7 +877,9 @@ class Window(QMainWindow):
     def diagnostics(self) -> None:
         if self.worker is None:
             self.diagnostics_attempted = True
-            self.start(lambda cancel, progress: collect(), self.diagnostics_ready)
+            self.start(
+                lambda cancel, progress: collect(home=self.engine.home), self.diagnostics_ready
+            )
 
     def diagnostics_ready(self, result) -> None:
         self.diagnostic_data = result
@@ -824,11 +887,38 @@ class Window(QMainWindow):
         self.fill(
             self.capabilities,
             [
-                [r["scanner"], r["installed"], r["version"], r["license"], r["network"], r["path"]]
+                [
+                    r["scanner"],
+                    r["installed"],
+                    r["version"],
+                    self.scanner_cache_label(r["scanner"], result),
+                    r["license"],
+                    r["network"],
+                    r["path"],
+                ]
                 for r in result["scanners"]
             ],
         )
         self.db.set_setting("last_diagnostics", result)
+
+    @staticmethod
+    def scanner_cache_label(scanner: str, result: dict) -> str:
+        caches = result.get("offline_caches", {})
+        if scanner == "osv-scanner":
+            return "; ".join(
+                f"{ecosystem}: "
+                + (
+                    "ready"
+                    if caches.get(ecosystem, {}).get("checksum_valid")
+                    else "missing/invalid"
+                )
+                for ecosystem in ECOSYSTEMS
+            )
+        if scanner == "trivy":
+            return "Config: bundled; vulnerability DB: " + (
+                "present" if caches.get("trivy_vulnerability_db", {}).get("present") else "missing"
+            )
+        return "Not required"
 
     def export_diagnostics(self) -> None:
         destination, _ = QFileDialog.getSaveFileName(

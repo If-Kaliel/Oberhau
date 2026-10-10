@@ -6,6 +6,7 @@ from pathlib import Path
 from threading import Event
 from urllib.parse import quote
 
+from oberhau import __version__
 from oberhau.core import DraftText, Finding, OberhauError, Status, now
 from oberhau.database import Database
 from oberhau.ollama import Ollama
@@ -154,7 +155,7 @@ def export(db: Database, report_id: int, destination: Path, content: str | None 
                 "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
                 "runs": [
                     {
-                        "tool": {"driver": {"name": "Oberhau", "version": "0.1.0"}},
+                        "tool": {"driver": {"name": "Oberhau", "version": __version__}},
                         "results": [
                             {
                                 "ruleId": finding.rule,

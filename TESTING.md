@@ -29,8 +29,23 @@ The local SQL replay records two vulnerable-query rows and zero parameterized-co
 
 Semgrep 1.180.0 was executed on the managed fixture with explicit bundled rules; one real eval alert
 was correlated with the matching builtin finding. Native core execution required leaving the Codex
-socket-restricted sandbox; no external target was involved. Gitleaks/OSV/Trivy were not available
-for live scanner verification, and Ollama API was unavailable for live inference.
+socket-restricted sandbox; no external target was involved. Gitleaks 8.30.1, OSV 2.6.0 and Trivy
+0.75.0 also passed real Windows fixture scans with negative controls. Ollama live inference is
+still unverified.
+
+Real optional scanner tests never download tools or feeds implicitly. Prepare them first as
+described in SCANNERS.md, then opt in:
+
+```powershell
+$env:OBERHAU_INTEGRATION_HOME = (Resolve-Path .oberhau\verified).Path
+.\.venv\Scripts\python.exe -m pytest -q tests/test_live_scanners.py --basetemp=.oberhau\pytest-live
+Remove-Item Env:OBERHAU_INTEGRATION_HOME
+```
+
+The dependency negative control is Django 6.1.2, verified against the official download page on
+2026-10-10. No advisory match in these cached feeds is a bounded regression result. New advisories
+may intentionally cause that test to fail and require reviewing the control version. Empty OSV
+manifests cause exit 128 and are treated as lack of coverage, not successful analysis.
 
 Coverage and exact verified commands/results are recorded in WORKLOG.md. UI coverage is lower than
 core coverage; tests do not claim every dialog, scanner version or vulnerability class is covered.

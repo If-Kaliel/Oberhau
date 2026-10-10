@@ -12,7 +12,7 @@ from oberhau.scanners.external import capabilities
 from oberhau.security import ProcessRunner
 
 
-def collect(limits: Limits | None = None) -> dict:
+def collect(limits: Limits | None = None, home: Path | None = None) -> dict:
     result = {
         "checked": now(),
         "python": sys.version,
@@ -21,9 +21,13 @@ def collect(limits: Limits | None = None) -> dict:
         "cpu_logical": __import__("os").cpu_count(),
         "git": shutil.which("git"),
         "ollama_executable": shutil.which("ollama"),
-        "scanners": capabilities(ProcessRunner(limits or Limits(timeout=10))),
+        "scanners": capabilities(ProcessRunner(limits or Limits(timeout=10), home=home)),
         "packages": {},
     }
+    if home is not None:
+        from oberhau.tooling import cache_status
+
+        result["offline_caches"] = cache_status(home)
     for name in ("PySide6-Essentials", "pydantic"):
         try:
             result["packages"][name] = importlib.metadata.version(name)

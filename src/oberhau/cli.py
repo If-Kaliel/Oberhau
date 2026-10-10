@@ -13,6 +13,7 @@ from oberhau.engine import ASSETS, PROFILES, Engine
 from oberhau.laboratory import validate_sql
 from oberhau.reporting import export, generate
 from oberhau.scheduler import add_schedule
+from oberhau.tooling import ECOSYSTEMS, PINNED, install_tool, refresh_osv_cache, refresh_trivy_cache
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -26,6 +27,17 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("projects")
     commands.add_parser("metrics")
     commands.add_parser("demo")
+    commands.add_parser(
+        "refresh-trivy-cache", help="Download the public Trivy vulnerability database"
+    )
+    install = commands.add_parser(
+        "install-tool", help="Download a pinned official Windows x64 scanner"
+    )
+    install.add_argument("tool", choices=PINNED)
+    cache = commands.add_parser(
+        "refresh-osv-cache", help="Download a public advisory feed; no project data is sent"
+    )
+    cache.add_argument("ecosystem", choices=ECOSYSTEMS)
     add = commands.add_parser("add")
     add.add_argument("source", type=Path)
     add.add_argument("--name", required=True)
@@ -71,7 +83,13 @@ def main(argv: list[str] | None = None) -> int:
         db = engine.db
         output = None
         if args.command == "diagnostics":
-            output = collect()
+            output = collect(home=engine.home)
+        elif args.command == "install-tool":
+            output = install_tool(engine.home, args.tool, cancel, print)
+        elif args.command == "refresh-osv-cache":
+            output = refresh_osv_cache(engine.home, args.ecosystem, cancel, print)
+        elif args.command == "refresh-trivy-cache":
+            output = refresh_trivy_cache(engine.home, cancel, print)
         elif args.command == "add":
             output = {"project": engine.ingestion.add(args.source, args.name, args.program)}
         elif args.command == "demo":

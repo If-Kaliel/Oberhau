@@ -6,6 +6,7 @@ from pathlib import Path
 from threading import Event
 from typing import Any
 
+from oberhau import __version__
 from oberhau.core import Finding, OberhauError
 from oberhau.security import ProcessRunner, confined, redact
 
@@ -120,6 +121,15 @@ def parse(tool: str, payload: str, root: Path) -> list[Finding]:
                                 evidence={
                                     "package": item,
                                     "affected": advisory.get("affected", []),
+                                    "fixed_versions": sorted(
+                                        {
+                                            event["fixed"]
+                                            for affected in advisory.get("affected", [])
+                                            for interval in affected.get("ranges", [])
+                                            for event in interval.get("events", [])
+                                            if event.get("fixed")
+                                        }
+                                    ),
                                 },
                             )
                         )
@@ -145,6 +155,7 @@ def parse(tool: str, payload: str, root: Path) -> list[Finding]:
                         )
                     )
                 for item in group.get("Misconfigurations", []) or []:
+                    cause = item.get("CauseMetadata", {}) or {}
                     findings.append(
                         Finding(
                             scanner=tool,
@@ -152,8 +163,11 @@ def parse(tool: str, payload: str, root: Path) -> list[Finding]:
                             category="configuration",
                             title=redact(item["Title"]),
                             path=location(root, group["Target"]),
+                            line=max(1, cause.get("StartLine", 1)),
+                            end_line=max(1, cause.get("EndLine", 1)),
                             severity=item.get("Severity", "medium").lower(),
                             explanation=redact(item.get("Description", "Review required")),
+                            evidence={"resolution": redact(item.get("Resolution", ""))},
                         )
                     )
         else:
@@ -164,10 +178,11 @@ def parse(tool: str, payload: str, root: Path) -> list[Finding]:
 
 
 class ExternalScanner:
-    def __init__(self, identifier: str, runner: ProcessRunner, rules: Path):
+    def __init__(self, identifier: str, runner: ProcessRunner, rules: Path, profile: str = "deep"):
         if identifier not in TOOLS:
             raise OberhauError("Scanner not registered")
         self.identifier, self.runner, self.rules = identifier, runner, rules
+        self.profile = profile
 
     def scan(self, root: Path, cancel: Event) -> list[Finding]:
         tool = self.identifier
@@ -227,6 +242,14 @@ class ExternalScanner:
             elif tool == "osv-scanner":
                 config = temp / "osv.toml"
                 config.write_text("", encoding="utf-8")
+                if self.runner.home is not None:
+                    from oberhau.tooling import cache_status
+
+                    for ecosystem, state in cache_status(self.runner.home).items():
+                        if state.get("present") and state.get("checksum_valid") is False:
+                            raise OberhauError(
+                                f"OSV {ecosystem} cache checksum mismatch; refresh the feed"
+                            )
                 output = self.runner.run(
                     tool,
                     [
@@ -236,6 +259,9 @@ class ExternalScanner:
                         str(root),
                         "--format=json",
                         "--offline",
+                        "--no-call-analysis=go,rust",
+                        "--no-resolve",
+                        "--no-ignore",
                         "--config",
                         str(config),
                     ],
@@ -246,6 +272,11 @@ class ExternalScanner:
             else:
                 config = temp / "trivy.yaml"
                 config.write_text("{}", encoding="utf-8")
+                cache = (self.runner.home or root.parent.parent) / "cache/trivy"
+                modules = temp / "modules"
+                modules.mkdir()
+                ignore = temp / "ignore"
+                ignore.write_text("", encoding="utf-8")
                 output = self.runner.run(
                     tool,
                     [
@@ -253,15 +284,70 @@ class ExternalScanner:
                         "--config",
                         str(config),
                         "--format=json",
-                        "--scanners=vuln,misconfig",
+                        "--scanners="
+                        + (
+                            "misconfig"
+                            if self.profile == "configuration"
+                            else "vuln"
+                            if self.profile == "dependencies"
+                            else "vuln,misconfig"
+                        ),
+                        "--cache-dir",
+                        str(cache),
+                        "--module-dir",
+                        str(modules),
+                        "--ignorefile",
+                        str(ignore),
                         "--skip-db-update",
+                        "--skip-java-db-update",
+                        "--skip-check-update",
+                        "--skip-version-check",
+                        "--disable-telemetry",
                         "--offline-scan",
+                        "--parallel",
+                        str(self.runner.limits.parallelism),
                         str(root),
                     ],
                     temp,
                     cancel,
                 )
-            return parse(tool, output, root)
+            findings = parse(tool, output, root)
+            from oberhau.tooling import PINNED, checksum, tool_directory
+
+            binary = self.runner.tools.get(tool)
+            provenance = {"binary_sha256": checksum(Path(binary))} if binary else {}
+            if (
+                binary
+                and self.runner.home
+                and tool in PINNED
+                and Path(binary)
+                == tool_directory(self.runner.home, tool) / PINNED[tool]["executable"]
+            ):
+                provenance.update(
+                    {
+                        "managed_version": PINNED[tool]["version"],
+                        "release_sha256": PINNED[tool]["sha256"],
+                    }
+                )
+            if tool == "semgrep":
+                provenance["rules_sha256"] = checksum(self.rules)
+            if self.runner.home and tool == "osv-scanner":
+                provenance["advisory_caches"] = {
+                    name: {
+                        key: value
+                        for key, value in state.items()
+                        if key in {"sha256", "downloaded", "source", "ecosystem"}
+                    }
+                    for name, state in cache_status(self.runner.home).items()
+                    if state.get("present") and name in {"PyPI", "npm"}
+                }
+            if self.runner.home and tool == "trivy" and self.profile != "configuration":
+                receipt = self.runner.home / "cache/trivy/db/receipt.json"
+                if receipt.is_file():
+                    provenance["advisory_cache"] = json.loads(receipt.read_text(encoding="utf-8"))
+            for finding in findings:
+                finding.evidence["scanner_provenance"] = provenance
+            return findings
 
 
 def capabilities(runner: ProcessRunner) -> list[dict[str, Any]]:
@@ -269,7 +355,7 @@ def capabilities(runner: ProcessRunner) -> list[dict[str, Any]]:
         {
             "scanner": "builtin",
             "installed": True,
-            "version": "0.1.0",
+            "version": __version__,
             "path": "bundled",
             "license": "MIT",
             "network": False,
@@ -287,6 +373,8 @@ def capabilities(runner: ProcessRunner) -> list[dict[str, Any]]:
             "active": False,
             **meta,
         }
+        if tool in runner.tool_errors:
+            status["error"] = runner.tool_errors[tool]
         if binary:
             try:
                 flag = "version" if tool == "gitleaks" else "--version"

@@ -1,0 +1,23 @@
+{
+  "gitleaks": {
+    "version": "8.30.1",
+    "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x64.zip",
+    "sha256": "d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e",
+    "executable": "gitleaks.exe",
+    "archive": true
+  },
+  "osv-scanner": {
+    "version": "2.6.0",
+    "url": "https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_windows_amd64.exe",
+    "sha256": "e0ed7644118b717b028c249ee9d3515024e55e8510747ca08906eb96765354d6",
+    "executable": "osv-scanner.exe",
+    "archive": false
+  },
+  "trivy": {
+    "version": "0.75.0",
+    "url": "https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_windows-64bit.zip",
+    "sha256": "4e43bd71a30f51aee39525f60f2b47043af77eb8df8fe082aae4372b69c6660f",
+    "executable": "trivy.exe",
+    "archive": true
+  }
+}

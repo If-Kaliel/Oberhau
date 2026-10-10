@@ -124,3 +124,70 @@ are excluded. Credential-like strings in the tests are explicitly fabricated reg
 Prepared a Windows/Python 3.12 CI job with pinned official Actions, read-only repository permission,
 lint, formatting, the existing regression suite and a wheel build. Publication targets
 `https://github.com/If-Kaliel/Oberhau`, with `main` as default and `testes` for ongoing validation.
+
+## Scanner integration milestone / 0.2.0 — 2026-10-10
+
+Published the public repository with `main` and `testes`. Both baseline CI runs completed
+successfully after correcting two clean-runner issues: pytest's temporary-directory parent was
+absent, and a non-isolated wheel build lacked setuptools. CI now creates the parent and uses the
+declared isolated build backend. Baseline successful runs:
+[main](https://github.com/If-Kaliel/Oberhau/actions/runs/38060770253) and
+[testes](https://github.com/If-Kaliel/Oberhau/actions/runs/38060776581).
+
+Added explicit Scanner-page/CLI installation of Gitleaks 8.30.1, OSV-Scanner 2.6.0 and Trivy 0.75.0
+from pinned official Windows x64 releases. Verified published GitHub release asset SHA-256 values
+before extraction/installation. Installation extracts only the exact expected executable and
+records a receipt; modified executables or receipts are rejected on discovery. Public advisory
+refresh is a separate operator action and never runs implicitly in a project scan. Added controlled
+OSV cache environment, removal of scanner environment overrides, cache diagnostics, Trivy profile
+selection and explicit DB/Java/check/version update, telemetry and module controls. Findings retain
+executable/rule/feed provenance, advisory fixed-version events and Trivy source line/resolution.
+
+Actual downloaded assets and cache provenance (all ignored local data):
+
+- Gitleaks release: 8,438,883 bytes; SHA-256
+  `d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e`.
+- OSV release: 58,692,096 bytes; SHA-256
+  `e0ed7644118b717b028c249ee9d3515024e55e8510747ca08906eb96765354d6`.
+- Trivy release: 52,927,180 bytes; SHA-256
+  `4e43bd71a30f51aee39525f60f2b47043af77eb8df8fe082aae4372b69c6660f`.
+- Public OSV PyPI feed: 26,219 advisories, 35,968,268 bytes; downloaded 2026-10-10;
+  SHA-256 `159fe3dc8e1545604fb515c1e60deead3785bd5b6c4b936920fd2e6c1963d035`.
+- Trivy expanded DB: 1,466,097,664 bytes; schema 2; upstream UpdatedAt 2026-10-10T12:33:35Z;
+  SHA-256 `56e17f3bd7565b1e6d865fbd2b7d98b99e83315883c0afa50c24e6f676248ad5`.
+
+Verification:
+
+- Full deterministic suite: **87 passed, 4 skipped**, 46.30 s, approximately **83% line coverage**.
+  The four skips are explicitly opt-in real-binary tests, not unexplained unavailable features.
+- Actual Gitleaks/OSV/Trivy integration suite after provenance additions: **4 passed**, 15.14 s.
+  Gitleaks detects a generated, nonfunctional GitHub credential and emits no raw secret;
+  replacing it removes the warning. OSV and Trivy match Django 2.2.0 advisories with fixes and
+  produce no advisory warning for the Django 6.1.2 control against these feed snapshots.
+  Trivy attributes a root-user configuration warning to Dockerfile line 2; changing the user
+  removes that rule's warning. No fixture/package code is executed or installed.
+- Complete real Deep profile on the managed original demo: **completed**, 11.77 s, no errors;
+  builtin 6 warnings, Semgrep 1, Gitleaks 0, OSV 74, Trivy 43. The intentionally weak demo key
+  is a builtin heuristic warning; the separate integration fixture exercises real Gitleaks.
+  These are observations, not distinct proven vulnerabilities; advisory aliases overlap.
+- Ruff checks and formatting passed. Native GUI launched, rendered and closed; added Scanner
+  page screenshot to the smoke script and inspected its actual cache/setup controls.
+- Wheel build completed with the trusted tool manifest included; local artifacts stay ignored.
+
+Issues found through real execution:
+
+1. OSV's public docs still show an `osv-scanner` cache subdirectory. The pinned 2.6.0 binary uses
+   `osv-scalibr`; confirmed in official source, fixed the managed layout, and reran successfully.
+2. Empty OSV manifests return 128 because there are no package sources. Kept this as a coverage
+   failure and used a real patched Django release as the advisory-negative control.
+3. The initial Trivy DB size guard was below the real 1.47 GB database. Raised completed-DB bound
+   to 2 GB, added a 4 GB free-space prerequisite and exposed the size in the download button.
+4. A simultaneous manual scan correctly hit the project lock; reran profiles sequentially.
+5. OneDrive briefly prevented Ruff replacing mapped source files; the subsequent run succeeded.
+
+Remaining work: complete portable source/database backup, reparse/TOCTOU and OS quotas, safe Git
+imports, expanded semantic analysis, live Qwen verification, complete localization and EXE packaging.
+For scanner integration specifically: Java index refresh, additional ecosystems, feed freshness
+policy, alias correlation, signed release verification and per-scanner timing/status history when
+no warnings occur. CLI offline flags are not an OS firewall; no external target testing was done.
+Ongoing feature changes are published to `testes`; `main` retains the verified initial baseline.

@@ -310,6 +310,11 @@ Verification before publication:
   CLI EXE: `08993d892c700e800b9b8273f924c91eaf68af1a9b47a392dd052c99b9eca8ad`. Package checksum is shipped separately to avoid
   a self-referential archive hash. No further application code changes followed this verification.
 
+- Final documentation CI exposed a timing-sensitive test: a sub-millisecond negative-control scan
+  can legitimately persist a rounded duration of zero. The assertion now accepts nonnegative
+  duration while retaining completed status, start/finish, provenance and zero-warning checks.
+  Application binaries are unchanged; the final commit is revalidated before publication.
+
 Remaining work follows ROADMAP.md: broader semantic/framework analysis, active/local HTTP validation
 recipes, full policy lifecycle, scheduling/change detection, quotas/retention/TOCTOU hardening,
 complete technical localization, additional feeds and signed distribution. Release 0.4.0 is ready

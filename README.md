@@ -6,8 +6,12 @@ Oberhau 0.1.0 is a working native desktop and CLI for authorized offline source 
 Import a folder, source file or ZIP; scan a managed snapshot; investigate normalized warnings;
 record human decisions; reproduce the bundled SQL laboratory; generate and export review drafts.
 
-Double-click **Launch-Oberhau.cmd** in this checkout. Its project virtual environment is prepared.
-For another computer, follow [INSTALLATION.md](INSTALLATION.md). Python 3.12+ is required.
+Follow [INSTALLATION.md](INSTALLATION.md) to prepare the project virtual environment, then
+double-click **Launch-Oberhau.cmd**. Python 3.12+ is required.
+
+Public repository: [If-Kaliel/Oberhau](https://github.com/If-Kaliel/Oberhau).
+`main` holds the published baseline; `testes` is for changes under validation. GitHub Actions runs
+the Windows regression suite, lint checks and wheel build for both branches and pull requests.
 
 ```powershell
 .\scripts\Run-CLI.ps1 --home .oberhau\demo demo

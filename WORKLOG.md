@@ -114,4 +114,13 @@ All working source, tests and docs are preserved. Normal user data stays empty u
 chosen. Development/demo data and screenshots are isolated under .oberhau/ and artifacts/.
 
 Original user specification is preserved as MASTER_SPECIFICATION.md. Work is saved on
-`codex/desktop-foundation` with a focused implementation commit. No push or external publication.
+`codex/desktop-foundation` with a focused implementation commit. That first milestone was local.
+
+## Public repository preparation — 2026-10-10
+
+User requested a public GitHub repository with `main` and a testing branch. Reviewed all tracked
+files before publication: local databases, virtual environments, reports and downloaded binaries
+are excluded. Credential-like strings in the tests are explicitly fabricated regression fixtures.
+Prepared a Windows/Python 3.12 CI job with pinned official Actions, read-only repository permission,
+lint, formatting, the existing regression suite and a wheel build. Publication targets
+`https://github.com/If-Kaliel/Oberhau`, with `main` as default and `testes` for ongoing validation.

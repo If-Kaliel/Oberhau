@@ -1,0 +1,36 @@
+name: Windows tests
+
+on:
+  push:
+    branches: [main, testes]
+  pull_request:
+    branches: [main, testes]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install desktop and development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Lint and formatting
+        run: |
+          python -m ruff check src tests examples
+          python -m ruff format --check src tests examples
+      - name: Engine, CLI, security and desktop regressions
+        run: python -m pytest -q --basetemp=.oberhau/ci-tests --cov=oberhau --cov-report=term-missing
+      - name: Build distributable wheel
+        run: python -m pip wheel --no-deps --no-build-isolation . --wheel-dir artifacts

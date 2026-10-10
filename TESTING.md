@@ -1,5 +1,9 @@
 # Verification
 
+`.github/workflows/tests.yml` runs these regressions on GitHub-hosted Windows with Python 3.12
+for `main`, `testes` and pull requests. External scanners and Ollama are optional and are not
+installed in that job; adapter contracts use synthetic fixtures, as described below.
+
 Use the local Python environment:
 
 ```powershell

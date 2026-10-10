@@ -29,6 +29,22 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("diagnostics")
     commands.add_parser("projects")
     commands.add_parser("metrics")
+    commands.add_parser(
+        "benchmark", help="Evaluate trusted synthetic positive/negative cases independently"
+    )
+    queue = commands.add_parser(
+        "research-queue", help="Prioritized evidence-based queue; retains human decisions"
+    )
+    queue.add_argument("--project", type=int)
+    research = commands.add_parser(
+        "research-details", help="Stored graph, contextual hypotheses, coverage and changes"
+    )
+    research.add_argument("run", type=int)
+    assistant = commands.add_parser(
+        "research-assist", help="Bounded local Qwen evidence queries; deterministic fallback"
+    )
+    assistant.add_argument("run", type=int)
+    assistant.add_argument("--ai", action="store_true")
     runs = commands.add_parser(
         "scanner-runs", help="Per-scanner status, timing, counts and provenance"
     )
@@ -90,6 +106,10 @@ def main(argv: list[str] | None = None) -> int:
     review.add_argument("--notes", default="")
     lab = commands.add_parser("validate")
     lab.add_argument("finding", type=int)
+    local_lab = commands.add_parser(
+        "local-lab", help="Disposable trusted synthetic loopback HTTP regressions"
+    )
+    local_lab.add_argument("recipe", choices=["authorization", "input-validation"])
     report = commands.add_parser("report")
     report.add_argument("finding", type=int)
     report.add_argument("--language", choices=["en", "pt-BR"], default="en")
@@ -179,6 +199,23 @@ def main(argv: list[str] | None = None) -> int:
             output = db.query("SELECT id,name,origin,demo,created FROM projects")
         elif args.command == "metrics":
             output = db.metrics()
+        elif args.command == "benchmark":
+            from oberhau.benchmark import evaluate
+
+            output = evaluate(cancel)
+            db.set_setting("last_research_benchmark", output)
+        elif args.command == "research-queue":
+            from oberhau.research import research_queue
+
+            output = research_queue(db, args.project)
+        elif args.command == "research-details":
+            from oberhau.research_assistant import ResearchTools
+
+            output = ResearchTools(engine, args.run).data
+        elif args.command == "research-assist":
+            from oberhau.research_assistant import assist
+
+            output = assist(engine, args.run, args.ai, cancel)
         elif args.command == "scanner-runs":
             output = db.scanner_runs(args.scan)
         elif args.command == "refresh":
@@ -209,6 +246,10 @@ def main(argv: list[str] | None = None) -> int:
             output = {"reviewed": args.finding, "status": args.status}
         elif args.command == "validate":
             output = validate_sql(db, args.finding)
+        elif args.command == "local-lab":
+            from oberhau.local_validation import validate_local
+
+            output = validate_local(db, args.recipe, cancel)
         elif args.command == "report":
             report_id, _ = generate(db, args.finding, args.language, args.ai, cancel)
             export(db, report_id, args.output)

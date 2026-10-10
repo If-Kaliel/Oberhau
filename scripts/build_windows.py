@@ -79,10 +79,21 @@ def notices(bundle, archives):
         "annotated_types",
         "typing_extensions",
         "typing_inspection",
+        "tree-sitter",
+        "tree-sitter-typescript",
+        "tree-sitter-javascript",
+        "tree-sitter-java",
+        "tree-sitter-c-sharp",
     ):
         distribution = importlib.metadata.distribution(name)
         for file in distribution.files:
-            if "/licenses/" in str(file).replace("\\", "/"):
+            notice_path = str(file).replace("\\", "/")
+            if "/licenses/" in notice_path or (
+                ".dist-info/" in notice_path
+                and Path(str(file))
+                .name.lower()
+                .startswith(("license", "copying", "copyright", "notice"))
+            ):
                 target = directory / name / Path(str(file)).name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(distribution.locate_file(file), target)

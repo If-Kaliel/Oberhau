@@ -48,12 +48,14 @@ def source_trace(text: str, line: int, rule: str) -> dict:
         return replacement + ("." + tail if tail else "")
 
     nodes = []
+    parents = {}
 
     def walk(node):
         nodes.append(node)
         for child in ast.iter_child_nodes(node):
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
                 continue
+            parents[child] = node
             walk(child)
 
     try:
@@ -102,6 +104,7 @@ def source_trace(text: str, line: int, rule: str) -> dict:
             if isinstance(target, ast.Name) and value is not None:
                 assignments.setdefault(target.id, []).append((node.lineno, value))
     sources, steps, unknown = {}, {}, set()
+    gaps, sanitizers = [], []
     truncated, visited = False, 0
 
     def excerpt(number):
@@ -128,13 +131,51 @@ def source_trace(text: str, line: int, rule: str) -> dict:
                 if item[0] <= before and (node.id, item[0]) not in stack
             ]
             if candidates:
-                number, value = max(candidates, key=lambda item: item[0])
-                steps[(number, node.id)] = {
-                    "line": number,
-                    "variable": node.id,
-                    "code": excerpt(number),
-                }
-                trace(value, number, (*stack, (node.id, number)))
+
+                def conditional(value):
+                    current = parents.get(value)
+                    while current is not None and current is not scope:
+                        if isinstance(
+                            current,
+                            (
+                                ast.If,
+                                ast.For,
+                                ast.AsyncFor,
+                                ast.While,
+                                ast.Try,
+                                ast.TryStar,
+                                ast.Match,
+                            ),
+                        ):
+                            return True
+                        current = parents.get(current)
+                    return False
+
+                straight = [item for item in candidates if not conditional(item[1])]
+                baseline = max(straight, key=lambda item: item[0]) if straight else None
+                selected = ([baseline] if baseline else []) + [
+                    item
+                    for item in candidates
+                    if conditional(item[1]) and (baseline is None or item[0] >= baseline[0])
+                ]
+                if any(conditional(value) for _, value in selected):
+                    gaps.append(
+                        {
+                            "variable": node.id,
+                            "reason": "Conditional/loop assignments have multiple possible reaching definitions; feasibility unresolved",
+                        }
+                    )
+                    if baseline is None and node.id in parameters:
+                        add_source(
+                            "function parameter; caller trust unknown", function.lineno, node.id
+                        )
+                for number, value in selected:
+                    steps[(number, node.id)] = {
+                        "line": number,
+                        "variable": node.id,
+                        "code": excerpt(number),
+                    }
+                    trace(value, number, (*stack, (node.id, number)))
             elif node.id in parameters:
                 add_source("function parameter; caller trust unknown", function.lineno, node.id)
             elif node.id not in {"True", "False", "None"}:
@@ -142,6 +183,15 @@ def source_trace(text: str, line: int, rule: str) -> dict:
             return
         if isinstance(node, ast.Call):
             callee = resolved(node.func)
+            if callee in {"html.escape", "shlex.quote", "bleach.clean"}:
+                sanitizers.append(
+                    {
+                        "line": node.lineno,
+                        "operation": callee,
+                        "code": excerpt(node.lineno),
+                        "limitations": "Syntactic sanitizer call; runtime binding, configuration and sink applicability unverified",
+                    }
+                )
             if callee == "input" and "input" not in shadowed:
                 add_source("interactive input", node.lineno, callee)
                 return
@@ -206,9 +256,20 @@ def source_trace(text: str, line: int, rule: str) -> dict:
         "unresolved_names": sorted(unknown)[:16],
         "same_name_call_sites": callers[:16],
         "truncated": truncated or len(sources) > 16 or len(steps) > 32 or len(callers) > 16,
+        "analysis_gaps": gaps[:16],
+        "sanitizers": sanitizers[:16],
+        "conditional_checks": [
+            {
+                "line": node.lineno,
+                "code": excerpt(node.lineno),
+                "effect": "Condition observed; enforcement and path dominance unresolved",
+            }
+            for node in nodes
+            if isinstance(node, ast.If)
+        ][:16],
         "limitations": [
-            "Static same-function assignment slice; latest textual assignment is used",
-            "Branches, dynamic dispatch, imports and interprocedural control flow are not resolved",
+            "Static same-function may-dependency slice; straight-line definitions and subsequent conditional alternatives are retained",
+            "Branch feasibility, dynamic dispatch, imports and interprocedural control flow are not resolved",
             "Same-name call sites are syntactic references; target bindings are not verified",
             "A parameter or request-shaped access does not prove attacker control or exploitability",
         ],

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +70,18 @@ MIGRATIONS = [
         scope TEXT NOT NULL, advisory TEXT NOT NULL, finding_id INTEGER NOT NULL REFERENCES findings(id),
         PRIMARY KEY(project_id,scope,advisory));
     CREATE INDEX advisory_links_finding ON advisory_links(finding_id);
+    """,
+    """
+    CREATE TABLE research_runs(id INTEGER PRIMARY KEY, project_id INTEGER NOT NULL REFERENCES projects(id),
+        scan_id INTEGER NOT NULL REFERENCES scans(id), status TEXT NOT NULL, started TEXT NOT NULL,
+        finished TEXT, commit_hash TEXT, manifest TEXT NOT NULL DEFAULT '{}',
+        data TEXT NOT NULL DEFAULT '{}', errors TEXT NOT NULL DEFAULT '[]', duration REAL NOT NULL DEFAULT 0);
+    CREATE INDEX research_runs_project ON research_runs(project_id,id);
+    CREATE TABLE research_files(project_id INTEGER NOT NULL REFERENCES projects(id),
+        path TEXT NOT NULL, sha256 TEXT NOT NULL, version TEXT NOT NULL, data TEXT NOT NULL,
+        PRIMARY KEY(project_id,path,sha256,version));
+    CREATE TABLE research_assistance(id INTEGER PRIMARY KEY, run_id INTEGER NOT NULL REFERENCES research_runs(id),
+        status TEXT NOT NULL, data TEXT NOT NULL, created TEXT NOT NULL);
     """,
 ]
 
@@ -149,12 +161,18 @@ class Database:
             (key, json.dumps(value)),
         )
 
-    def save_finding(self, project_id: int, scan_id: int, finding: Finding) -> int:
+    def save_finding(
+        self,
+        project_id: int,
+        scan_id: int,
+        finding: Finding,
+        connection: sqlite3.Connection | None = None,
+    ) -> int:
         finding = Finding.model_validate(sanitize(finding.model_dump()))
         observation_data = finding.model_dump_json()
         fingerprint = finding.fingerprint(project_id)
         scope = dependency_scope(finding)
-        with self.connect() as connection:
+        with nullcontext(connection) if connection is not None else self.connect() as connection:
             aliases = advisory_aliases(finding) if scope else set()
             related = set()
             for alias in aliases:
@@ -184,9 +202,19 @@ class Database:
                     rank = {"informative": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
                     if rank.get(old.severity, 2) > rank.get(finding.severity, 2):
                         finding.severity = old.severity
-                if old.evidence.get("source_sha256") != finding.evidence.get(
-                    "source_sha256"
-                ) and existing["status"] in {
+                old_references = {
+                    (ref.get("path"), ref.get("sha256"))
+                    for ref in old.evidence.get("references", [])
+                }
+                new_references = {
+                    (ref.get("path"), ref.get("sha256"))
+                    for ref in finding.evidence.get("references", [])
+                }
+                evidence_changed = (
+                    old.evidence.get("source_sha256") != finding.evidence.get("source_sha256")
+                    or old_references != new_references
+                )
+                if evidence_changed and existing["status"] in {
                     Status.VERIFIED,
                     Status.READY,
                     Status.FALSE_POSITIVE,

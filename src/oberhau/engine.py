@@ -23,6 +23,10 @@ from oberhau.storage import storage_operation, store_lock
 
 ASSETS = Path(__file__).parent / "assets"
 PROFILES = {
+    "research": (
+        "Offline builtin scan, framework syntax index, contextual hypotheses and evidence graph.",
+        ["builtin"],
+    ),
     "quick": ("Bundled Python AST, literal secrets, and configuration heuristics.", ["builtin"]),
     "standard": (
         "Bundled checks and Semgrep with trusted bundled rules, if installed.",
@@ -179,6 +183,10 @@ class Engine:
         started = time.monotonic()
         with project_lock(self.home, project_id):
             self.db.execute(
+                "UPDATE research_runs SET status='interrupted',finished=? WHERE project_id=? AND status='running'",
+                (now(), project_id),
+            )
+            self.db.execute(
                 "UPDATE scanner_runs SET status='interrupted',finished=? WHERE status IN ('pending','running') AND scan_id IN (SELECT id FROM scans WHERE project_id=? AND status='running')",
                 (now(), project_id),
             )
@@ -327,6 +335,10 @@ class Engine:
                         errors.extend(run_errors)
                 if errors:
                     status = "partial" if successes else "failed"
+                if profile == "research":
+                    from oberhau.research import run_research
+
+                    run_research(self, project, scan_id, manifest, cancel, progress)
                 progress(f"Scan #{scan_id}: {status}. Findings require review.")
             except Cancelled:
                 status = "cancelled"
@@ -387,7 +399,17 @@ class Engine:
             "python_analysis": self.python_analysis(content, finding)
             if unchanged and path.suffix == ".py"
             else None,
+            "contextual_hypothesis": finding.evidence.get("hypothesis"),
+            "evidence_graph": self.research_graph(finding.evidence.get("research_run")),
         }
+
+    def research_graph(self, run_id: int | None) -> dict | None:
+        if run_id is None:
+            return None
+        rows = self.db.query(
+            "SELECT data FROM research_runs WHERE id=? AND status='completed'", (run_id,)
+        )
+        return json.loads(rows[0]["data"]).get("graph") if rows else None
 
     @staticmethod
     def python_analysis(content: bytes, finding: Finding) -> dict:

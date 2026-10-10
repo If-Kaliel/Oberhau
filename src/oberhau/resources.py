@@ -91,3 +91,54 @@ def numeric(value: str) -> int | None:
         return int(value.strip())
     except ValueError:
         return None
+
+
+def process_memory() -> dict:
+    """Actual process-wide Windows working set; native parser allocations are included."""
+    if os.name != "nt":
+        return {"available": False}
+    import ctypes
+    from ctypes import wintypes
+
+    class Counters(ctypes.Structure):
+        _fields_ = [
+            ("cb", wintypes.DWORD),
+            ("faults", wintypes.DWORD),
+            *[
+                (name, ctypes.c_size_t)
+                for name in (
+                    "peak_working_set",
+                    "working_set",
+                    "peak_paged",
+                    "paged",
+                    "peak_nonpaged",
+                    "nonpaged",
+                    "pagefile",
+                    "peak_pagefile",
+                    "private",
+                )
+            ],
+        ]
+
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.GetCurrentProcess.restype = wintypes.HANDLE
+    psapi = ctypes.WinDLL("psapi", use_last_error=True)
+    psapi.GetProcessMemoryInfo.argtypes = [
+        wintypes.HANDLE,
+        ctypes.POINTER(Counters),
+        wintypes.DWORD,
+    ]
+    psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+    counters = Counters()
+    counters.cb = ctypes.sizeof(counters)
+    if not psapi.GetProcessMemoryInfo(
+        kernel.GetCurrentProcess(), ctypes.byref(counters), counters.cb
+    ):
+        return {"available": False}
+    return {
+        "available": True,
+        "working_set_bytes": counters.working_set,
+        "peak_working_set_bytes": counters.peak_working_set,
+        "private_commit_bytes": counters.private,
+        "scope": "Whole process including native allocations; peak includes earlier and concurrent work",
+    }

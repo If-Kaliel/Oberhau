@@ -7,7 +7,10 @@ a = Analysis(
     [str(root / 'packaging/desktop_entry.py'), str(root / 'packaging/cli_entry.py')],
     pathex=[str(root / 'src')],
     datas=[(str(root / 'src/oberhau/assets'), 'oberhau/assets')]
-        + copy_metadata('pydantic') + copy_metadata('PySide6-Essentials'),
+        + copy_metadata('pydantic') + copy_metadata('PySide6-Essentials')
+        + copy_metadata('tree-sitter') + copy_metadata('tree-sitter-typescript')
+        + copy_metadata('tree-sitter-javascript') + copy_metadata('tree-sitter-java')
+        + copy_metadata('tree-sitter-c-sharp'),
     excludes=['pytest', 'ruff', 'semgrep', 'PySide6.QtQml', 'PySide6.QtQuick',
               'PySide6.QtDesigner', 'PySide6.QtUiTools', 'PySide6.QtTest'],
 )

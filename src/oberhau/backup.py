@@ -176,6 +176,10 @@ def remap_database(
             (now(),),
         )
         connection.execute(
+            "UPDATE research_runs SET status='interrupted',finished=? WHERE status='running'",
+            (now(),),
+        )
+        connection.execute(
             "INSERT INTO audit(event,details,created) VALUES(?,?,?)",
             (
                 "backup.restore",

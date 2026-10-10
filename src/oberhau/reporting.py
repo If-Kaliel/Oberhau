@@ -36,14 +36,22 @@ def report_evidence(db: Database, finding_id: int) -> dict:
             if hashlib.sha256(content).hexdigest() == finding.evidence.get("source_sha256")
             else "changed"
         )
+        for reference in finding.evidence.get("references", []):
+            with confined(root, reference["path"]).open("rb") as stream:
+                referenced = stream.read(maximum + 1)
+            if (
+                len(referenced) > maximum
+                or hashlib.sha256(referenced).hexdigest() != reference["sha256"]
+            ):
+                source_state = "changed"
         if source_state == "verified" and path.suffix == ".py":
             from oberhau.python_analysis import source_trace
 
             analysis = source_trace(
                 content.decode("utf-8", errors="replace"), finding.line, finding.rule
             )
-    except (OSError, ValueError, OberhauError):
-        pass
+    except (OSError, ValueError, OberhauError, KeyError):
+        source_state = "unavailable"
     validation = [
         json.loads(row["result"])
         for row in db.query("SELECT result FROM validations WHERE finding_id=?", (finding_id,))
@@ -55,6 +63,7 @@ def report_evidence(db: Database, finding_id: int) -> dict:
         "local_reproduction_recorded": any(item.get("passed") for item in validation),
         "ready_for_human_review": reviewed and source_state == "verified",
         "python_analysis": analysis,
+        "contextual_hypothesis": finding.evidence.get("hypothesis"),
         "validations": validation,
         "remaining_manual_checks": [
             "Preconditions and attacker control",
@@ -98,6 +107,7 @@ def generate(
             "advisories": finding.advisories,
             "source_integrity": quality["source_integrity"],
             "python_analysis": quality["python_analysis"],
+            "contextual_hypothesis": quality["contextual_hypothesis"],
             "validations": quality["validations"][:3],
         }
         try:

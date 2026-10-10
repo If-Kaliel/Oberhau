@@ -1,6 +1,6 @@
 # Research backup and recovery
 
-Oberhau 0.3.0 provides a portable `.oberhau.zip` research bundle. Settings runs backup and restore
+Oberhau 0.4.0 provides a portable `.oberhau.zip` research bundle. Settings runs backup and restore
 in a cancellable background worker. The CLI uses the same service; Ctrl+C requests cancellation.
 
 ```powershell
@@ -74,4 +74,6 @@ against another process replacing paths during these checks remains a roadmap it
 The CLI retains `backup FILE` and `restore FILE NEW_DATABASE_FILE` without `--complete` for
 database-only SQLite copies. These do not include or relocate source snapshots, and cannot recover
 portable evidence by themselves. Use `--complete` for the research recovery workflow. Restore
-accepts the current SQLite schema; automatic import of future/older bundle schemas is not provided.
+accepts exact known SQLite schemas 1–3 and applies only built-in numbered migrations. Complete 0.3.0 bundles (schema 2) were restored and verified with schema 3; unknown/future schemas remain rejected.
+
+Git projects require **Relink Git repository** or `relink-git PROJECT URL --ref BRANCH` before remote refresh after recovery. Previous-snapshot comparison references are relocated too. Scanner histories and advisory links are included in schema 3 backups.

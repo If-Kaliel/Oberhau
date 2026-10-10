@@ -11,8 +11,7 @@ keeps migration and backup semantics observable. Migration failure rolls back at
 
 Tables store programs/policies, projects/manifests, scans, normalized findings, immutable
 scanner observations, reviews/notes, reports, validation evidence, settings, audit records,
-schedules and manually entered research returns. Version 2 retains separate scanner observations
-when equivalent alerts are correlated.
+schedules and manually entered research returns. Schema 3 adds per-scanner lifecycle/provenance rows, an explicit scoped advisory index and observations distinct by scanner/rule/scan.
 
 Imports create snapshots under `projects/`. SHA-256 indexes establish provenance. Refresh creates
 a new snapshot and swaps project metadata transactionally. Previous snapshots remain available
@@ -36,15 +35,17 @@ after verification. Database remapping uses bounded batches; optional binaries/c
 Fingerprints use project, explicit rule family, path and line. Only bundled Python dynamic-code
 and Semgrep eval rules have an established cross-engine equivalence. Arbitrary same-CWE findings
 are not merged. Same-file findings remain related investigation references. Line shifts can create
-new occurrences; semantic fingerprints and multi-language dataflow are roadmap items.
+new occurrences; semantic fingerprints remain a roadmap item. Dependency correlation uses explicit advisory aliases within a package/ecosystem/version/manifest scope. The ten-rule Semgrep pack includes bounded multi-language request flows; Python investigation adds a conservative same-function assignment slice.
 
 The desktop schedules persisted offline profiles only while open, enabled and idle. Schedule
 claims are transactional. Closing requests cancellation and waits asynchronously for workers;
 it installs no startup worker.
 
-Ollama has a loopback-only HTTP client, no redirects/proxies, a process-local generation lock,
+Ollama has a loopback-only HTTP client, no redirects/proxies, a local generation lock plus Windows named-mutex process coordination,
 schema-constrained drafts, bounded prompts, timeout/cancellation watchdog and `keep_alive=0`.
 AI prose is provisional. Deterministic report fields are read directly from stored evidence.
 
 Trusted plugins register explicitly through `Registry`; no internet downloads, automatic entry
 points or arbitrary AI-generated commands are executed. Python plugins are not a sandbox.
+
+`repositories.py` performs isolated shallow Git acquisition and exports checksum-verified raw blobs. Refresh retains previous commits/manifests/snapshots for bounded redacted diffs. `resources.py` provides optional RAM/NVIDIA telemetry. `packaging/Oberhau.spec` builds two EXE entry points sharing one dynamic Python/Qt runtime; the build script includes complete library sources and notices.

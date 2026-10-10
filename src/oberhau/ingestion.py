@@ -206,6 +206,8 @@ class Ingestion:
     @storage_operation
     def refresh(self, project_id: int, cancel: Event | None = None) -> None:
         project = self.project(project_id)
+        if json.loads(project["metadata"]).get("source_kind") == "git":
+            raise OberhauError("Use the shared engine refresh for remote Git snapshots")
         if json.loads(project["metadata"]).get("source_link_required"):
             raise OberhauError("Restored source must be relinked explicitly before refreshing")
         source = Path(project["origin"])
@@ -217,12 +219,23 @@ class Ingestion:
             source, project["name"], project["program_id"], bool(project["demo"]), cancel
         )
         fresh = self.project(replacement)
+        from oberhau.repositories import change_summary
+
+        old_metadata, metadata = json.loads(project["metadata"]), json.loads(fresh["metadata"])
+        metadata.update(
+            {
+                "previous_snapshot": Path(project["root"]).relative_to(self.home).as_posix(),
+                "previous_commit": old_metadata.get("commit"),
+                "previous_manifest": old_metadata["manifest"],
+                "changes": change_summary(old_metadata["manifest"], metadata["manifest"]),
+            }
+        )
         # Keep identity and history; snapshots are swapped only after a complete import.
         with self.db.connect() as connection:
             connection.execute("DELETE FROM projects WHERE id=?", (replacement,))
             connection.execute(
                 "UPDATE projects SET root=?,metadata=? WHERE id=?",
-                (fresh["root"], fresh["metadata"], project_id),
+                (fresh["root"], json.dumps(metadata), project_id),
             )
         self.db.audit("project.refresh", {"id": project_id})
         # Old immutable snapshots remain for evidence and can be removed after retention review.
@@ -244,6 +257,7 @@ class Ingestion:
             raise OberhauError("Source contains Oberhau storage")
         metadata = json.loads(project["metadata"])
         metadata["source_link_required"] = False
+        metadata["source_kind"] = "local"
         self.db.execute(
             "UPDATE projects SET origin=?,metadata=? WHERE id=?",
             (str(source), json.dumps(metadata), project_id),

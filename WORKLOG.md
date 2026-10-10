@@ -240,3 +240,60 @@ Remaining limitations: full Windows filesystem TOCTOU hardening, OS quotas, rete
 signed/encrypted backups, bundle schema migration and installation packaging. Optional scanner/feed
 and model installations must be repeated separately after moving to another computer. No full master
 specification completion is claimed. Publication continues on `testes`.
+
+## Git, evidence history, Qwen and Windows delivery / 0.4.0 — 2026-10-10
+
+Added public HTTPS Git imports using isolated configuration and no-checkout shallow clones.
+Raw blobs are independently verified against Git object IDs and exported without filters/hooks;
+source count/bytes, staging disk, output and deadlines are bounded. Refresh retains prior commits,
+manifests and snapshots, with redacted source diffs. Private/SSH Git, submodules, symlinks, LFS
+content downloads and full repository history remain unsupported.
+
+Schema 3 records every requested scanner's status, duration, counts/errors/provenance, including
+zero warnings and unavailable engines. Explicit overlapping advisory aliases correlate only within
+project/manifest/ecosystem/package/version scope. Scanner/rule observations remain distinct; old
+historical duplicate IDs and human notes are preserved. Known schema 1–3 backups are validated and
+migrated with built-in SQL only; restored comparison roots and scanner histories are relocated.
+
+Ten Semgrep rules cover the original eval/process patterns plus bounded JS/TS request flows to
+shell/SQL/HTML/outbound URL, Servlet Statement SQL and ASP.NET SqlCommand SQL. Bundled positive
+and corrected controls are static fixtures, never executed. Python investigation follows bounded
+same-function assignments, treats shadowed imports conservatively and labels same-name call sites
+as syntactic/unverified. Reports recheck source integrity and expose remaining manual evidence checks.
+
+Qwen uses complete bounded UTF-8 JSON, rejects incomplete output and unrecorded CVE/GHSA/URL claims,
+and coordinates generations through a thread lock plus Windows named mutex. Regression found
+Windows shutdown did not reliably interrupt a stalled HTTP body; changed response reads to bounded
+polling with explicit cancellation/deadline checks. The Connection: close case now passes. Read-only
+RAM/NVIDIA probes report actual hardware; they do not impose quotas or pause workloads.
+
+Portable Windows build uses two EXEs sharing dynamic Python/Qt libraries. Official Qtbase/QtSvg/
+PySide-Shiboken source archives are checksum-pinned and included with the corresponding notices;
+Qt DLL replacement is permitted and documented. Frozen runtime uses process-local DLL directories
+and clears inherited bundle search paths before external tools. No administrator/startup service,
+paid runtime, scanner weights/databases or user research data is bundled.
+
+Verification before publication:
+
+- Full local suite: **177 passed, 5 optional skips**, 114.84 s; **83.68% line coverage** before
+  the final dialog/collision regressions. New/changed investigation/Git/native-dialog targets:
+  **50 passed**, 34.80 s. Security/CLI environment regressions: **36 passed**, 13.74 s.
+- Real Gitleaks/OSV/Trivy controls: **4 passed**; real expanded Semgrep and live Qwen plus new
+  native dialog regression: **3 passed**, 48.03 s. Optional tests require explicit installed-tool
+  or model opt-in; no tool/feed/model downloads occur during those tests.
+- Real dependency correlation: OSV **74** plus Trivy **43** raw warnings become **43** normalized
+  findings and **117** preserved observations for the pinned vulnerable Django fixture.
+- Actual public Oberhau main import: **59 files**, commit 2b5397fea532f9571f563bf952e281899f2fdc90,
+  **2.59 s**, no imported source execution. Native local Git tests verify inherited hostile
+  configuration/attributes, refresh/diff, restored relinking, raw blobs and cancelled-stage cleanup.
+- Actual earlier 0.3.0 complete backup recovered with schema 3: **123 findings**, all source hashes
+  valid. Current bundles also round-trip histories and previous-snapshot comparisons.
+- Actual Qwen Portuguese report completed in **6.08 s** in one run; independent live inference
+  regression also passed. Generated prose remained provisional; review status/evidence were unchanged.
+- Actual resource probe: **32 GB RAM**, **RTX 4060 / 8 GB VRAM**, valid driver/utilization/temperature.
+- Native Projects and Settings captured/inspected at **1060×760**; source/details/diff/scanner histories
+  are actual records. Ruff and formatting passed; final suite currently collects **188 tests**.
+- Wheel: `oberhau-0.4.0-py3-none-any.whl`, **88,307 bytes**, SHA-256
+  `81b8372275af20db757007b0b2a3175570bd1a0e0855be6da9ac82e8496ff5a8`; required modules, rules, fixture assets and license notice verified.
+- Publication candidates: **92 files** checked with real Gitleaks, **zero secret warnings**.
+- First frozen CLI demo/metrics/report succeeded with Python absent from PATH. Frozen GUI QA exposed a Qt DLL startup conflict; release publication is held until the corrected native EXE passes.

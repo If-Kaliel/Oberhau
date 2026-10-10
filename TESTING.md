@@ -7,8 +7,8 @@ installed in that job; adapter contracts use synthetic fixtures, as described be
 Use the local Python environment:
 
 ```powershell
-.\.venv\Scripts\ruff.exe check src tests examples
-.\.venv\Scripts\ruff.exe format --check src tests examples
+.\.venv\Scripts\ruff.exe check src tests examples scripts packaging
+.\.venv\Scripts\ruff.exe format --check src tests examples scripts packaging
 .\.venv\Scripts\python.exe -m pytest -q --basetemp=.oberhau\pytest-current --cov=oberhau --cov-report=term-missing --cov-report=json:coverage.json
 .\.venv\Scripts\python.exe scripts\smoke_desktop.py
 ```
@@ -37,14 +37,14 @@ The local SQL replay records two vulnerable-query rows and zero parameterized-co
 Semgrep 1.180.0 was executed on the managed fixture with explicit bundled rules; one real eval alert
 was correlated with the matching builtin finding. Native core execution required leaving the Codex
 socket-restricted sandbox; no external target was involved. Gitleaks 8.30.1, OSV 2.6.0 and Trivy
-0.75.0 also passed real Windows fixture scans with negative controls. Ollama live inference is
-still unverified.
+0.75.0 also passed real Windows fixture scans with negative controls. Ollama qwen3.5:4b live inference was verified separately, including preservation of evidence/review state.
 
 Real optional scanner tests never download tools or feeds implicitly. Prepare them first as
 described in SCANNERS.md, then opt in:
 
 ```powershell
 $env:OBERHAU_INTEGRATION_HOME = (Resolve-Path .oberhau\verified).Path
+$env:PATH = (Resolve-Path .venv\Scripts).Path + ";" + $env:PATH # Installed Semgrep
 .\.venv\Scripts\python.exe -m pytest -q tests/test_live_scanners.py --basetemp=.oberhau\pytest-live
 Remove-Item Env:OBERHAU_INTEGRATION_HOME
 ```
@@ -56,3 +56,13 @@ manifests cause exit 128 and are treated as lack of coverage, not successful ana
 
 Coverage and exact verified commands/results are recorded in WORKLOG.md. UI coverage is lower than
 core coverage; tests do not claim every dialog, scanner version or vulnerability class is covered.
+
+Live Qwen tests opt in with `OBERHAU_LIVE_QWEN=1` and `pytest tests/test_live_ollama.py`; they
+require the already installed model and running local Ollama, and download nothing. Deterministic
+tests cover JSON/UTF-8 budgets, unknown CVE/URL rejection, cross-process model arbitration,
+queue cancellation and a stalled Connection: close HTTP body. Native Git fixtures use generated
+local repositories with a test-only transport override; production imports accept HTTPS only.
+Tests preserve raw blobs despite attributes/inherited hostile configuration, validate update/diff/
+portable recovery and prove scripts never execute. Actual public repository acquisition was also
+checked manually. Frozen CLI/native GUI tests and library-source manifest checks are described
+in WINDOWS_BUILD.md. Optional tests and real observations are distinguished in WORKLOG.md.

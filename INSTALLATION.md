@@ -1,6 +1,11 @@
 # Windows installation
 
-Install a complete Python 3.12+ from the official Python distribution
+For the ready-to-run application, download the Windows x64 ZIP from
+[Releases](https://github.com/If-Kaliel/Oberhau/releases), extract the entire folder and open
+**Oberhau.exe**. Python is included. See [WINDOWS_BUILD.md](WINDOWS_BUILD.md) for build,
+licenses and DLL replacement instructions. Optional scanners/Git/Ollama remain separate.
+
+For source installation, install a complete Python 3.12+ from the official Python distribution
 and Git if repository commit metadata is wanted. Then run PowerShell in this directory:
 
 ```powershell
@@ -26,7 +31,7 @@ WSL, administrator installation or Windows startup service are required. Optiona
 scanners need explicitly prepared caches; ordinary scans never refresh them automatically.
 Optional scanners can be installed from the Scanner page or the commands in [SCANNERS.md](SCANNERS.md).
 They are stored in the selected data directory and are not included in Git or in the Python wheel.
-Portable EXE packaging remains pending; a virtual environment cannot be moved between computers.
+The portable EXE directory can be copied between Windows x64 computers; a source-install virtual environment cannot. Research data moves separately using complete backup/recovery.
 
 `requirements-lock-windows.txt` captures the verified development environment, including optional
 Semgrep dependencies. It is a Windows/Python 3.12 environment snapshot, not a cross-platform lock.

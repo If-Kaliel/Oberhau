@@ -148,7 +148,17 @@ def parse(tool: str, payload: str, root: Path) -> list[Finding]:
                             advisories=[item["VulnerabilityID"]],
                             severity=item.get("Severity", "medium").lower(),
                             evidence={
-                                "package": item["PkgName"],
+                                "package": {
+                                    "name": item["PkgName"],
+                                    "version": item.get("InstalledVersion"),
+                                    "purl": (item.get("PkgIdentifier") or {}).get("PURL", ""),
+                                    "ecosystem": {
+                                        "pip": "PyPI",
+                                        "npm": "npm",
+                                        "yarn": "npm",
+                                        "pnpm": "npm",
+                                    }.get(group.get("Type"), ""),
+                                },
                                 "version": item.get("InstalledVersion"),
                                 "fixed": item.get("FixedVersion"),
                             },
@@ -183,9 +193,11 @@ class ExternalScanner:
             raise OberhauError("Scanner not registered")
         self.identifier, self.runner, self.rules = identifier, runner, rules
         self.profile = profile
+        self.last_provenance: dict = {}
 
     def scan(self, root: Path, cancel: Event) -> list[Finding]:
         tool = self.identifier
+        self.last_provenance = self.provenance()
         work = root.parent.parent / "tmp"
         work.mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="oberhau-tool-", dir=work) as temporary:
@@ -312,42 +324,48 @@ class ExternalScanner:
                     cancel,
                 )
             findings = parse(tool, output, root)
-            from oberhau.tooling import PINNED, checksum, tool_directory
-
-            binary = self.runner.tools.get(tool)
-            provenance = {"binary_sha256": checksum(Path(binary))} if binary else {}
-            if (
-                binary
-                and self.runner.home
-                and tool in PINNED
-                and Path(binary)
-                == tool_directory(self.runner.home, tool) / PINNED[tool]["executable"]
-            ):
-                provenance.update(
-                    {
-                        "managed_version": PINNED[tool]["version"],
-                        "release_sha256": PINNED[tool]["sha256"],
-                    }
-                )
-            if tool == "semgrep":
-                provenance["rules_sha256"] = checksum(self.rules)
-            if self.runner.home and tool == "osv-scanner":
-                provenance["advisory_caches"] = {
-                    name: {
-                        key: value
-                        for key, value in state.items()
-                        if key in {"sha256", "downloaded", "source", "ecosystem"}
-                    }
-                    for name, state in cache_status(self.runner.home).items()
-                    if state.get("present") and name in {"PyPI", "npm"}
-                }
-            if self.runner.home and tool == "trivy" and self.profile != "configuration":
-                receipt = self.runner.home / "cache/trivy/db/receipt.json"
-                if receipt.is_file():
-                    provenance["advisory_cache"] = json.loads(receipt.read_text(encoding="utf-8"))
             for finding in findings:
-                finding.evidence["scanner_provenance"] = provenance
+                finding.evidence["scanner_provenance"] = self.last_provenance
             return findings
+
+    def provenance(self) -> dict:
+        from oberhau.tooling import PINNED, cache_status, checksum, tool_directory
+
+        tool, binary = self.identifier, self.runner.tools.get(self.identifier)
+        if not binary or not Path(binary).is_file():
+            return {"unavailable": True}
+        provenance = (
+            {"executable": str(binary), "binary_sha256": checksum(Path(binary))} if binary else {}
+        )
+        if (
+            binary
+            and self.runner.home
+            and tool in PINNED
+            and Path(binary) == tool_directory(self.runner.home, tool) / PINNED[tool]["executable"]
+        ):
+            provenance.update(
+                {
+                    "managed_version": PINNED[tool]["version"],
+                    "release_sha256": PINNED[tool]["sha256"],
+                }
+            )
+        if tool == "semgrep":
+            provenance["rules_sha256"] = checksum(self.rules)
+        if self.runner.home and tool == "osv-scanner":
+            provenance["advisory_caches"] = {
+                name: {
+                    key: value
+                    for key, value in state.items()
+                    if key in {"sha256", "downloaded", "source", "ecosystem", "checksum_valid"}
+                }
+                for name, state in cache_status(self.runner.home).items()
+                if state.get("present") and name in {"PyPI", "npm"}
+            }
+        if self.runner.home and tool == "trivy" and self.profile != "configuration":
+            receipt = self.runner.home / "cache/trivy/db/receipt.json"
+            if receipt.is_file():
+                provenance["advisory_cache"] = json.loads(receipt.read_text(encoding="utf-8"))
+        return provenance
 
 
 def capabilities(runner: ProcessRunner) -> list[dict[str, Any]]:

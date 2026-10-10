@@ -105,10 +105,15 @@ class ProcessRunner:
     """Only registered tool binaries; no shells, repository executables, or generated commands."""
 
     def __init__(
-        self, limits: Limits, tools: dict[str, str] | None = None, home: Path | None = None
+        self,
+        limits: Limits,
+        tools: dict[str, str] | None = None,
+        home: Path | None = None,
+        git_home: Path | None = None,
     ):
         self.limits = limits
         self.home = home
+        self.git_home = git_home
         self.tool_errors: dict[str, str] = {}
         self.tools = (
             tools
@@ -134,6 +139,11 @@ class ProcessRunner:
         cwd: Path,
         cancel: Event,
         allowed_codes: tuple[int, ...] = (0,),
+        disk_root: Path | None = None,
+        max_disk_bytes: int | None = None,
+        stdin_data: bytes | None = None,
+        stdout_path: Path | None = None,
+        output_limit: int | None = None,
     ) -> str:
         binary = self.tools.get(tool)
         if not binary or not Path(binary).is_file():
@@ -144,6 +154,7 @@ class ProcessRunner:
             raise OberhauError("Invalid tool argument")
         if cancel.is_set():
             raise Cancelled()
+        maximum_output = output_limit if output_limit is not None else self.limits.max_output_bytes
         env = {
             k: v
             for k, v in os.environ.items()
@@ -156,6 +167,8 @@ class ProcessRunner:
                 "PYTHONHOME",
                 "NODE_OPTIONS",
                 "LD_PRELOAD",
+                "QT_PLUGIN_PATH",
+                "QML2_IMPORT_PATH",
             }:
                 env.pop(key)
         env.update(
@@ -167,17 +180,44 @@ class ProcessRunner:
         )
         if self.home is not None:
             env["OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY"] = str(self.home / "cache/osv")
+        if tool == "git" and self.git_home is not None:
+            # This private child profile isolates netrc/config/filter credentials; the parent is untouched.
+            env.update(
+                {
+                    "HOME": str(self.git_home),
+                    "USERPROFILE": str(self.git_home),
+                    "XDG_CONFIG_HOME": str(self.git_home),
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_CONFIG_SYSTEM": str(self.git_home / "empty.config"),
+                    "GIT_CONFIG_GLOBAL": str(self.git_home / "empty.config"),
+                    "GIT_ATTR_NOSYSTEM": "1",
+                    "GIT_CEILING_DIRECTORIES": str(cwd.parent),
+                    "GIT_TERMINAL_PROMPT": "0",
+                    "GCM_INTERACTIVE": "Never",
+                    "GIT_LFS_SKIP_SMUDGE": "1",
+                }
+            )
+            for key in list(env):
+                if "proxy" in key.lower() or key in {"SSH_ASKPASS", "CURL_HOME"}:
+                    env.pop(key)
         flags = (
             subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
             if os.name == "nt"
             else 0
         )
-        with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+        with (
+            stdout_path.open("xb") if stdout_path is not None else tempfile.TemporaryFile() as out,
+            tempfile.TemporaryFile() as err,
+            tempfile.TemporaryFile() as input_file,
+        ):
+            if stdin_data is not None:
+                input_file.write(stdin_data)
+                input_file.seek(0)
             process = subprocess.Popen(
                 [binary, *args],
                 cwd=cwd,
                 env=env,
-                stdin=subprocess.DEVNULL,
+                stdin=input_file if stdin_data is not None else subprocess.DEVNULL,
                 stdout=out,
                 stderr=err,
                 shell=False,
@@ -185,19 +225,33 @@ class ProcessRunner:
                 start_new_session=os.name != "nt",
             )
             deadline = time.monotonic() + self.limits.timeout
+            next_disk_check = 0.0
             try:
                 while process.poll() is None:
                     if cancel.wait(0.05):
                         raise Cancelled()
                     if time.monotonic() > deadline:
                         raise OberhauError(f"{tool}: timeout")
-                    if out.tell() + err.tell() > self.limits.max_output_bytes:
+                    if out.tell() + err.tell() > maximum_output:
                         raise OberhauError(f"{tool}: output limit exceeded")
-                if out.tell() + err.tell() > self.limits.max_output_bytes:
+                    if (
+                        disk_root is not None
+                        and max_disk_bytes is not None
+                        and time.monotonic() >= next_disk_check
+                    ):
+                        enforce_disk_limit(disk_root, max_disk_bytes)
+                        next_disk_check = time.monotonic() + 0.25
+                if disk_root is not None and max_disk_bytes is not None:
+                    enforce_disk_limit(disk_root, max_disk_bytes)
+                if out.tell() + err.tell() > maximum_output:
                     raise OberhauError(f"{tool}: output limit exceeded")
                 out.seek(0)
                 err.seek(0)
-                result = out.read(self.limits.max_output_bytes).decode("utf-8", errors="replace")
+                result = (
+                    out.read(self.limits.max_output_bytes).decode("utf-8", errors="replace")
+                    if stdout_path is None
+                    else ""
+                )
                 error = err.read(8000).decode("utf-8", errors="replace")
                 if process.returncode not in allowed_codes:
                     raise OberhauError(f"{tool}: exit {process.returncode}: {redact(error)}")
@@ -226,3 +280,16 @@ class ProcessRunner:
                         os.killpg(process.pid, signal.SIGKILL)
                     process.kill()
                 process.wait(timeout=10)
+
+
+def enforce_disk_limit(root: Path, maximum: int) -> None:
+    total, count = 0, 0
+    for directory, _, files in os.walk(root, followlinks=False):
+        for name in files:
+            try:
+                total += (Path(directory) / name).lstat().st_size
+            except FileNotFoundError:
+                continue
+            count += 1
+            if total > maximum or count > 200_000:
+                raise OberhauError("Git staging exceeds disk or file-count limit")

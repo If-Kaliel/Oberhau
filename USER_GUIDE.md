@@ -1,10 +1,10 @@
 # User guide
 
-1. Launch `Launch-Oberhau.cmd`. Complete first-run resource setup; optionally import the labeled lab.
+1. Launch portable `Oberhau.exe`, or `Launch-Oberhau.cmd` after source installation. Complete first-run resource setup; optionally import the labeled lab.
 2. Add a program under Programs if applicable. Record the official policy URL and exact scope
    hosts in the JSON editor. Double-click a program to update it. Material policy changes increment
    revision and invalidate its reviewed flag. This release does not conduct active tests.
-3. Under Projects, import an authorized local folder, individual file or ZIP. Choose a program or
+3. Under Projects, import an authorized local folder, individual file, ZIP or public HTTPS Git repository. Git supports GitHub, GitLab and Codeberg; select an optional branch/tag. Choose a program or
    independent offline research. Oberhau analyzes its managed copy, never installs or runs its code.
 4. Choose the project and actual profile under Scanner. Quick uses bundled checks; Standard adds
    installed Semgrep. Missing requested engines make coverage partial, or failed if none can run.
@@ -43,3 +43,19 @@ Research restore rewrites evidence paths for the new directory, pauses schedules
 project/finding IDs, review notes, reports and validation records. Offline scans can use the restored
 snapshot immediately. Select a project and use **Relink source folder/file** before Refresh reads
 its original source on the current computer. The CLI equivalent is `relink PROJECT SOURCE`.
+
+Overview → **Scanner run details** lists engine status, duration, warning count, errors and
+provenance even with zero warnings. Investigations includes a bounded Python assignment slice
+and syntactic same-name call sites; these are investigation clues, not exploit confirmation.
+Reports recheck source integrity and summarize remaining manual evidence checks.
+
+**Project details** shows actual origin/commit/manifest and refresh changes. **Compare source file**
+shows a redacted diff against the retained previous snapshot; refresh once to establish a baseline.
+**Relink Git repository** explicitly reviews a recovered repository URL/branch before refresh.
+Private repositories, SSH, submodules, Git LFS downloads and full Git history are unsupported.
+CLI equivalents: `add-git URL --name NAME --ref BRANCH`, `project-details PROJECT`,
+`refresh PROJECT`, `compare PROJECT PATH`, `relink-git PROJECT URL --ref BRANCH`.
+
+System diagnostics reports available/total RAM and optional NVIDIA utilization, temperature and
+VRAM through the installed trusted nvidia-smi utility. Probes are optional and do not enforce quotas.
+The sidebar **Licenses** control explains open-source terms and Qt replacement rights.

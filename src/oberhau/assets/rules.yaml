@@ -27,3 +27,152 @@ rules:
     pattern: Process.Start(...)
     metadata:
       cwe: [CWE-78]
+  - id: oberhau-web-command-flow
+    languages: [javascript, typescript]
+    mode: taint
+    severity: ERROR
+    message: Request-shaped input reaches a shell command; review trust and execution boundaries (CWE-78).
+    pattern-sources:
+      - pattern: req.query
+      - pattern: req.body
+      - pattern: req.params
+      - pattern: request.query
+      - pattern: request.body
+      - pattern: request.params
+      - pattern: await req.json()
+      - pattern: await request.json()
+      - pattern: request.nextUrl.searchParams.get(...)
+      - pattern: req.nextUrl.searchParams.get(...)
+    pattern-sinks:
+      - patterns:
+          - pattern: child_process.exec($CMD, ...)
+          - focus-metavariable: $CMD
+      - patterns:
+          - pattern-inside: |
+              const { exec, ... } = require("node:child_process");
+              ...
+          - pattern: exec($CMD, ...)
+          - focus-metavariable: $CMD
+    metadata:
+      cwe: [CWE-78]
+  - id: oberhau-web-sql-flow
+    languages: [javascript, typescript]
+    mode: taint
+    severity: ERROR
+    message: Request-shaped input reaches query text; verify parameterization and input provenance (CWE-89).
+    pattern-sources:
+      - pattern: req.query
+      - pattern: req.body
+      - pattern: req.params
+      - pattern: request.query
+      - pattern: request.body
+      - pattern: request.params
+      - pattern: await req.json()
+      - pattern: await request.json()
+      - pattern: request.nextUrl.searchParams.get(...)
+      - pattern: req.nextUrl.searchParams.get(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: db.query($QUERY, ...)
+              - pattern: pool.query($QUERY, ...)
+              - pattern: connection.query($QUERY, ...)
+              - pattern: db.execute($QUERY, ...)
+              - pattern: pool.execute($QUERY, ...)
+              - pattern: connection.execute($QUERY, ...)
+          - pattern-not: $DB.query({...}, ...)
+          - pattern-not: $DB.execute({...}, ...)
+          - focus-metavariable: $QUERY
+      - patterns:
+          - pattern: '$DB.query({..., text: $QUERY, ...}, ...)'
+          - metavariable-regex:
+              metavariable: $DB
+              regex: ^(db|pool|connection)$
+          - focus-metavariable: $QUERY
+    metadata:
+      cwe: [CWE-89]
+  - id: oberhau-web-html-flow
+    languages: [javascript, typescript]
+    mode: taint
+    severity: WARNING
+    message: Request-shaped input reaches an HTML response; inspect escaping and content type (CWE-79).
+    pattern-sources:
+      - pattern: req.query
+      - pattern: req.body
+      - pattern: req.params
+      - pattern: request.query
+      - pattern: request.body
+      - pattern: request.params
+      - pattern: await req.json()
+      - pattern: await request.json()
+      - pattern: request.nextUrl.searchParams.get(...)
+      - pattern: req.nextUrl.searchParams.get(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: res.send($HTML)
+              - pattern: response.send($HTML)
+          - pattern-not: $RESPONSE.send({...})
+          - focus-metavariable: $HTML
+    metadata:
+      cwe: [CWE-79]
+  - id: oberhau-web-fetch-flow
+    languages: [javascript, typescript]
+    mode: taint
+    severity: WARNING
+    message: Request-shaped input reaches an outbound URL; review destination constraints and network reachability (CWE-918).
+    pattern-sources:
+      - pattern: req.query
+      - pattern: req.body
+      - pattern: req.params
+      - pattern: request.query
+      - pattern: request.body
+      - pattern: request.params
+      - pattern: await req.json()
+      - pattern: await request.json()
+      - pattern: request.nextUrl.searchParams.get(...)
+      - pattern: req.nextUrl.searchParams.get(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: fetch($URL, ...)
+              - pattern: axios.get($URL, ...)
+          - focus-metavariable: $URL
+    metadata:
+      cwe: [CWE-918]
+  - id: oberhau-servlet-sql-flow
+    languages: [java]
+    mode: taint
+    severity: ERROR
+    message: Servlet parameter reaches Statement query text; review parameterization and deployed reachability (CWE-89).
+    pattern-sources:
+      - pattern: $REQUEST.getParameter(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $STMT.executeQuery($QUERY)
+              - pattern: $STMT.executeUpdate($QUERY)
+          - metavariable-type:
+              metavariable: $STMT
+              type: java.sql.Statement
+          - focus-metavariable: $QUERY
+    metadata:
+      cwe: [CWE-89]
+  - id: oberhau-aspnet-sql-flow
+    languages: [csharp]
+    mode: taint
+    severity: ERROR
+    message: ASP.NET request input reaches SqlCommand query text; review bound parameters and deployed reachability (CWE-89).
+    pattern-sources:
+      - pattern: Request.QueryString[...]
+      - pattern: Request.Query[...]
+      - pattern: Request.Form[...]
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: new SqlCommand($QUERY, ...)
+              - pattern: new System.Data.SqlClient.SqlCommand($QUERY, ...)
+              - pattern: new Microsoft.Data.SqlClient.SqlCommand($QUERY, ...)
+          - focus-metavariable: $QUERY
+    metadata:
+      cwe: [CWE-89]

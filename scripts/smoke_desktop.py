@@ -43,6 +43,10 @@ def capture():
     target = root / "artifacts"
     target.mkdir(exist_ok=True)
     window.grab().save(str(target / "desktop-overview.png"))
+    window.resize(1060, 760)
+    window.navigation.setCurrentRow(1)
+    app.processEvents()
+    window.grab().save(str(target / "desktop-projects.png"))
     window.navigation.setCurrentRow(3)
     app.processEvents()
     window.grab().save(str(target / "desktop-scanner.png"))

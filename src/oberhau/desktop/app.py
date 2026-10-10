@@ -165,6 +165,7 @@ class Window(QMainWindow):
         self.navigation.addItems([self.tr_label(page) for page in PAGES])
         side.addWidget(self.navigation, 1)
         side.addWidget(QLabel(f"v{__version__} · LOCAL / OFFLINE"))
+        side.addWidget(self.button("Licenses", self.licenses))
         layout.addWidget(sidebar)
         body = QWidget()
         body_layout = QVBoxLayout(body)
@@ -346,6 +347,49 @@ class Window(QMainWindow):
         self.scan_history = self.table(
             "Overview", ["ID", "Project", "Profile", "Status", "Files", "Seconds", "Started"]
         )
+        self.scan_history.cellDoubleClicked.connect(lambda *_: self.guard(self.show_scanner_runs))
+        self.bar("Overview", [("Scanner run details", self.show_scanner_runs)])
+
+    def show_scanner_runs(self) -> None:
+        scan_id = self.selected(self.scan_history)
+        rows = self.db.scanner_runs(scan_id)
+        dialog = QDialog(self)
+        dialog.setWindowTitle(self.tr_label("Scanner run details") + f" #{scan_id}")
+        dialog.resize(940, 600)
+        layout = QVBoxLayout(dialog)
+        table = QTableWidget(0, 6)
+        table.setHorizontalHeaderLabels(
+            [
+                self.tr_label(label)
+                for label in ["Scanner", "Status", "Seconds", "Warnings", "Started", "Finished"]
+            ]
+        )
+        table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.fill(
+            table,
+            [
+                [
+                    row["scanner"],
+                    row["status"],
+                    round(row["duration"], 3),
+                    row["findings"],
+                    row["started"],
+                    row["finished"],
+                ]
+                for row in rows
+            ],
+        )
+        layout.addWidget(table)
+        details = QPlainTextEdit()
+        details.setReadOnly(True)
+        details.setPlainText(
+            json.dumps(rows, indent=2, ensure_ascii=False)
+            if rows
+            else self.tr_label("Detailed scanner history was not recorded by this version.")
+        )
+        layout.addWidget(details)
+        dialog.exec()
 
     def make_projects(self) -> None:
         self.note(
@@ -367,10 +411,83 @@ class Window(QMainWindow):
         self.bar(
             "Projects",
             [
-                ("Relink source folder", self.relink_folder),
-                ("Relink source file", self.relink_file),
+                ("Import public Git repository", self.import_git),
+                ("Project details", self.project_details),
+                ("Compare source file", self.compare_file),
             ],
         )
+        self.bar(
+            "Projects",
+            [
+                ("Relink source folder", self.relink_folder),
+                ("Relink source file", self.relink_file),
+                ("Relink Git repository", self.relink_git),
+            ],
+        )
+
+    def import_git(self) -> None:
+        source, accepted = QInputDialog.getText(
+            self,
+            self.tr_label("Import public Git repository"),
+            self.tr_label("Public HTTPS repository URL"),
+        )
+        if accepted and source.strip():
+            self.import_source(source.strip(), git=True)
+
+    def relink_git(self) -> None:
+        project_id = self.selected(self.projects_table)
+        project = self.engine.ingestion.project(project_id)
+        url, accepted = QInputDialog.getText(
+            self,
+            self.tr_label("Relink Git repository"),
+            self.tr_label("Public HTTPS repository URL"),
+            text=project["origin"],
+        )
+        if not accepted:
+            return
+        ref, accepted = QInputDialog.getText(
+            self,
+            self.tr_label("Relink Git repository"),
+            self.tr_label("Git branch/tag (optional)"),
+            text=json.loads(project["metadata"]).get("ref") or "",
+        )
+        if accepted:
+            self.engine.repositories().relink(project_id, url.strip(), ref)
+            self.refresh()
+
+    def text_dialog(self, title: str, content: str) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle(self.tr_label(title))
+        dialog.resize(940, 640)
+        layout = QVBoxLayout(dialog)
+        text = QPlainTextEdit()
+        text.setReadOnly(True)
+        text.setPlainText(content)
+        layout.addWidget(text)
+        dialog.exec()
+
+    def project_details(self) -> None:
+        project = self.engine.ingestion.project(self.selected(self.projects_table))
+        project["metadata"] = json.loads(project["metadata"])
+        self.text_dialog("Project details", json.dumps(project, indent=2, ensure_ascii=False))
+
+    def compare_file(self) -> None:
+        project_id = self.selected(self.projects_table)
+        path, accepted = QInputDialog.getText(
+            self, self.tr_label("Compare source file"), self.tr_label("Relative source path")
+        )
+        if accepted and path.strip():
+            result = self.engine.compare_source(project_id, path.strip())
+            self.text_dialog(
+                "Compare source file",
+                json.dumps(
+                    {key: value for key, value in result.items() if key != "diff"},
+                    indent=2,
+                    ensure_ascii=False,
+                )
+                + "\n\n"
+                + result["diff"],
+            )
 
     def relink_folder(self) -> None:
         project_id = self.selected(self.projects_table)
@@ -398,7 +515,7 @@ class Window(QMainWindow):
         if source:
             self.import_source(source)
 
-    def import_source(self, source: str) -> None:
+    def import_source(self, source: str, git: bool = False) -> None:
         dialog = QDialog(self)
         dialog.setWindowTitle(self.tr_label("Project"))
         layout = QFormLayout(dialog)
@@ -409,6 +526,9 @@ class Window(QMainWindow):
             program.addItem(row["name"], row["id"])
         layout.addRow(self.tr_label("Name"), name)
         layout.addRow("Program", program)
+        ref = QLineEdit()
+        if git:
+            layout.addRow(self.tr_label("Git branch/tag (optional)"), ref)
         accepted = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
@@ -416,10 +536,19 @@ class Window(QMainWindow):
         accepted.rejected.connect(dialog.reject)
         layout.addRow(accepted)
         if dialog.exec():
+            project_name, program_id, git_ref = name.text(), program.currentData(), ref.text()
+
+            def operation(cancel, progress):
+                if git:
+                    return self.engine.repositories().add(
+                        source, project_name, program_id, git_ref, cancel, progress
+                    )
+                return self.engine.ingestion.add(
+                    Path(source), project_name, program_id, cancel=cancel
+                )
+
             self.start(
-                lambda cancel, progress: self.engine.ingestion.add(
-                    Path(source), name.text(), program.currentData(), cancel=cancel
-                ),
+                operation,
                 lambda result: self.log_message(f"Imported project #{result}"),
             )
 
@@ -435,7 +564,9 @@ class Window(QMainWindow):
 
     def refresh_snapshot(self) -> None:
         project_id = self.selected(self.projects_table)
-        self.start(lambda cancel, progress: self.engine.ingestion.refresh(project_id, cancel))
+        self.start(
+            lambda cancel, progress: self.engine.refresh_project(project_id, cancel, progress)
+        )
 
     def make_programs(self) -> None:
         self.note(
@@ -659,6 +790,12 @@ class Window(QMainWindow):
             + "\n".join(result["questions"])
             + "\n\nHuman notes\n"
             + result["notes"]
+            + (
+                "\n\nPython assignment slice / direct callers\n"
+                + json.dumps(result["python_analysis"], indent=2, ensure_ascii=False)
+                if result.get("python_analysis")
+                else ""
+            )
         )
         self.review_status.setCurrentText(result["status"])
         self.review_notes.setText(result["notes"])
@@ -893,6 +1030,9 @@ class Window(QMainWindow):
         self.diagnostics_text = QPlainTextEdit()
         self.diagnostics_text.setReadOnly(True)
         self.pages["Settings"].addWidget(self.diagnostics_text, 1)
+
+    def licenses(self) -> None:
+        self.text_dialog("Licenses", (ASSETS / "licenses.txt").read_text(encoding="utf-8"))
 
     def save_settings(self) -> None:
         if self.worker:

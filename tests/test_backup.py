@@ -355,8 +355,8 @@ def test_recovery_handles_large_history_and_interrupted_scan(engine, scanned, tm
                 ),
             )
             connection.execute(
-                "INSERT INTO observations(finding_id,scan_id,scanner,data) VALUES(?,?,?,?)",
-                (cursor.lastrowid, base["first_scan"], "builtin", base["data"]),
+                "INSERT INTO observations(finding_id,scan_id,scanner,rule,data) VALUES(?,?,?,?,?)",
+                (cursor.lastrowid, base["first_scan"], "builtin", "history", base["data"]),
             )
     engine.db.execute("UPDATE scans SET status='running'")
     target, home = tmp_path / "history.zip", tmp_path / "history-restored"

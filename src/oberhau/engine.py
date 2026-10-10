@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import difflib
+import hashlib
 import json
 import logging
 import time
@@ -13,9 +15,10 @@ from oberhau.core import Cancelled, Finding, Limits, OberhauError, now
 from oberhau.database import Database
 from oberhau.ingestion import Ingestion, file_index
 from oberhau.plugins import Registry
+from oberhau.repositories import GitRepositories
 from oberhau.scanners.builtin import BuiltinScanner
 from oberhau.scanners.external import ExternalScanner
-from oberhau.security import ProcessRunner, redact, redact_source
+from oberhau.security import ProcessRunner, confined, redact, redact_source
 from oberhau.storage import storage_operation, store_lock
 
 ASSETS = Path(__file__).parent / "assets"
@@ -89,6 +92,76 @@ class Engine:
         self.registry = Registry()
         self.registry.register(BuiltinScanner())
 
+    def repositories(self) -> GitRepositories:
+        return GitRepositories(self.ingestion)
+
+    @storage_operation
+    def refresh_project(
+        self,
+        project_id: int,
+        cancel: Event | None = None,
+        progress: Callable[[str], None] | None = None,
+    ) -> None:
+        project = self.ingestion.project(project_id)
+        if json.loads(project["metadata"]).get("source_kind") == "git":
+            self.repositories().refresh(project_id, cancel, progress)
+        else:
+            self.ingestion.refresh(project_id, cancel)
+
+    def managed_snapshot(self, value: str) -> Path:
+        path = Path(value)
+        try:
+            relative = path.relative_to(self.home)
+        except ValueError as error:
+            raise OberhauError("Snapshot is outside managed project storage") from error
+        if len(relative.parts) != 2 or relative.parts[0] != "projects":
+            raise OberhauError("Invalid managed snapshot root")
+        root = confined(self.home, relative.as_posix())
+        if not root.is_dir():
+            raise OberhauError("Managed source snapshot is unavailable")
+        return root
+
+    def compare_source(self, project_id: int, relative: str) -> dict:
+        project = self.ingestion.project(project_id)
+        metadata = json.loads(project["metadata"])
+        if not metadata.get("previous_snapshot"):
+            raise OberhauError("Refresh the project first to retain a comparison baseline")
+        before, after = metadata["previous_manifest"], metadata["manifest"]
+        if relative not in before and relative not in after:
+            raise OberhauError("File is not present in the retained manifests")
+        old_root = self.managed_snapshot(str(confined(self.home, metadata["previous_snapshot"])))
+        new_root = self.managed_snapshot(project["root"])
+
+        def content(root, expected):
+            if expected is None:
+                return b"", True
+            path = confined(root, relative)
+            with path.open("rb") as source:
+                data = source.read(self.limits.max_file_bytes + 1)
+            if len(data) > self.limits.max_file_bytes:
+                raise OberhauError("Comparison file exceeds configured size limit")
+            return data, hashlib.sha256(data).hexdigest() == expected
+
+        old, old_valid = content(old_root, before.get(relative))
+        new, new_valid = content(new_root, after.get(relative))
+        lines = difflib.unified_diff(
+            redact_source(old.decode("utf-8", errors="replace")).splitlines(keepends=True),
+            redact_source(new.decode("utf-8", errors="replace")).splitlines(keepends=True),
+            fromfile="previous/" + relative,
+            tofile="current/" + relative,
+            n=4,
+        )
+        text = "".join(lines)
+        return {
+            "project": project_id,
+            "path": relative,
+            "previous_commit": metadata.get("previous_commit"),
+            "commit": metadata.get("commit"),
+            "source_integrity": old_valid and new_valid,
+            "diff": text[:50000],
+            "truncated": len(text) > 50000,
+        }
+
     @storage_operation
     def scan(
         self,
@@ -102,9 +175,13 @@ class Engine:
         cancel = cancel or Event()
         progress = progress or (lambda message: logging.getLogger("oberhau").info(redact(message)))
         project = self.ingestion.project(project_id)
-        root = Path(project["root"])
+        root = self.managed_snapshot(project["root"])
         started = time.monotonic()
         with project_lock(self.home, project_id):
+            self.db.execute(
+                "UPDATE scanner_runs SET status='interrupted',finished=? WHERE status IN ('pending','running') AND scan_id IN (SELECT id FROM scans WHERE project_id=? AND status='running')",
+                (now(), project_id),
+            )
             self.db.execute(
                 "UPDATE scans SET status='interrupted',finished=? WHERE project_id=? AND status='running'",
                 (now(), project_id),
@@ -116,10 +193,19 @@ class Engine:
             errors: list[str] = []
             status = "completed"
             successes = 0
+            selected = PROFILES[profile][1]
+            run_ids = {
+                name: self.db.execute(
+                    "INSERT INTO scanner_runs(scan_id,scanner,status) VALUES(?,?,'pending')",
+                    (scan_id, name),
+                )
+                for name in selected
+            }
+            job_errors = {name: [] for name in selected}
 
-            def scanner_progress(message: str) -> None:
+            def scanner_progress(name: str, message: str) -> None:
                 if "Python parse error" in message:
-                    errors.append(redact(message))
+                    job_errors[name].append(redact(message))
                 progress(message)
 
             try:
@@ -141,52 +227,104 @@ class Engine:
                     (len(paths), json.dumps(manifest), scan_id),
                 )
                 runner = ProcessRunner(self.limits, home=self.home)
-                selected = PROFILES[profile][1]
                 categories = [profile] if profile in {"secrets", "configuration"} else None
                 jobs: dict[str, Callable[[], list[Finding]]] = {}
+                adapters = {}
+                provenance = {}
                 for name in selected:
                     if name in self.registry.plugins:
                         plugin = self.registry.plugins[name]
-                        jobs[name] = lambda p=plugin: p.scan(
-                            root, paths, cancel, self.limits, scanner_progress, categories
+                        provenance[name] = {
+                            "version": plugin.version,
+                            "license": plugin.license,
+                            "bundled": name == "builtin",
+                        }
+                        jobs[name] = lambda p=plugin, n=name: p.scan(
+                            root,
+                            paths,
+                            cancel,
+                            self.limits,
+                            lambda text: scanner_progress(n, text),
+                            categories,
                         )
                     elif name in runner.tools:
                         adapter = ExternalScanner(name, runner, ASSETS / "rules.yaml", profile)
+                        adapters[name] = adapter
                         jobs[name] = lambda a=adapter: a.scan(root, cancel)
                     else:
-                        errors.append(
-                            runner.tool_errors.get(name, f"{name}: not installed; skipped")
+                        message = runner.tool_errors.get(name, f"{name}: not installed; skipped")
+                        errors.append(message)
+                        self.db.execute(
+                            "UPDATE scanner_runs SET status='unavailable',finished=?,errors=? WHERE id=?",
+                            (now(), json.dumps([message]), run_ids[name]),
                         )
                         progress(errors[-1])
                 if not jobs:
                     raise OberhauError("No requested scanner is installed")
+
+                def run_job(name: str, job: Callable) -> tuple[str, list[str]]:
+                    run_started = time.monotonic()
+                    self.db.execute(
+                        "UPDATE scanner_runs SET status='running',started=? WHERE id=?",
+                        (now(), run_ids[name]),
+                    )
+                    run_status, count = "completed", 0
+                    try:
+                        if cancel.is_set():
+                            raise Cancelled()
+                        findings = job()
+                        count = len(findings)
+                        for finding in findings:
+                            if cancel.is_set():
+                                raise Cancelled()
+                            finding.evidence.update(
+                                {
+                                    "source_sha256": manifest.get(finding.path),
+                                    "snapshot": str(root),
+                                    "scan": scan_id,
+                                }
+                            )
+                            self.db.save_finding(project_id, scan_id, finding)
+                        if job_errors[name]:
+                            run_status = "partial"
+                    except Cancelled:
+                        run_status = "cancelled"
+                        cancel.set()
+                    except Exception as error:
+                        run_status = "failed"
+                        job_errors[name].append(redact(f"{name}: {error}"))
+                    finally:
+                        info = (
+                            adapters[name].last_provenance
+                            if name in adapters
+                            else provenance.get(name, {})
+                        )
+                        self.db.execute(
+                            "UPDATE scanner_runs SET status=?,finished=?,duration=?,findings=?,errors=?,provenance=? WHERE id=?",
+                            (
+                                run_status,
+                                now(),
+                                time.monotonic() - run_started,
+                                count,
+                                json.dumps(job_errors[name]),
+                                json.dumps(info),
+                                run_ids[name],
+                            ),
+                        )
+                    progress(f"{name}: {run_status}, {count} warnings")
+                    return run_status, job_errors[name]
+
                 with ThreadPoolExecutor(
                     max_workers=self.limits.parallelism, thread_name_prefix="oberhau-scan"
                 ) as pool:
-                    futures = {pool.submit(job): name for name, job in jobs.items()}
+                    futures = {pool.submit(run_job, name, job): name for name, job in jobs.items()}
                     for future in as_completed(futures):
-                        name = futures[future]
                         if cancel.is_set():
                             raise Cancelled()
-                        try:
-                            findings = future.result()
+                        run_status, run_errors = future.result()
+                        if run_status in {"completed", "partial"}:
                             successes += 1
-                            for finding in findings:
-                                finding.evidence.update(
-                                    {
-                                        "source_sha256": manifest.get(finding.path),
-                                        "snapshot": str(root),
-                                        "scan": scan_id,
-                                    }
-                                )
-                                self.db.save_finding(project_id, scan_id, finding)
-                            progress(f"{name}: completed, {len(findings)} warnings")
-                        except Cancelled:
-                            cancel.set()
-                            raise
-                        except Exception as error:
-                            errors.append(redact(f"{name}: {error}"))
-                            progress(errors[-1])
+                        errors.extend(run_errors)
                 if errors:
                     status = "partial" if successes else "failed"
                 progress(f"Scan #{scan_id}: {status}. Findings require review.")
@@ -199,6 +337,10 @@ class Engine:
                 progress(errors[-1])
             finally:
                 self.db.execute(
+                    "UPDATE scanner_runs SET status=?,finished=? WHERE scan_id=? AND status IN ('pending','running')",
+                    ("cancelled" if status == "cancelled" else "interrupted", now(), scan_id),
+                )
+                self.db.execute(
                     "UPDATE scans SET status=?,finished=?,errors=?,duration=? WHERE id=?",
                     (status, now(), json.dumps(errors), time.monotonic() - started, scan_id),
                 )
@@ -208,13 +350,12 @@ class Engine:
     def investigate(self, finding_id: int) -> dict:
         record = self.db.finding(finding_id)
         finding: Finding = record["finding"]
-        from oberhau.security import confined
-
-        snapshot = Path(finding.evidence["snapshot"])
+        snapshot = self.managed_snapshot(finding.evidence["snapshot"])
         path = confined(snapshot, finding.path)
-        import hashlib
-
-        content = path.read_bytes()
+        with path.open("rb") as source:
+            content = source.read(self.limits.max_file_bytes + 1)
+        if len(content) > self.limits.max_file_bytes:
+            raise OberhauError("Investigation source exceeds configured size limit")
         unchanged = hashlib.sha256(content).hexdigest() == finding.evidence.get("source_sha256")
         lines = redact_source(content.decode("utf-8", errors="replace")).splitlines()
         context = redact(
@@ -243,4 +384,13 @@ class Engine:
                 "Can a safe isolated regression demonstrate impact and remediation?",
             ],
             "notes": record["notes"],
+            "python_analysis": self.python_analysis(content, finding)
+            if unchanged and path.suffix == ".py"
+            else None,
         }
+
+    @staticmethod
+    def python_analysis(content: bytes, finding: Finding) -> dict:
+        from oberhau.python_analysis import source_trace
+
+        return source_trace(content.decode("utf-8", errors="replace"), finding.line, finding.rule)

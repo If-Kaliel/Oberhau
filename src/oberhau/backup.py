@@ -58,12 +58,13 @@ def check_cancel(cancel: Event) -> None:
         raise Cancelled()
 
 
-def validate_database(connection: sqlite3.Connection) -> None:
+def validate_database(connection: sqlite3.Connection) -> int:
     connection.execute("PRAGMA trusted_schema=OFF")
-    if connection.execute("PRAGMA user_version").fetchone()[0] != len(MIGRATIONS):
+    version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if not 1 <= version <= len(MIGRATIONS):
         raise OberhauError("Unsupported backup database schema")
     with closing(sqlite3.connect(":memory:")) as expected:
-        for migration in MIGRATIONS:
+        for migration in MIGRATIONS[:version]:
             expected.executescript(migration)
         if connection.execute(SCHEMA_QUERY).fetchall() != expected.execute(SCHEMA_QUERY).fetchall():
             raise OberhauError(
@@ -74,6 +75,17 @@ def validate_database(connection: sqlite3.Connection) -> None:
         or connection.execute("PRAGMA foreign_key_check").fetchone()
     ):
         raise OberhauError("Backup database integrity check failed")
+    return version
+
+
+def upgrade_database(connection: sqlite3.Connection, version: int) -> None:
+    for index in range(version, len(MIGRATIONS)):
+        connection.executescript(
+            f"BEGIN IMMEDIATE;\n{MIGRATIONS[index]}\nPRAGMA user_version={index + 1};\nCOMMIT;"
+        )
+    if version < 3:
+        connection.execute("DELETE FROM settings WHERE key='advisory_index_version'")
+        connection.commit()
 
 
 def snapshot_reference(value: str, home: Path | None, snapshots: set[str]) -> str:
@@ -137,6 +149,8 @@ def remap_database(
             raise OberhauError("Malformed project metadata")
         if destination_home:
             metadata["source_link_required"] = True
+        if "previous_snapshot" in metadata:
+            snapshot_reference(metadata["previous_snapshot"], None, snapshots)
         connection.execute(
             "UPDATE projects SET root=?,metadata=? WHERE id=?",
             (remap(root), json.dumps(metadata), project_id),
@@ -156,6 +170,10 @@ def remap_database(
         connection.execute("UPDATE schedules SET enabled=0")
         connection.execute(
             "UPDATE scans SET status='interrupted',finished=? WHERE status='running'", (now(),)
+        )
+        connection.execute(
+            "UPDATE scanner_runs SET status='interrupted',finished=? WHERE status IN ('pending','running')",
+            (now(),),
         )
         connection.execute(
             "INSERT INTO audit(event,details,created) VALUES(?,?,?)",
@@ -365,7 +383,7 @@ def read_manifest(bundle: zipfile.ZipFile, stage: Path, limits: BackupLimits) ->
     if (
         manifest.format != FORMAT
         or manifest.version != 1
-        or manifest.database_schema != len(MIGRATIONS)
+        or not 1 <= manifest.database_schema <= len(MIGRATIONS)
     ):
         raise OberhauError("Unsupported research backup format or schema")
     if len(manifest.snapshots) > limits.max_files or len(
@@ -474,7 +492,10 @@ def restore_backup(
                     if index % 25 == 0:
                         progress(f"Restored and verified {index + 1}/{len(manifest.files)} files")
             with closing(sqlite3.connect(stage / "oberhau.sqlite3")) as connection:
-                validate_database(connection)
+                version = validate_database(connection)
+                if version != manifest.database_schema:
+                    raise OberhauError("Backup database version does not match manifest")
+                upgrade_database(connection, version)
                 remap_database(connection, set(manifest.snapshots), None, destination, cancel)
                 connection.commit()
                 connection.execute("PRAGMA journal_mode=DELETE")

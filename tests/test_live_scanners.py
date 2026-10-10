@@ -83,3 +83,24 @@ def test_live_trivy_dependency_advisory_and_corrected_control(scanner, source):
     assert all(f.path == "requirements.txt" for f in findings)
     requirements.write_text("Django==6.1.2\n", encoding="utf-8")
     assert scanner("trivy", "dependencies").scan(source, Event()) == []
+
+
+def test_live_semgrep_multilanguage_positive_and_corrected_controls(scanner, source):
+    import shutil
+    from collections import Counter
+
+    for file in (ASSETS / "multilang").iterdir():
+        shutil.copyfile(file, source / file.name)
+    findings = scanner("semgrep", "standard").scan(source, Event())
+    assert Counter(f.path for f in findings) == {
+        "unsafe.js": 5,
+        "unsafe.ts": 1,
+        "Unsafe.java": 1,
+        "Unsafe.cs": 1,
+    }
+    assert {cwe for finding in findings for cwe in finding.cwe} == {
+        "CWE-78",
+        "CWE-79",
+        "CWE-89",
+        "CWE-918",
+    }

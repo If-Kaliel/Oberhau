@@ -1,6 +1,6 @@
 # Security model
 
-Offline Research is the only project execution mode available in 0.3.0. There is no external active scanner,
+Offline Research is the only project execution mode available in 0.4.0. There is no external active scanner,
 credential validation, destructive test, report submission or arbitrary target execution feature.
 The policy validator rejects ambiguous scope, excludes hosts, requires exact lowercase hosts,
 reviewed revision, category/automation permission and explicit approval. It is preparatory logic,
@@ -54,3 +54,18 @@ jobs are offline and opt-in. Shutdown cancels workers and external process trees
 
 Limits do not enforce OS-level CPU/RAM quotas. Plugins execute as the current Windows user and must
 be trusted. Source snapshots and old history are retained until an operator manages retention.
+
+Public Git import accepts credential-free HTTPS GitHub/GitLab/Codeberg URLs and explicit branch/tag
+selection. A shallow no-checkout clone runs with isolated configuration, empty templates, disabled
+hooks/credentials/submodules/redirects and other transports. Git raw blobs are independently hashed
+and exported without attributes/filters/LFS downloads. Symlinks/submodules, unsafe/colliding names
+and oversized trees are rejected. The staged disk bound is sampled, not an OS quota, and can overshoot
+between checks. Git remains a trusted native parser; this is not containment against a Git vulnerability.
+
+Python slices use the latest textual assignment within the same function and explicitly label
+unknown caller trust. Import shadowing is treated conservatively. They do not resolve branch order
+or runtime bindings. Reports recheck source hashes and cannot present changed/unavailable evidence
+as ready merely because a historical review exists. Qwen claims introducing unrecorded CVE/GHSA
+identifiers or URLs are rejected, but other prose can still be wrong. Generation queues coordinate
+across Windows processes; POSIX coordination is only within the process. RAM/GPU telemetry is
+read-only; it does not enforce resource quotas or automatically pause workloads.

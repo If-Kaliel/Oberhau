@@ -29,7 +29,14 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("diagnostics")
     commands.add_parser("projects")
     commands.add_parser("metrics")
+    runs = commands.add_parser(
+        "scanner-runs", help="Per-scanner status, timing, counts and provenance"
+    )
+    runs.add_argument("--scan", type=int)
     commands.add_parser("demo")
+    commands.add_parser(
+        "demo-multilang", help="Import static web/Java/.NET controls and run Semgrep"
+    )
     commands.add_parser(
         "refresh-trivy-cache", help="Download the public Trivy vulnerability database"
     )
@@ -45,6 +52,24 @@ def main(argv: list[str] | None = None) -> int:
     add.add_argument("source", type=Path)
     add.add_argument("--name", required=True)
     add.add_argument("--program", type=int)
+    git_add = commands.add_parser(
+        "add-git", help="Import a public HTTPS repository as a verified committed snapshot"
+    )
+    git_add.add_argument("url")
+    git_add.add_argument("--name", required=True)
+    git_add.add_argument("--ref")
+    git_add.add_argument("--program", type=int)
+    git_link = commands.add_parser("relink-git")
+    git_link.add_argument("project", type=int)
+    git_link.add_argument("url")
+    git_link.add_argument("--ref")
+    compare = commands.add_parser(
+        "compare", help="Redacted source diff against the previous snapshot"
+    )
+    compare.add_argument("project", type=int)
+    compare.add_argument("path")
+    details = commands.add_parser("project-details")
+    details.add_argument("project", type=int)
     scan = commands.add_parser("scan")
     scan.add_argument("project", type=int)
     scan.add_argument("--profile", choices=PROFILES, default="standard")
@@ -123,15 +148,43 @@ def main(argv: list[str] | None = None) -> int:
             output = refresh_trivy_cache(engine.home, cancel, print)
         elif args.command == "add":
             output = {"project": engine.ingestion.add(args.source, args.name, args.program)}
+        elif args.command == "add-git":
+            output = {
+                "project": engine.repositories().add(
+                    args.url,
+                    args.name,
+                    args.program,
+                    args.ref,
+                    cancel,
+                    lambda message: print(message, file=sys.stderr),
+                )
+            }
+        elif args.command == "relink-git":
+            engine.repositories().relink(args.project, args.url, args.ref)
+            output = {"relinked": args.project, "source": args.url}
+        elif args.command == "compare":
+            output = engine.compare_source(args.project, args.path)
+        elif args.command == "project-details":
+            output = engine.ingestion.project(args.project)
+            output["metadata"] = json.loads(output["metadata"])
         elif args.command == "demo":
             project = engine.ingestion.add(ASSETS / "demo", "DEMONSTRATION / LABORATORY", demo=True)
             output = {"project": project, "scan": engine.scan(project, "quick", cancel)}
+        elif args.command == "demo-multilang":
+            project = engine.ingestion.add(
+                ASSETS / "multilang", "DEMONSTRATION / MULTILANGUAGE", demo=True
+            )
+            output = {"project": project, "scan": engine.scan(project, "standard", cancel)}
         elif args.command == "projects":
             output = db.query("SELECT id,name,origin,demo,created FROM projects")
         elif args.command == "metrics":
             output = db.metrics()
+        elif args.command == "scanner-runs":
+            output = db.scanner_runs(args.scan)
         elif args.command == "refresh":
-            engine.ingestion.refresh(args.project)
+            engine.refresh_project(
+                args.project, cancel, lambda message: print(message, file=sys.stderr)
+            )
             output = {"refreshed": args.project}
         elif args.command == "relink":
             engine.ingestion.relink(args.project, args.source)

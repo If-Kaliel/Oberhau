@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 — 2026-10-10
+
+- Safe public HTTPS Git import: isolated no-checkout clone, verified raw blobs, bounded staging, refresh and redacted source comparison.
+- Persisted per-scanner lifecycle, duration, errors and provenance, including zero-warning/unavailable runs.
+- Explicit advisory-alias correlation scoped to project, manifest, ecosystem, package and version; raw scanner/rule history retained.
+- Ten Semgrep rules with positive/corrected JavaScript, TypeScript, Java and C# controls.
+- Bounded Python assignment slices, conservative import shadowing, syntactic caller references and source-integrity report checks.
+- Live Qwen 3.5 4B verification, UTF-8 JSON budgets, incomplete-output/advisory/URL guards, cancellable HTTP and Windows cross-process generation coordination.
+- Read-only Windows RAM and optional NVIDIA telemetry; installed Ollama discovery.
+- Known schema 1–3 recovery/migration, preserving previous-snapshot comparison references and scanner history.
+- Portable native Windows GUI + CLI executables with shared dynamic runtime, complete Qt sources/notices and SHA-256 manifest.
+- Portuguese quick-start guide and expanded engine/security/native GUI regressions.
+
 ## 0.3.0 — 2026-10-10 (testes branch)
 
 - Portable research ZIP backups include SQLite and every retained current/historical source snapshot.

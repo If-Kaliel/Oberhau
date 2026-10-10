@@ -94,6 +94,9 @@ class BuiltinScanner:
                         confidence=confidence,
                         context=redact("\n".join(lines[max(0, line - 3) : line + 2])),
                         explanation="Heuristic static warning. Review protective controls, input provenance, reachability, and impact before confirmation.",
+                        evidence={
+                            "confidence_reason": "Matched a bundled AST or literal/configuration pattern; no measured field precision or runtime reachability"
+                        },
                     )
                 )
 

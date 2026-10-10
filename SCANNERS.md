@@ -3,7 +3,7 @@
 | Engine | Scope and current verification | Requirements |
 |---|---|---|
 | Builtin | Python AST eval/exec, shell, pickle/yaml, weak hash, formatted SQL; literal credential and debug/privilege patterns. Real execution tested. | Bundled |
-| Semgrep CE | Four bundled patterns: Python/JS/TS eval, Java Runtime.exec, C# Process.Start. Real Windows fixture execution tested. | Semgrep 1.180.0 on PATH |
+| Semgrep CE | Ten rules: eval/process patterns plus bounded JS/TS request-to-shell/SQL/HTML/URL flows and Servlet/ASP.NET SQL flows. Real positive/corrected controls tested. | Semgrep 1.180.0 on PATH |
 | Gitleaks | `dir`, trusted default-rule config, complete redaction; real fabricated GitHub credential and corrected control verified. | Managed 8.30.1 or trusted PATH binary |
 | OSV v2 | Recursive `scan source --offline`, no resolution/call analysis, trusted config; real Django advisory matching and fixed-version evidence verified. | Managed 2.6.0 and downloaded ecosystem feed |
 | Trivy | `fs`, configuration and vulnerability checks selected by profile; real Dockerfile line attribution and Django advisory/control verified. | Managed 0.75.0; vulnerability DB needed only for dependency/Deep scans |
@@ -20,7 +20,7 @@ requests bundled configuration checks plus Trivy; Dependencies requests OSV and 
 missing/failed engines produce partial or failed scan states and persisted errors.
 
 Warning severity is distinct from detection confidence. Dependency version matching never means
-application reachability. Missing authorization, IDOR, SSRF, CSRF, business logic, race conditions,
+application reachability. Missing authorization, IDOR, general SSRF, CSRF, business logic, race conditions,
 framework access boundaries, full taint flows and novel exploit discovery are not covered by the
 small bundled rules. They require expanded trusted rule packs and manual investigation.
 
@@ -56,7 +56,7 @@ indicator does not certify every database ecosystem or its freshness; metadata i
 
 Findings preserve managed version, executable checksum, Semgrep rule checksum, and relevant
 advisory-feed receipt. Fixed versions are advisory evidence across potentially multiple release
-branches, not a tested upgrade plan. Alias-overlapping advisories remain distinct findings.
+branches, not a tested upgrade plan. Explicit overlapping advisory aliases are correlated only within the same project, manifest, normalized package name, ecosystem and version (PyPI/npm). Raw observations retain their scanner and rule. Old historical duplicate IDs/reviews remain intact; future observations select the earliest explicitly linked ID. Matching titles or CWE alone never merge advisories.
 
 Optional manually installed executables must be outside imported projects. Official sources:
 
@@ -69,3 +69,12 @@ The adapter argument contracts follow official [Semgrep CLI](https://docs.semgre
 [Gitleaks README](https://github.com/gitleaks/gitleaks) and [OSV usage](https://google.github.io/osv-scanner/usage/).
 Gitleaks currently states feature development has ended while security fixes continue; reevaluate
 its successor before expanding this integration. Neither ZAP, Nuclei nor CodeQL is integrated.
+
+Every requested engine has a persisted run row with lifecycle, duration, warning count, errors
+and provenance, including zero-warning and unavailable runs. Overview → Scanner run details, or
+`scanner-runs --scan ID`, exposes those records. Earlier releases did not record these rows.
+
+Try the labeled web/Java/.NET controls with `demo-multilang` (Semgrep must be on PATH).
+Request-shaped variable names and static taint are review signals, not proof of network reachability
+or attacker control. Parameterized SQL, constant URLs, JSON responses and execFile controls are
+covered by the bundled negative fixtures. Arbitrary user rule packs remain unsupported.

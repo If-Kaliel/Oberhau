@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.metadata
+import os
 import platform
 import shutil
 import sys
@@ -8,8 +9,16 @@ from pathlib import Path
 
 from oberhau.core import Limits, OberhauError, now
 from oberhau.ollama import Ollama
+from oberhau.resources import gpu_status, memory_status
 from oberhau.scanners.external import capabilities
 from oberhau.security import ProcessRunner
+
+
+def ollama_executable() -> str | None:
+    installed = Path(os.environ.get("LOCALAPPDATA", "")) / "Programs/Ollama/ollama.exe"
+    return shutil.which("ollama") or (
+        str(installed) if installed.is_absolute() and installed.is_file() else None
+    )
 
 
 def collect(limits: Limits | None = None, home: Path | None = None) -> dict:
@@ -20,7 +29,7 @@ def collect(limits: Limits | None = None, home: Path | None = None) -> dict:
         "platform": platform.platform(),
         "cpu_logical": __import__("os").cpu_count(),
         "git": shutil.which("git"),
-        "ollama_executable": shutil.which("ollama"),
+        "ollama_executable": ollama_executable(),
         "scanners": capabilities(ProcessRunner(limits or Limits(timeout=10), home=home)),
         "packages": {},
     }
@@ -39,7 +48,8 @@ def collect(limits: Limits | None = None, home: Path | None = None) -> dict:
     except OberhauError as error:
         result["ollama_error"] = str(error)
         result["qwen_available"] = False
-    result["gpu_probe"] = "Ollama manages GPU offloading; dedicated GPU telemetry not implemented."
+    result["memory"] = memory_status()
+    result["gpu"] = gpu_status()
     if Path(sys.executable).is_file():
         result["runtime"] = "operational"
     return result

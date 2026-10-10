@@ -57,6 +57,8 @@ class Finding(BaseModel):
     status: Status = Status.DETECTED
 
     def fingerprint(self, project_id: int) -> str:
+        from oberhau.correlation import dependency_scope
+
         # Only explicitly equivalent bundled rules correlate across engines.
         equivalents = {
             ("builtin", "python-dynamic-code"): "dynamic-code",
@@ -65,7 +67,12 @@ class Finding(BaseModel):
         family = equivalents.get(
             (self.scanner, self.rule.split(".")[-1]), f"{self.scanner}:{self.rule}"
         )
-        identity = f"{project_id}|{family}|{self.path}|{self.line}"
+        scope = dependency_scope(self)
+        identity = (
+            f"{project_id}|{family}|{self.path}|{self.line}|{scope}"
+            if scope
+            else f"{project_id}|{family}|{self.path}|{self.line}"
+        )
         return hashlib.sha256(identity.encode()).hexdigest()
 
 
@@ -76,6 +83,7 @@ class Limits(BaseModel):
     max_total_bytes: int = Field(default=200_000_000, ge=1000, le=2_000_000_000)
     max_output_bytes: int = Field(default=20_000_000, ge=1000, le=100_000_000)
     parallelism: int = Field(default=2, ge=1, le=8)
+    max_git_bytes: int = Field(default=500_000_000, ge=1_000_000, le=2_000_000_000)
 
 
 class DraftText(BaseModel):

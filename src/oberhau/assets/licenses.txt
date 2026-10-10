@@ -1,0 +1,27 @@
+OBERHAU — MIT License
+Copyright (c) 2026 Oberhau contributors.
+Source and build instructions: https://github.com/If-Kaliel/Oberhau
+
+This application uses unmodified PySide6 Essentials, Shiboken6 and Qt 6.10.2
+under LGPL version 3. Qt and PySide are trademarks of The Qt Company Ltd.
+You may replace, modify and relink these libraries, and reverse engineer the
+application for debugging modifications to them. Oberhau imposes no restriction
+on these rights and no digital signature check on the Qt libraries.
+
+Portable Windows distribution: full license and copyright notices are in
+licenses/ and corresponding unmodified Qtbase, QtSvg and PySide/Shiboken sources
+are in sources/. Dynamic libraries remain separate in _internal/PySide6/ and
+_internal/shiboken6/. Replace them with ABI-compatible builds, retaining the
+directory layout. Rebuild Oberhau from the public source and packaging/Oberhau.spec
+when needed. See WINDOWS_BUILD.md for installation and replacement information.
+
+Source installation: license notices are also supplied by the installed packages;
+the portable build script retrieves the complete upstream sources and notices.
+
+Python: PSF license; SQLite: public domain; Pydantic and its supporting Python
+packages: MIT. Optional scanners and Ollama are separate installations with their
+own licenses. No paid runtime service is required.
+
+Qt terms: https://www.qt.io/development/open-source-lgpl-obligations
+GNU LGPLv3: https://www.gnu.org/licenses/lgpl-3.0.html
+GNU GPLv3: https://www.gnu.org/licenses/gpl-3.0.html

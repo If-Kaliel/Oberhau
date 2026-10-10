@@ -69,6 +69,7 @@ PAGES = [
     "Automation",
     "Analytics",
     "Settings",
+    "Research",
 ]
 
 
@@ -223,6 +224,10 @@ class Window(QMainWindow):
         self.make_automation()
         self.make_analytics()
         self.make_settings()
+        from oberhau.desktop.research_page import ResearchPage
+
+        self.research_page = ResearchPage(self)
+        self.pages["Research"].addWidget(self.research_page)
         self.navigation.currentRowChanged.connect(self.navigate)
         self.navigation.setCurrentRow(0)
         for key, callback in [
@@ -1320,8 +1325,8 @@ class Window(QMainWindow):
                     v["id"],
                     v["finding_id"],
                     json.loads(v["result"])["passed"],
-                    json.loads(v["result"])["observed_rows"],
-                    json.loads(v["result"])["fixed_rows"],
+                    json.loads(v["result"]).get("observed_rows", "HTTP recipe"),
+                    json.loads(v["result"]).get("fixed_rows", "See Research"),
                     v["created"],
                 ]
                 for v in validations
@@ -1356,6 +1361,7 @@ class Window(QMainWindow):
             rewards["amount"] / rewards["hours"] if rewards["hours"] else None
         )
         self.analytics_text.setPlainText(json.dumps(metrics, indent=2, ensure_ascii=False))
+        self.research_page.refresh()
 
     def setup(self) -> None:
         dialog = QDialog(self)

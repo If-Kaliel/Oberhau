@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 — contextual research development on testes
+
+Schema 4 evidence graphs and syntax caches; selected Next.js/Spring/ASP.NET profiles; provisional
+resource-access/policy-difference hypotheses; bounded direct-call dependencies; separate-axis
+review queue; typed local Qwen investigation with cited evidence/fallback; retained security deltas;
+two synthetic loopback HTTP labs; a separate measured 12-case benchmark and a real Research page.
+Python slices retain conditional alternatives/sanitizer uncertainty. Reports check intermediate
+file integrity. No general reachability, confirmed vulnerability or complete Directive 002 claim.
+
 ## 0.4.0 — 2026-10-10
 
 - Safe public HTTPS Git import: isolated no-checkout clone, verified raw blobs, bounded staging, refresh and redacted source comparison.

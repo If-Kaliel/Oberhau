@@ -1,5 +1,15 @@
 # Verification
 
+Directive 002 adds contextual, assistant and validation/GUI regressions: framework positive/negative
+controls, intermediate/constant arguments, cache/history/backup, comment metadata, Python branch/
+sanitizer uncertainty, cross-file report integrity, typed-query/citation rejection/fallback and Qt
+workers. Local HTTP tests use only owned loopback sockets. Exact results are in WORKLOG.md.
+
+Independent detection evaluation: `oberhau benchmark`, identified by the unchanged
+`assets/research_benchmark.json` hash. It retains every expected/detected/missed signal and resource
+scope. The unit test checks measurement accounting rather than forcing perfect detection. The 12
+original synthetic cases do not establish an independently curated production detection rate.
+
 `.github/workflows/tests.yml` runs these regressions on GitHub-hosted Windows with Python 3.12
 for `main`, `testes` and pull requests. External scanners and Ollama are optional and are not
 installed in that job; adapter contracts use synthetic fixtures, as described below.

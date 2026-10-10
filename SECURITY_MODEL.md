@@ -1,5 +1,13 @@
 # Security model
 
+0.5.0 research stays offline. Tree-sitter/Python AST parse imported source as data; native parsers
+are trusted and not process-sandboxed. Structural deadlines/budgets do not enforce OS RSS quotas.
+Paths are syntax observations and absent controls remain hypotheses. Typed AI queries permit
+bounded reads by recorded evidence ID with excerpt hashes and consulted-citation checks; schema
+does not prove prose truth. AI cannot execute commands, refresh networks or change findings.
+Disposable HTTP recipes serve fixed synthetic data on random loopback ports, accept no targets,
+and are deliberately unassociated with imported findings. See RESEARCH.md for remaining controls.
+
 Offline Research is the only project execution mode available in 0.4.0. There is no external active scanner,
 credential validation, destructive test, report submission or arbitrary target execution feature.
 The policy validator rejects ambiguous scope, excludes hosts, requires exact lowercase hosts,

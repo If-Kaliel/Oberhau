@@ -1,5 +1,84 @@
 # Worklog — 2026-10-10
 
+## Directive 002 / 0.5.0 contextual research — 2026-10-10
+
+Inspected clean branch `testes` at `13f65bb`, read architecture/security/testing/roadmap/history and
+reused the existing engine, scans, findings, observations, reviews, backups, Qwen client and scheduler.
+Original instructions are preserved in DEVELOPMENT_DIRECTIVE_002.md. Main was not modified.
+
+Implemented a working bounded research vertical slice: schema 4 evidence/run/cache/AI histories;
+Tree-sitter syntax profiles for Next.js/Spring/ASP.NET and Python AST indexing; provisional resource
+authorization/policy-difference hypotheses; typed graph evidence and explicit unresolved calls;
+relative named JS import/direct-call identifier propagation; conditional Python slice alternatives;
+queue with separate axes/human decisions; retained sensitive/control/dependency deltas and possible
+regressions; cited typed Qwen reads/fallback; two trusted synthetic HTTP recipes; an independent
+12-case detection evaluation; and a separate backend-connected desktop Research component.
+Reports check all referenced file hashes. Helper-file changes reopen historical human decisions.
+Exact coverage, acceptance criteria and pending work are in RESEARCH.md; this is not completion
+of the full directive or proof of general interprocedural/authorization/zero-day capability.
+
+Verification milestones (counts are separate runs, never added together):
+
+- Initial restricted baseline: **179 passed, 3 failed, 6 optional skips**, **205.52 s**. HTTP socket
+  restrictions prevented loopback completion; Git/MSYS reported NtCreateDirectoryObject access denial.
+  Repeated those exact three owned local tests outside the restrictions: **3 passed**, **22.18 s**.
+- Initial contextual profiles/cache/graph/backup controls: **14 passed**, **7.00 s**.
+- Contextual/assistant plus existing AI targets excluding socket/mutex cases: **40 passed**,
+  **2 deselected**, **33.76 s**; no live-model success claim follows mocked responses.
+- Real local HTTP/Qt research plus contextual/assistant: **29 passed**, **15.94 s**.
+- Complete suite before final helper-review/decoder refinements: **213 passed, 6 optional skips**,
+  **176.44 s**. Final broad revalidation is recorded below.
+- Helper-review change with assistant/history/pipeline regressions: **38 passed**, **98.02 s**.
+- Final GUI/lab persistence regression: **5 passed**, **5.89 s**; includes actual owned HTTP
+  vulnerable/fixed handlers and Qt workers, no imported-source execution.
+- Native source GUI captured/inspected all research paths/benchmark tabs. Both trusted HTTP recipes
+  passed: vulnerable authorization 200/fixed 403; vulnerable invalid count 200/fixed 400.
+- Actual Oberhau source self-import/research: **55 files**, **96 symbols**, **48 parsed source files**,
+  **0 supported endpoints / contextual hypotheses**, **334,278 serialized index bytes**. This
+  Python-heavy real project does not demonstrate real-world three-framework authorization coverage.
+- Separate unchanged benchmark SHA-256
+  `36787d3b9694b089ed6f3a806aeda6e9c2b5e3d0c7bc145d8c66d02d72a7ecb6`:
+  **12 cases**, **6 expected/detected signals**, **0 false positives / false negatives**, precision/
+  recall **1.0 on this dataset only**. Native smoke **0.125 s**, Python peak **206,598 bytes**,
+  Windows process working set **66,813,952 bytes**, including earlier imports/native allocations.
+  No large/representative/externally curated corpus or zero-day performance claim is made.
+- Frozen CLI with Python absent from PATH executed the real benchmark: **exit 0**, same **6/0/0**
+  signals across **12 cases**. Final bundle integrity/native startup verification is recorded below.
+
+Final source verification:
+
+- Full suite after helper-review and Qwen enum/prompt refinements: **214 passed, 6 optional skips**,
+  **126.48 s**, JUnit artifact `artifacts/directive002-tests.xml`. The subsequent GUI lab-history
+  visibility adjustment passed its actual HTTP/Qt targets (**5 passed**, **5.89 s**).
+- Actual qwen3.5:4b returned HTTP 200 in **21.09 s**, with two relevant policy/middleware questions
+  and a limitation citing a provided code evidence ID. It returned **no structured claims and no
+  additional read queries** in this one-iteration smoke. Generator `ollama:unverified-research`;
+  findings unchanged. Iterative tool/citation behavior is tested with controlled responses, not
+  asserted as demonstrated by this live sample.
+- Ruff lint/format, compileall and `git diff --check` passed. Final commands did not measure
+  coverage; no new coverage percentage is claimed.
+
+Failures and limitations found in actual execution:
+
+- Tree-sitter 0.25.2 Windows `progress_callback` parsing caused a native access violation. Replaced
+  that path with the supported native timeout API; follow-up contextual/assistant **26 passed**,
+  **31.33 s**. Native parsing cancellation resumes after that file parse. Process isolation remains
+  pending; the obsolete callback is not used in production.
+- Initial Ollama was off: deterministic fallback preserved findings and questions. A temporary
+  existing Ollama server initially stalled in inherited Vulkan GPU discovery. A process-local retry
+  with Vulkan disabled discovered the RTX 4060 and loaded all 33 Qwen layers on CUDA, but a 60-second
+  structured generation deadline expired. Fallback was recorded and findings remained unchanged.
+  Added brief single-question prompting and schema ID enums, with a 90-second per-call/180-second
+  total cap. Final actual model result is recorded below. No model was downloaded or service installed;
+  every owned temporary Ollama process tree was closed after verification.
+- Windows notice collection originally missed Java/TypeScript wheels using root dist-info LICENSE
+  paths. Added that format and verified all five Tree-sitter license files in the bundle.
+
+Local verification artifacts live under ignored artifacts/ and separate ignored .oberhau/directive002-*
+homes; ordinary user data and the published stable package remain separate. Remaining work includes
+global policy/DI bindings, native isolation/OS quotas, cache retention, realistic external benchmark,
+semantic AI truth checks, source monitoring and resumable unattended multi-stage automation.
+
 ## Session objective and delivered state
 
 User supplied the Oberhau Master Development Specification and requested actual iterative

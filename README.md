@@ -2,6 +2,12 @@
 
 **Security Research Workbench · Windows · local-first · no paid runtime services**
 
+Development on `testes` is **0.5.0**: [contextual research](RESEARCH.md) adds selected framework
+syntax profiles, evidence graphs, provisional authorization hypotheses, review queue, typed local
+Qwen investigation, security deltas, synthetic HTTP labs and a small measured detection benchmark.
+Select **Pesquisa contextual / Research** or use `scan ID --profile research`. The stable 0.4.0
+release and `main` are preserved; the complete Directive 002 remains broader than this milestone.
+
 Oberhau 0.4.0 is a working native desktop and CLI for authorized offline source research.
 Import a folder, source file, ZIP or public HTTPS Git repository; scan a managed snapshot; investigate normalized warnings;
 record human decisions; reproduce the bundled SQL laboratory; generate and export review drafts.

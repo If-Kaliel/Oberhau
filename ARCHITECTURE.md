@@ -1,5 +1,13 @@
 # Architecture
 
+0.5.0 adds the domain-only [research subsystem](RESEARCH.md): `framework_analysis` indexes
+Tree-sitter/Python syntax, `research_models` validates bounded evidence and `research` constructs
+graphs/hypotheses, reuses per-file cache and ranks the queue. `git_intelligence` compares retained
+observations; `research_assistant` exposes typed read tools to existing Ollama. `local_validation`
+owns disposable synthetic HTTP recipes and `benchmark` evaluates a separate dataset. Schema 4
+stores runs/caches/assistance and reuses findings/reviews/scans. Graph/finding publication is atomic.
+The new `desktop/research_page.py` renders real records without moving existing page behavior.
+
 The GUI and CLI invoke `Engine`, `Ingestion`, `Database`, and reporting services directly.
 Domain modules have no Qt imports. Python 3.12+, Pydantic v2 and PySide6 Essentials provide the
 runtime. Essentials contains the actual Widgets and SVG modules used; Addons is unnecessary.

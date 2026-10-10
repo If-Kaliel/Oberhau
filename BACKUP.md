@@ -1,5 +1,9 @@
 # Research backup and recovery
 
+Schema 4 preserves contextual graphs, syntax caches, provisional AI histories and synthetic HTTP
+validation records. Run snapshots use portable relative references; finding paths are remapped
+as before. Restored stale research jobs become interrupted and schedules remain paused.
+
 Oberhau 0.4.0 provides a portable `.oberhau.zip` research bundle. Settings runs backup and restore
 in a cancellable background worker. The CLI uses the same service; Ctrl+C requests cancellation.
 

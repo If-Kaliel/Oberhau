@@ -1,5 +1,11 @@
 # Local Qwen drafts
 
+0.5.0 adds an explicit Research-page/CLI investigator. It sends bounded redacted graph evidence,
+allows typed read queries and requires consulted IDs for structured claims; the decoder schema
+enumerates known citation IDs. Unavailable/invalid/timeout responses fall back to deterministic
+questions. [RESEARCH.md](RESEARCH.md) documents iteration/context/deadline limits. Actual
+one-iteration qwen3.5:4b results and their limitations are recorded in WORKLOG.md.
+
 Ollama defaults to `http://127.0.0.1:11434` and `qwen3.5:4b`. Settings accepts only loopback HTTP
 origins without credentials, paths, queries or fragments. There is no cloud endpoint, paid account,
 redirect or proxy support. Actual qwen3.5:4b inference was verified on the local RTX 4060, including

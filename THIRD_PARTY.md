@@ -8,6 +8,7 @@ license texts. The portable Windows directory includes full license/copyright no
 | Python | PSF; runtime interpreter |
 | PySide6 Essentials / Qt | LGPLv3/GPL/commercial options; dynamic open-source modules only |
 | Pydantic | MIT |
+| Tree-sitter binding / TypeScript / JavaScript / Java / C# grammars | MIT; pinned local parsing wheels; notices retained by Windows build |
 | SQLite | Public domain |
 | Semgrep CE engine | LGPL-2.1; optional subprocess; our bundled rules are original MIT |
 | OSV-Scanner | Apache-2.0; optional subprocess |

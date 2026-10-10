@@ -30,6 +30,13 @@ Native screenshots were visually inspected. The updated native receipt is in
 `evaluation/windows-result.json`; final package checksums remain separate from packaged documents.
 These native checks still use the existing Windows host, rather than a newly installed OS/VM.
 
+The first remote Windows CI caught a third issue: explicit `text eol=lf` attributes normalized
+the originally frozen CRLF evaluation JSON when staging, while the local working bytes retained
+their original hash. CI correctly rejected the changed bytes (261 passed, one failed, six skipped).
+Evaluation receipts and the benchmark now use `-text`, preserving their exact original bytes
+across staging and checkout. No labels, case content or expected hashes were regenerated or relaxed.
+The original label SHA-256 remains `fd649e2f5bc85e01c7b68d2af71997cda97ffe3870c0f9c186f1830525799c2d`.
+
 ## 1.0.0 — four scoped acceptance areas
 
 User accepted the 1.0 scope as an offline investigation workbench and requested completion of

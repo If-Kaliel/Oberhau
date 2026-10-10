@@ -191,3 +191,52 @@ For scanner integration specifically: Java index refresh, additional ecosystems,
 policy, alias correlation, signed release verification and per-scanner timing/status history when
 no warnings occur. CLI offline flags are not an OS firewall; no external target testing was done.
 Ongoing feature changes are published to `testes`; `main` retains the verified initial baseline.
+
+## Portable research recovery / 0.3.0 — 2026-10-10
+
+Implemented versioned research ZIP bundles containing SQLite and every retained current/historical
+source snapshot. Evidence paths become relative in the bundle and are rewritten to the recovery
+directory. Review notes/status, observations, reports, laboratory records, policies, reward/time
+history and IDs remain intact. Empty snapshot directories are retained. Scanner binaries/caches,
+logs and model weights stay outside the bundle. Archives contain raw source and are neither encrypted
+nor authenticated; hashes detect corruption against their manifest.
+
+Restore bounds inventory/bytes, rejects unsafe paths/types/collisions, verifies sizes/SHA-256 and
+SQLite integrity/foreign keys/exact canonical schema, then publishes a new directory. Unknown SQL
+triggers/views/indexes are rejected before updates. Schedules are paused, stale running scans are
+interrupted, old diagnostics are removed, and original source refresh requires explicit relinking.
+Database remapping is paginated. Cooperative OS storage locks exclude scans/imports/refreshes/relinks
+and complete backups across threads/processes; scanners within one scan retain parallelism.
+
+Added cancellable GUI backup/restore workers, recovered-data switching, source relinking controls,
+CLI `backup/restore --complete` and `relink`. Legacy database-only CLI commands remain available.
+Backup/recovery contents, plaintext-source handling, exclusions, limits and steps are documented in
+BACKUP.md and the user guide.
+
+Verification:
+
+- Full local deterministic suite: **120 passed, 4 optional skips**, 175.50 s, **84.22% line coverage**.
+  Added an unsupported-compression guard afterward; its regression plus complete CLI round-trip
+  passed separately (**2 passed**, 5.72 s). Final deterministic suite contains 121 tests.
+- Real Gitleaks/OSV/Trivy regression suite: **4 passed**, 31.20 s using existing verified public
+  caches and local fixtures. No imported package code or external target was executed.
+- Round-trip regression made the original data directory unavailable and recovered two snapshots,
+  historical investigations, reports/reviews/laboratory evidence, empty directories and source links.
+  A separate history test covers more than one remapping batch and interrupted-scan recovery.
+- Corruption, unsupported schema/custom trigger, broken foreign keys, missing snapshots/inventory,
+  traversal/reserved/case-colliding/special archive members, cancellation, concurrent storage access,
+  modified-source copying, existing destinations and publication races are covered.
+- Real Qt workers backed up, restored and opened recovered data. Native Settings rendering was
+  inspected at 1060×760; new controls fit on two rows. Ruff and formatting checks passed.
+- Actual previous scanner database recovered to a different directory: **123 findings**, every
+  investigation's source hash unchanged. Backup: **5 files, 1 snapshot, 853,602 uncompressed bytes,
+  53,607 archive bytes**. The 1.47 GB Trivy DB, OSV cache and native executables were excluded.
+- Wheel: `oberhau-0.3.0-py3-none-any.whl`, **64,540 bytes**, SHA-256
+  `b657f010ed3fd54839334e4c8362bc10c3b5ec15d6e92eed487e7bbfcfbc156e`.
+  Includes backup/storage modules and the trusted tool manifest. Local pip staging initially hit
+  the restricted system temporary directory; building with a workspace temporary directory passed.
+
+Remaining limitations: full Windows filesystem TOCTOU hardening, OS quotas, retention policy,
+signed/encrypted backups, bundle schema migration and installation packaging. Optional scanner/feed
+and model installations must be repeated separately after moving to another computer. No full master
+specification completion is claimed. Publication continues on `testes`.

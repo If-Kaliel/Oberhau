@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-10-10 (testes branch)
+
+- Portable research ZIP backups include SQLite and every retained current/historical source snapshot.
+- Restore verifies bounded file inventory, SHA-256, canonical SQLite schema and foreign keys before publication.
+- Relocated project/evidence paths preserve investigations, reviews, reports and laboratory history.
+- Recovery pauses schedules, clears stale diagnostics and requires explicit source relinking before refresh.
+- GUI background backup/restore and data-directory switching; CLI `--complete` and `relink` commands.
+- Cooperative OS data-directory lock prevents competing scans/imports from changing backup snapshots.
+- Cancellation, corruption, unsafe archives, destination races, portability and native UI recovery regressions.
+
 ## 0.2.0 — 2026-10-10 (testes branch)
 
 - Explicit local Windows x64 scanner installation from pinned official releases and SHA-256 checks.

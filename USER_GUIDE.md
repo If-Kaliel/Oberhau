@@ -28,14 +28,18 @@ Settings persists language (applies on restart), scanner concurrency, deadlines 
 preferences. System diagnostics runs asynchronously and reports executable paths, versions, model
 availability and installation guidance. Diagnostic exports contain local filesystem paths.
 
-Back up the SQLite database using Settings or CLI. Also copy the entire data directory's projects
-and logs for complete evidence recovery; a database-only backup cannot reconstruct source snapshots.
+Settings offers **Backup research**, **Restore research**, and **Open data directory**. A research
+backup includes the database and every retained source snapshot, including historical evidence.
+Restore chooses a new directory; Open data directory opens its research in the desktop.
+See [BACKUP.md](BACKUP.md) for contents, limits and recovery steps.
 
 ```powershell
-.\scripts\Run-CLI.ps1 backup 'C:\Backups\oberhau-2026-10-10.sqlite3'
-.\scripts\Run-CLI.ps1 restore 'C:\Backups\oberhau-2026-10-10.sqlite3' 'C:\Recovery\oberhau.sqlite3'
+.\scripts\Run-CLI.ps1 backup 'C:\Backups\research.oberhau.zip' --complete
+.\scripts\Run-CLI.ps1 restore 'C:\Backups\research.oberhau.zip' 'C:\Recovery\Oberhau' --complete
+.\scripts\Run-CLI.ps1 --home 'C:\Recovery\Oberhau' gui
 ```
 
-Restore refuses to overwrite an existing file. Close Oberhau and point `OBERHAU_HOME` at the
-recovered data directory containing `oberhau.sqlite3` and the original project snapshots. Snapshot
-paths are currently absolute; moving a backup to a different computer requires reimporting source.
+Research restore rewrites evidence paths for the new directory, pauses schedules and preserves
+project/finding IDs, review notes, reports and validation records. Offline scans can use the restored
+snapshot immediately. Select a project and use **Relink source folder/file** before Refresh reads
+its original source on the current computer. The CLI equivalent is `relink PROJECT SOURCE`.

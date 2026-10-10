@@ -44,6 +44,7 @@ from PySide6.QtWidgets import (
 )
 
 from oberhau import __version__
+from oberhau.backup import create_backup, restore_backup
 from oberhau.core import Cancelled, OberhauError, Status, data_home, now
 from oberhau.desktop.i18n import translate
 from oberhau.desktop.theme import THEME
@@ -53,7 +54,7 @@ from oberhau.laboratory import validate_sql
 from oberhau.reporting import export, generate
 from oberhau.scheduler import add_schedule, take_due
 from oberhau.scope import Policy
-from oberhau.security import local_ollama_url, redact
+from oberhau.security import confined, local_ollama_url, redact
 from oberhau.tooling import ECOSYSTEMS, PINNED, install_tool, refresh_osv_cache, refresh_trivy_cache
 
 PAGES = [
@@ -363,6 +364,27 @@ class Window(QMainWindow):
         self.projects_table = self.table(
             "Projects", ["ID", "Name", "Languages", "Program", "Origin", "Type"]
         )
+        self.bar(
+            "Projects",
+            [
+                ("Relink source folder", self.relink_folder),
+                ("Relink source file", self.relink_file),
+            ],
+        )
+
+    def relink_folder(self) -> None:
+        project_id = self.selected(self.projects_table)
+        source = QFileDialog.getExistingDirectory(self, self.tr_label("Relink source folder"))
+        if source:
+            self.engine.ingestion.relink(project_id, Path(source))
+            self.refresh()
+
+    def relink_file(self) -> None:
+        project_id = self.selected(self.projects_table)
+        source, _ = QFileDialog.getOpenFileName(self, self.tr_label("Relink source file"))
+        if source:
+            self.engine.ingestion.relink(project_id, Path(source))
+            self.refresh()
 
     def import_folder(self) -> None:
         source = QFileDialog.getExistingDirectory(
@@ -846,13 +868,26 @@ class Window(QMainWindow):
         form.addRow("Ollama URL", self.ollama_url)
         form.addRow("Ollama model", self.ollama_model)
         self.pages["Settings"].addLayout(form)
+        self.note(
+            "Settings",
+            self.tr_label(
+                "Research backups include raw source, historical snapshots and the database. Keep the archive protected. Scanner binaries, caches and model weights are installed separately."
+            ),
+        )
         self.bar(
             "Settings",
             [
                 ("Save settings", self.save_settings),
                 ("System diagnostics", self.diagnostics),
                 ("Export diagnostics", self.export_diagnostics),
-                ("Backup database", self.backup),
+            ],
+        )
+        self.bar(
+            "Settings",
+            [
+                ("Backup research", self.backup),
+                ("Restore research", self.restore),
+                ("Open data directory", self.open_data_directory),
             ],
         )
         self.diagnostics_text = QPlainTextEdit()
@@ -931,13 +966,64 @@ class Window(QMainWindow):
 
     def backup(self) -> None:
         destination, _ = QFileDialog.getSaveFileName(
-            self, self.tr_label("Backup database"), "oberhau-backup.sqlite3", "SQLite (*.sqlite3)"
+            self,
+            self.tr_label("Backup research"),
+            "oberhau-backup.oberhau.zip",
+            "Oberhau research backup (*.oberhau.zip)",
         )
         if destination:
-            self.db.backup(Path(destination))
-            self.log_message(
-                f"Database backup: {destination}. Back up managed project snapshots separately."
+            self.start(
+                lambda cancel, progress: create_backup(
+                    self.db, self.engine.home, Path(destination), cancel, progress
+                ),
+                lambda result: self.log_message(json.dumps(result, ensure_ascii=False)),
             )
+
+    def restore(self) -> None:
+        source, _ = QFileDialog.getOpenFileName(
+            self, self.tr_label("Restore research"), "", "Oberhau research backup (*.oberhau.zip)"
+        )
+        if not source:
+            return
+        parent = QFileDialog.getExistingDirectory(
+            self, self.tr_label("Choose the parent folder for restoration")
+        )
+        if not parent:
+            return
+        name, accepted = QInputDialog.getText(
+            self,
+            self.tr_label("Restore research"),
+            self.tr_label("New data directory name"),
+            text="Oberhau-Restored",
+        )
+        if accepted and name.strip():
+            destination = confined(Path(parent), name.strip())
+            self.start(
+                lambda cancel, progress: restore_backup(
+                    Path(source), destination, cancel, progress
+                ),
+                lambda result: self.log_message(
+                    self.tr_label("Restored data directory")
+                    + ": "
+                    + result["restored"]
+                    + ". "
+                    + self.tr_label("Use Open data directory to view the restored research.")
+                ),
+            )
+
+    def open_data_directory(self) -> None:
+        if self.worker:
+            raise OberhauError("Wait for the current operation before switching data directories")
+        directory = QFileDialog.getExistingDirectory(self, self.tr_label("Open data directory"))
+        if directory:
+            path = Path(directory).resolve()
+            if path == self.engine.home:
+                return
+            if not (path / "oberhau.sqlite3").is_file():
+                raise OberhauError("Select an Oberhau data directory containing oberhau.sqlite3")
+            self.replacement = Window(Engine(path), first_run=False)
+            self.replacement.show()
+            self.close()
 
     def start(self, operation: Callable, completion: Callable | None = None) -> None:
         if self.worker is not None:

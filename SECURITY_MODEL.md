@@ -1,6 +1,6 @@
 # Security model
 
-Offline Research is the only project execution mode available in 0.2.0. There is no external active scanner,
+Offline Research is the only project execution mode available in 0.3.0. There is no external active scanner,
 credential validation, destructive test, report submission or arbitrary target execution feature.
 The policy validator rejects ambiguous scope, excludes hosts, requires exact lowercase hosts,
 reviewed revision, category/automation permission and explicit approval. It is preparatory logic,
@@ -44,7 +44,11 @@ truth. Human verification and false-positive decisions require notes. Local repr
 a passing validation record and is restricted to a checksum-matched bundled lab fixture.
 
 SQLite SQL values are parameterized. Reports escape HTML, and Markdown is edited/displayed as plain
-text. Backups validate SQLite integrity/schema and cannot overwrite existing destinations. All UI
+text. Complete research backups validate bounded ZIP paths, entry types, SHA-256/size inventory,
+foreign keys and the exact known SQLite schema; custom executable triggers/views/indexes are rejected.
+Restore relocates snapshots into a new data home, pauses schedules and requires explicit source
+relinking before refresh. Backups contain raw source and are not encrypted or signed. Legacy
+database-only backups do not relocate evidence. Existing destinations are not overwritten. All UI
 research tasks have auditable persisted results; rotating logs avoid unlimited growth. Scheduler
 jobs are offline and opt-in. Shutdown cancels workers and external process trees.
 

@@ -9,6 +9,59 @@ from oberhau.desktop.app import PAGES, Window, configure_fonts
 from oberhau.desktop.theme import THEME
 
 
+def wait_for_worker(app, window):
+    deadline = time.monotonic() + 30
+    # Allow the delayed startup diagnostics to run as well.
+    while time.monotonic() < deadline:
+        app.processEvents()
+        if window.worker is None and window.diagnostics_attempted:
+            return
+        time.sleep(0.01)
+    raise AssertionError("Qt background operation did not finish")
+
+
+def test_gui_research_backup_restore_and_open(engine, scanned, tmp_path, monkeypatch):
+    app = QApplication.instance() or QApplication([])
+    window = Window(engine, first_run=False)
+    window.show()
+    wait_for_worker(app, window)
+    target = tmp_path / "gui.oberhau.zip"
+    monkeypatch.setattr(
+        "oberhau.desktop.app.QFileDialog.getSaveFileName", lambda *a, **k: (str(target), "")
+    )
+    window.backup()
+    wait_for_worker(app, window)
+    assert target.is_file()
+    monkeypatch.setattr(
+        "oberhau.desktop.app.QFileDialog.getOpenFileName", lambda *a, **k: (str(target), "")
+    )
+    monkeypatch.setattr(
+        "oberhau.desktop.app.QFileDialog.getExistingDirectory", lambda *a, **k: str(tmp_path)
+    )
+    monkeypatch.setattr(
+        "oberhau.desktop.app.QInputDialog.getText", lambda *a, **k: ("gui-recovered", True)
+    )
+    window.restore()
+    wait_for_worker(app, window)
+    recovered = tmp_path / "gui-recovered"
+    assert (recovered / "oberhau.sqlite3").exists()
+    monkeypatch.setattr(
+        "oberhau.desktop.app.QFileDialog.getExistingDirectory", lambda *a, **k: str(recovered)
+    )
+    window.open_data_directory()
+    replacement = window.replacement
+    try:
+        wait_for_worker(app, replacement)
+        assert replacement.engine.home == recovered
+        assert replacement.findings_table.rowCount() == 6
+        assert replacement.engine.investigate(1)["source_unchanged"]
+        assert not window.isVisible()
+    finally:
+        replacement.close()
+        window.close()
+        app.processEvents()
+
+
 def test_native_ui_navigation_real_data_and_worker(engine, scanned):
     app = QApplication.instance() or QApplication([])
     configure_fonts()

@@ -18,12 +18,20 @@ Imports create snapshots under `projects/`. SHA-256 indexes establish provenance
 a new snapshot and swaps project metadata transactionally. Previous snapshots remain available
 for finding evidence. There is no automatic cache deletion or Git hook execution.
 
-Scans acquire an OS file lock per project, record their lifecycle, index the snapshot and submit
+Scans acquire an OS file lock for the data directory and per project, record their lifecycle, index the snapshot and submit
 scanner jobs to a bounded thread pool. The GUI owns a QThread for each user task and uses signals
 to update widgets. External tool subprocesses receive fixed arguments, sanitized environments,
 temporary working directories, deadlines, output limits and cancellation signals. Windows
 process-tree termination uses the system taskkill binary. A GUI permits one foreground research
-job at a time; scanner jobs within it can run concurrently. Cross-project fair queues are pending.
+job at a time; scanner jobs within it can run concurrently. Imports, refreshes, relinks and complete
+backups share the data-directory lock across threads/processes. Cross-project fair queues are pending.
+
+`backup.py` captures SQLite through its online backup API and streams every retained source snapshot
+into a versioned ZIP with per-file SHA-256/size metadata and directory inventory. Project roots and
+finding/observation snapshot references become relative in the bundle. Restore validates bounded
+archive contents and the exact canonical schema before rewriting references to a new data home,
+disabling schedules and requiring explicit source relinking. It publishes the staged directory only
+after verification. Database remapping uses bounded batches; optional binaries/caches are excluded.
 
 Fingerprints use project, explicit rule family, path and line. Only bundled Python dynamic-code
 and Semgrep eval rules have an established cross-engine equivalence. Arbitrary same-CWE findings

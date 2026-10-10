@@ -13,6 +13,7 @@ from threading import Event
 from oberhau.core import Cancelled, Limits, OberhauError, now
 from oberhau.database import Database
 from oberhau.security import ProcessRunner, confined
+from oberhau.storage import storage_operation
 
 EXCLUDED = {
     ".git",
@@ -105,6 +106,7 @@ class Ingestion:
         self.db, self.home, self.limits = db, home, limits
         (home / "projects").mkdir(parents=True, exist_ok=True)
 
+    @storage_operation
     def add(
         self,
         source: Path,
@@ -201,8 +203,11 @@ class Ingestion:
             raise OberhauError("Project does not exist")
         return rows[0]
 
+    @storage_operation
     def refresh(self, project_id: int, cancel: Event | None = None) -> None:
         project = self.project(project_id)
+        if json.loads(project["metadata"]).get("source_link_required"):
+            raise OberhauError("Restored source must be relinked explicitly before refreshing")
         source = Path(project["origin"])
         if source.suffix.lower() == ".zip" or not source.exists():
             raise OberhauError(
@@ -221,3 +226,26 @@ class Ingestion:
             )
         self.db.audit("project.refresh", {"id": project_id})
         # Old immutable snapshots remain for evidence and can be removed after retention review.
+
+    @storage_operation
+    def relink(self, project_id: int, source: Path) -> None:
+        project = self.project(project_id)
+        source = source.absolute()
+        if (
+            not source.exists()
+            or source.is_symlink()
+            or source.is_junction()
+            or source.suffix.lower() == ".zip"
+        ):
+            raise OberhauError(
+                "Relink to an existing local folder or source file without links; reimport ZIPs separately"
+            )
+        if source.is_dir() and self.home.resolve().is_relative_to(source.resolve()):
+            raise OberhauError("Source contains Oberhau storage")
+        metadata = json.loads(project["metadata"])
+        metadata["source_link_required"] = False
+        self.db.execute(
+            "UPDATE projects SET origin=?,metadata=? WHERE id=?",
+            (str(source), json.dumps(metadata), project_id),
+        )
+        self.db.audit("project.relink", {"id": project_id, "source": str(source)})

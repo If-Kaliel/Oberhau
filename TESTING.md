@@ -23,6 +23,13 @@ locks, cancellation, missing binaries, malformed output, path/ZIP boundaries, Ol
 secret redaction, transactional migration rollback, backup restore, offline schedules and a plugin.
 Parser fixtures for absent scanners are explicitly synthetic test inputs, never production results.
 
+Research backup tests restore to a different data home after making the original unavailable,
+including historical snapshots, notes/reports/laboratory records, empty directories and large
+observation history. They exercise byte corruption, unsafe ZIP members, edited SQLite schemas,
+foreign-key failures, missing inventory, cancellation, storage exclusion and destination races.
+The Qt recovery regression performs real backup/restore jobs and opens the recovered research;
+only its interactive file-picker choices are supplied by the test.
+
 The bundled Python fixture produces six warnings and the corrected control produces zero. These
 are regression expectations for intentionally small fixtures, not a measured field precision score.
 The local SQL replay records two vulnerable-query rows and zero parameterized-control rows.

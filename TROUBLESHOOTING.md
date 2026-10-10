@@ -33,5 +33,11 @@ running records are marked interrupted. Complete scanner observations already co
 **A finding disappeared:** absent warnings are not proof of remediation. Review the stored excerpt,
 refresh snapshots and document a corrected regression before manually marking Fixed.
 
-**Backup missing source:** database backups contain metadata and reports, not repository files.
-Copy the entire data directory when preserving evidentiary snapshots. See USER_GUIDE.md for recovery.
+**Backup missing source:** legacy CLI database-only backups omit snapshots. Use Settings' Backup
+research or CLI `backup FILE --complete` for portable evidence. See BACKUP.md for recovery.
+
+**Refresh asks for relinking:** restored projects retain the previous source path as provenance.
+Select the real source with Relink source folder/file, or `relink PROJECT SOURCE`, then refresh.
+
+**Data directory busy:** another scan, import or complete backup holds its storage lock. Wait for
+completion or request cancellation in that instance. Scanners inside a single scan still run in parallel.

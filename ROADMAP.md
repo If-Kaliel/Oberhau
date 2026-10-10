@@ -9,8 +9,9 @@ Next implementation order:
    advisory downloads, cache metadata, executable/rule/feed hashes and fixed-version evidence.
    Still pending: per-scanner run timing/status records even when zero warnings, Java index refresh,
    advisory-alias correlation, signed release verification and additional ecosystem caches.
-2. Harden file handling against Windows reparse/TOCTOU changes; trusted configurable executable
-   paths/checksums; OS memory/CPU limits; complete data-directory backup/recovery portability.
+2. Delivered in 0.3.0: portable database/current/historical snapshot backup, validated recovery to
+   a new data directory, relocated evidence and explicit source relinking. Still pending: hardened
+   Windows reparse/TOCTOU handling, trusted configurable executable paths/checksums and OS quotas.
 3. Git URL cloning with repository policy/provenance, safe clone/update and commit comparison;
    trusted rule management and expanded JS/TS/Next.js, Spring and ASP.NET profiles.
 4. Semantic finding fingerprints, confidence rationale, reachability/AST caller tracing,

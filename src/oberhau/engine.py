@@ -16,6 +16,7 @@ from oberhau.plugins import Registry
 from oberhau.scanners.builtin import BuiltinScanner
 from oberhau.scanners.external import ExternalScanner
 from oberhau.security import ProcessRunner, redact, redact_source
+from oberhau.storage import storage_operation, store_lock
 
 ASSETS = Path(__file__).parent / "assets"
 PROFILES = {
@@ -81,12 +82,14 @@ class Engine:
         home = home.resolve()
         self.home = home
         home.mkdir(parents=True, exist_ok=True)
-        self.db = Database(home / "oberhau.sqlite3")
-        self.limits = Limits.model_validate(self.db.setting("limits", {}))
-        self.ingestion = Ingestion(self.db, home, self.limits)
+        with store_lock(home):
+            self.db = Database(home / "oberhau.sqlite3")
+            self.limits = Limits.model_validate(self.db.setting("limits", {}))
+            self.ingestion = Ingestion(self.db, home, self.limits)
         self.registry = Registry()
         self.registry.register(BuiltinScanner())
 
+    @storage_operation
     def scan(
         self,
         project_id: int,

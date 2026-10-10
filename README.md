@@ -2,7 +2,7 @@
 
 **Security Research Workbench · Windows · local-first · no paid runtime services**
 
-Oberhau 0.2.0 is a working native desktop and CLI for authorized offline source research.
+Oberhau 0.3.0 is a working native desktop and CLI for authorized offline source research.
 Import a folder, source file or ZIP; scan a managed snapshot; investigate normalized warnings;
 record human decisions; reproduce the bundled SQL laboratory; generate and export review drafts.
 
@@ -30,6 +30,7 @@ Normal storage is `%LOCALAPPDATA%\Oberhau`; `OBERHAU_HOME` or `--home` changes i
 | Semgrep CE, explicit bundled rules | Real Windows execution verified with 1.180.0 |
 | Gitleaks / OSV v2 / Trivy | Real Windows fixture scans verified; explicit checksum-verified installation and public cache refresh |
 | Historical observations, conservative correlation, human reviews | Implemented; Python eval equivalence across bundled/Semgrep rules |
+| Portable research backup/recovery | SQLite plus current/historical source snapshots; checksums, new-directory restore and relocated evidence paths |
 | Source investigation | Redacted excerpt, checksum check, same-file related IDs, history, review questions |
 | Qwen JSON drafts | Local client, schema validation, bounded context and fallback implemented; live inference not verified |
 | Reports | Editable history, Markdown / escaped HTML / JSON / SARIF exports |
@@ -45,4 +46,4 @@ Static warnings never prove reachability, exploitability, novelty or bounty elig
 
 Documentation: [architecture](ARCHITECTURE.md), [user guide](USER_GUIDE.md), [scanners](SCANNERS.md),
 [Ollama](OLLAMA.md), [security](SECURITY_MODEL.md), [plugins](PLUGIN_DEVELOPMENT.md),
-[testing](TESTING.md), [troubleshooting](TROUBLESHOOTING.md), [changelog](CHANGELOG.md).
+[backup/recovery](BACKUP.md), [testing](TESTING.md), [troubleshooting](TROUBLESHOOTING.md), [changelog](CHANGELOG.md).

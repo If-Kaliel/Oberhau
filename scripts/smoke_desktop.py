@@ -51,6 +51,10 @@ def capture():
     window.inspect()
     app.processEvents()
     window.grab().save(str(target / "desktop-investigations.png"))
+    window.navigation.setCurrentRow(10)
+    window.resize(1060, 760)
+    app.processEvents()
+    window.grab().save(str(target / "desktop-settings.png"))
     window.close()
     app.quit()
 

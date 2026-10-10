@@ -35,4 +35,4 @@ jobs:
           New-Item -ItemType Directory -Force .oberhau | Out-Null
           python -m pytest -q --basetemp=.oberhau/ci-tests --cov=oberhau --cov-report=term-missing
       - name: Build distributable wheel
-        run: python -m pip wheel --no-deps --no-build-isolation . --wheel-dir artifacts
+        run: python -m pip wheel --no-deps . --wheel-dir artifacts

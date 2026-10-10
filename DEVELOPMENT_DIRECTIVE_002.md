@@ -1,11 +1,11 @@
 # OBERHAU — DIRETIVA DE DESENVOLVIMENTO 002
 ## Advanced Vulnerability Research & Autonomous Investigation
 
-**Repositório:** `If-Kaliel/Oberhau`  
-**Base conhecida:** Oberhau 0.4.0  
-**Ambiente:** Windows 11  
-**IA local:** Ollama + `qwen3.5:4b`  
-**Orçamento operacional:** R$ 0  
+**Repositório:** `If-Kaliel/Oberhau`
+**Base conhecida:** Oberhau 0.4.0
+**Ambiente:** Windows 11
+**IA local:** Ollama + `qwen3.5:4b`
+**Orçamento operacional:** R$ 0
 **Objetivo:** Evoluir o Oberhau de uma plataforma de análise estática e correlação de alertas para um ambiente sofisticado de investigação automatizada de vulnerabilidades.
 
 ---

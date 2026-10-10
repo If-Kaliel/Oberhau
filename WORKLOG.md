@@ -58,6 +58,22 @@ Final source verification:
 - Ruff lint/format, compileall and `git diff --check` passed. Final commands did not measure
   coverage; no new coverage percentage is claimed.
 
+Final distribution verification:
+
+- Final wheel: **119,284 bytes**, SHA-256
+  `07c8a99d089a5cde7c75e2e96ea9d973063a2447271b9e7e8ec2e9a823082673`.
+- Final frozen native GUI smoke **exit 0**; frozen contextual scan **completed**, one actual
+  provisional queue item, benchmark **12 cases / 6 expected signals / 0 FP / 0 FN**. All ran with
+  **Python absent from PATH**, **12.50 s** total. Native screenshot saved/inspected separately.
+- All **413 declared file hashes/sizes**, **three Qt source archives**, **five parser LICENSE files**
+  and ZIP CRC passed. Documentation was refreshed afterward without changing application code;
+  final ZIP SHA-256 is shipped separately to avoid a self-referential archive hash.
+- GUI EXE SHA-256: `4f219d7beca0fcf311a1037daf0c008d16a7f8ed8e86bb57e867e96a32e08015`;
+  CLI EXE: `c14cf22e8c90681fd0576a5f7f4f7ca0a1374d1afd4d5e95b9bbe0778b243ef8`.
+- Source commits: `36e359b` (research engine/CLI/evidence), `5e6bdcf` (desktop/coverage documentation).
+  Main remains `13f65bb6fbd31a36e3703e77b49adb8405aac605`. Development artifacts were generated
+  locally; no merge, release publication, active target test or report submission occurred.
+
 Failures and limitations found in actual execution:
 
 - Tree-sitter 0.25.2 Windows `progress_callback` parsing caused a native access violation. Replaced

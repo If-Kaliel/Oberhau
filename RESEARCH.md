@@ -1,6 +1,6 @@
 # Contextual research / Directive 002
 
-Development 0.5.0 adds a functional bounded research workflow to the 0.4.0 workbench. The entire
+Development 0.5.1 continues the bounded research workflow introduced in 0.5.0. The entire
 directive is not complete. Imported source remains data: parsing never loads its dependencies,
 starts applications, builds a project or executes its functions. Main retains the stable release.
 
@@ -28,21 +28,28 @@ accept `research` and run only while the desktop is open, enabled and idle.
 Tree-sitter uses pinned small MIT wheels for TypeScript/TSX, JavaScript/JSX, Java and C#. Python
 uses its standard AST. Syntax errors exclude a file and appear in coverage limitations. The
 Windows 0.25.2 callback parser crashed during verification; the supported native timeout API avoids
-that path. Cancellation is checked before/after each parse and throughout tree/call traversal.
+that path. Research and benchmarks now parse in a separate trusted worker process, including Python
+AST parsing. The parent enforces cancellation and a per-file wall deadline (10 s default, configurable
+1–60 s) while the worker performs syntax traversal. Crashes, invalid/oversized responses and timeouts
+fail the run; no partial contextual findings are published. Cached summaries can be reused without
+starting a worker. The private protocol accepts source bytes and identity, never commands or modules.
 
 | Profile | Implemented syntax coverage |
 |---|---|
-| Next.js / JS / TS | Exported App Router `route` handlers; exported functions in files beginning with `use server`; parameters/request-shaped access, assignments, direct calls, identity/validator/resource-filter candidates; middleware/proxy presence as unresolved counterevidence |
+| Next.js / JS / TS | Exported App Router `route` handlers; exported functions under a leading `use server` directive, allowing header comments; parameters/request-shaped access, assignments, direct calls, identity/validator/resource-filter candidates; middleware/proxy presence as unresolved counterevidence |
 | Spring / Java | Mapping annotations; class/method PreAuthorize/Secured/RolesAllowed; selected repository/JDBC operations, selected object-bound permission expressions and security-configuration call candidates |
 | ASP.NET / C# | Http method attributes; class/method Authorize and AllowAnonymous override; Map HTTP lambda handlers/chained RequireAuthorization; selected EF/file/process/HTTP calls and owner-filter candidates |
-| Python | Indexes top-level functions/sensitive calls; existing finding slices retain conditional assignment alternatives, sanitizer candidates and condition locations |
+| Python | Indexes top-level functions/sensitive calls, excluding bodies of nested functions/classes/lambdas; existing finding slices retain conditional assignment alternatives, sanitizer candidates and condition locations |
 
-Calls follow unique direct same-file JS functions and relative named JS imports/aliases, default
+Calls follow unique direct same-file JS functions and relative named/default/namespace JS imports,
+including export aliases and named/anonymous default functions. Cross-file targets must be indexed
+exports; private, ambiguous, type-only and re-export targets remain unresolved. Default
+exported wrappers do not imply their internal callbacks are exported call targets. Default
 depth four and 64 visits per endpoint. Parameter-position identifier dependencies propagate through
 those supported calls; constant arguments do not become request input because a helper parameter
 is named `id`. Assignments use a conservative dependency union: branch feasibility, reassignment
 kills, exception paths and runtime bindings are not solved. Java/C# service dispatch/DI,
-default/namespace imports and external dependencies remain unresolved and produce graph gaps.
+JS re-exports/package resolution and external dependencies remain unresolved and produce graph gaps.
 This is not general interprocedural taint analysis.
 
 Two rules open questions: identifier-bearing resource access without observed object controls;
@@ -103,14 +110,20 @@ passing a bundled recipe cannot confirm an imported finding. Docker is unnecessa
 One foreground desktop job and existing scanner/Qwen coordination remain. Research limits are
 configurable in Automation Control: defaults 5,000 symbols, 20,000 nodes, four edges per node budget,
 32 MB serialized index, depth four and 64 visits. These are structural/cooperative limits, not OS
-RAM/CPU quotas. Cache retention, native parser process isolation, fair queues, resumable checkpoints,
-OS quotas and optional GPU auto-pause remain pending.
+RAM/CPU quotas for the entire application. On Windows, parser workers join a private Job Object
+before source is sent: a configurable committed-memory ceiling (512 MiB default, 128–2048 MiB)
+and kill-on-job-close cleanup apply to the worker. Attachment failure fails the run. This is not
+a filesystem/network/token sandbox; startup before job attachment and parent graph/SQLite work
+remain outside that memory ceiling. Other platforms retain worker/deadline isolation without this
+Windows quota. Cache retention, fair queues, resumable checkpoints, global CPU/RAM/disk quotas
+and optional GPU auto-pause remain pending.
 
 The separate benchmark has 12 original MIT synthetic code cases: six expected signals and six
 negative controls, distinct from development regression strings. It was first executed after initial
 analyzer tests; no blinded or external independent curation is claimed. Dataset SHA-256 identifies
 evaluations. Reports retain expected/detected/missed signals, false positives, precision, recall,
-time, Python allocation peak and Windows process memory with scope caveats. This small dataset is
+time, parent Python allocation/Windows working set and parser Job Object peak committed memory,
+with distinct scope caveats. This small dataset is
 not representative; no zero-day/production detection claim follows. An external licensed corpus is pending.
 
 | Directive criteria | Demonstrated subset / limitations |

@@ -23,7 +23,7 @@ a.binaries = [entry for entry in a.binaries
 pyz = PYZ(a.pure)
 hooks = a.scripts[:-2]
 gui = EXE(pyz, hooks + a.scripts[-2:-1], [], exclude_binaries=True,
-          name='Oberhau', console=False, upx=False)
+          name='Oberhau', console=False, upx=False, icon=str(root / 'build/emblem.ico'))
 cli = EXE(pyz, hooks + a.scripts[-1:], [], exclude_binaries=True,
-          name='oberhau-cli', console=True, upx=False)
+          name='oberhau-cli', console=True, upx=False, icon=str(root / 'build/emblem.ico'))
 collect = COLLECT(gui, cli, a.binaries, a.datas, name='Oberhau', upx=False)

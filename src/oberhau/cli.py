@@ -228,7 +228,7 @@ def main(argv: list[str] | None = None) -> int:
             output = {"relinked": args.project, "source": str(args.source)}
         elif args.command == "scan":
             scan_id = engine.scan(
-                args.project, args.profile, cancel, lambda message: print(message)
+                args.project, args.profile, cancel, lambda message: print(message, file=sys.stderr)
             )
             output = db.query("SELECT * FROM scans WHERE id=?", (scan_id,))[0]
             print(json.dumps(output, indent=2, ensure_ascii=False))

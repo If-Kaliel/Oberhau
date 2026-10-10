@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.1 — parser hardening and recognizable brand
+
+- Black minimalist skull with descending sword; vector sidebar/window icon and generated Windows EXE icons.
+- One isolated parser worker per research/benchmark job, private bounded JSON, cancellable pipe transport and enforced per-file deadline.
+- Windows Job Object committed-memory ceiling (512 MiB default), peak measurement and worker cleanup on parent exit. Failure to attach the Windows quota fails the run.
+- Relative JS/TS named/default/namespace imports follow only unique indexed exports, including aliases and anonymous default functions; ambiguous, private, type-only and re-export targets remain gaps.
+- Server Action directives after comments are recognized; nested Python function/class/lambda calls are excluded from outer-function observations.
+- Recorded analyzer versions preserve historical symbol queries; index version advances to contextual-2. Existing schema 4 and reviews remain compatible.
+- Backup restoration retries brief Windows directory-access/sharing contention, remains cancellable and rechecks that the destination is new on every attempt.
+- CLI scan progress uses stderr, leaving stdout as one parseable JSON scan record.
+- Evidence graph entry points distinguish function/class identity even when routes share a source line.
+
+The parser process is not a filesystem/network/privilege sandbox. Whole-application CPU/RAM/disk
+quotas, retention, Java/C# DI resolution and broader independent evaluation remain pending.
+
 ## 0.5.0 — contextual research development on testes
 
 Schema 4 evidence graphs and syntax caches; selected Next.js/Spring/ASP.NET profiles; provisional

@@ -130,6 +130,9 @@ def main():
         raise RuntimeError("Release build requires Windows x64")
     bundle = ROOT / "dist/Oberhau"
     if not args.skip_freeze:
+        from render_brand import windows_icon
+
+        windows_icon(ROOT / "build/emblem.ico")
         environment = os.environ.copy()
         environment["PATH"] = os.pathsep.join(
             [

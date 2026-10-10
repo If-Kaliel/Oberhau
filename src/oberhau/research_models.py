@@ -15,6 +15,8 @@ class ResearchLimits(BaseModel):
     max_depth: int = Field(default=4, ge=1, le=8)
     max_visits: int = Field(default=64, ge=1, le=256)
     max_index_bytes: int = Field(default=32_000_000, ge=1000, le=100_000_000)
+    parser_timeout_seconds: int = Field(default=10, ge=1, le=60)
+    parser_memory_mib: int = Field(default=512, ge=128, le=2048)
 
 
 class EvidenceNode(BaseModel):
@@ -124,6 +126,7 @@ class FileSummary(BaseModel):
     parser: str
     symbols: list[Symbol] = Field(default_factory=list)
     imports: dict[str, dict] = Field(default_factory=dict)
+    exports: dict[str, str] = Field(default_factory=dict)
     ambient_controls: list[dict] = Field(default_factory=list)
     limitations: list[str] = Field(default_factory=list)
 

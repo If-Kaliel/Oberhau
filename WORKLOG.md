@@ -1,5 +1,74 @@
 # Worklog — 2026-10-10
 
+## 0.5.1 — recognizable brand and unfinished foundation hardening
+
+User requested a recognizable minimal black cyberpunk skull with a descending sword, then further
+development/validation with priority to unfinished work. Kept `testes` and main's stable commit.
+Redrew the existing SVG with a cranium, broad sockets, nasal cavity, teeth and restrained temple
+cuts; checked 32/48/96 px renderings against dark/light backgrounds. Windows EXE icons now derive
+from that same vector rather than retaining PyInstaller's default artwork.
+
+Closed the native-parser fault-isolation gap: a reusable private worker per research/benchmark
+job, bounded source/summary JSON, interruptible transport even during a blocked large pipe write,
+per-file parent-enforced deadline, crash/invalid-response failure and deterministic cleanup.
+Windows workers join a committed-memory-limited Job Object before source is sent (512 MiB default,
+configurable 128–2048 MiB) with kill-on-job-close behavior. Actual allocation-denial test passed.
+This is worker fault/resource isolation, not a filesystem/network/token sandbox or an application-wide
+RAM/CPU/GPU quota. Benchmarks distinguish parent allocations/working set from worker commit peak.
+
+Closed default/namespace JS import gaps for unique indexed exports, export aliases and anonymous
+default functions. Private, ambiguous, shadowed, type-only, re-export and constant-input negative
+controls remain conservative. Server Action directives allow header comments. Nested Python
+function/class/lambda bodies no longer appear as calls by the outer function. Analyzer version
+advances to contextual-2; historical symbol queries use their recorded version, preserving old runs.
+
+Verification before final release QA:
+
+- Existing contextual/assistant baseline: 27 passed, 6.29 s.
+- New isolation/contextual/GUI subset: 30 passed, 15.39 s; expanded import/assistant subset:
+  55 passed, 42.88 s. Separate actual Windows memory/assistant targets: 25 passed, 22.66 s.
+- Initial full run: 238 passed, 2 failed, 6 optional skips, 217.41 s. Both failures were WinError 5
+  at the final verified-backup directory rename, while the build was running. The same two tests
+  passed alone (11.07 s); the origin of the interfering handle was not established.
+- Added bounded cancellable retries only for Windows access/sharing errors, rechecking a new
+  destination on every attempt. Regression tests cover successful retry, a competing destination
+  and cancellation. Backup/parser/assistant targets: 62 passed, 84.32 s.
+- Ruff lint/format, compileall and diff whitespace checks pass. Full final suite and frozen native
+  QA are recorded below after completion. The 12-case benchmark data/labels are unchanged.
+
+The broader Directive 002 is still partial: Java/C# DI/service binding, global/branch/identity
+semantics, retention, unattended refresh/AI/lab pipeline and externally curated evaluation remain
+documented in RESEARCH.md and ROADMAP.md. No imported application is executed or finding confirmed
+by a bundled laboratory, and no release is published/merged automatically.
+
+Final 0.5.1 verification:
+
+- Final full suite, including CLI JSON output and same-line endpoint identity: **247 passed,
+  6 optional skips, 157.40 s**. JUnit: `artifacts/oberhau-051-tests-complete.xml`.
+- Final graph/assistant/native GUI subset: **48 passed, 38.51 s**; separate CLI/assistant checks:
+  **20 passed, 47.60 s**. Counts refer to separate runs and are not added together.
+- Source native Research capture completed with both trusted HTTP labs passing and deterministic
+  assistance. Reviewed 32/48/96 px brand renderings and real source/frozen Research screenshots.
+- `scripts/verify_windows.py` completed in **16.61 s**, with PATH restricted to System32 and no
+  PYTHONHOME/PYTHONPATH: frozen default-import research completed, 2 files parsed/1 hypothesis;
+  wrapped callback 0 signals; named function expression 1; same-line routes 2 distinct entries;
+  deterministic assistant, unchanged 12-case benchmark, both HTTP recipes and portable backup/
+  restore passed. Native baseline GUI had 6 demonstration findings; frozen Research completed
+  with enforced worker memory ceiling. This milestone did not rerun live Qwen inference.
+- The first QA driver reached cleanup with a SQLite connection still open: its inspection
+  connections now use explicit `closing`; the repeated native verification completed and cleaned
+  its owned data. This was a QA-driver handle, not a parser/app failure.
+- Dataset identity remains `36787d3b9694b089ed6f3a806aeda6e9c2b5e3d0c7bc145d8c66d02d72a7ecb6`;
+  6 TP/0 FP/0 FN are observations only on those 12 synthetic cases. Source native benchmark
+  took 1.266 s with worker peak committed memory 20,230,144 bytes. Frozen research worker peak:
+  29,544,448 bytes, under its 536,870,912-byte committed-memory ceiling.
+- Final wheel `oberhau-0.5.1-py3-none-any.whl`: **125,896 bytes**, SHA-256
+  `75adfe6b062af1b3de6aa2d4d2ef6280be1c6934dab8f0e68bd1e310c98cb86b`.
+  ZIP CRC and packaged parser/CLI/framework bytes match current source.
+- Final lint, formatting (69 Python files), compileall and diff whitespace checks pass. The
+  final Windows ZIP is refreshed with these documents, retaining the tested EXE hashes; its
+  actual checksum is in the `.zip.sha256` sidecar, with per-file hashes in `MANIFEST.json`.
+
 ## Directive 002 / 0.5.0 contextual research — 2026-10-10
 
 Inspected clean branch `testes` at `13f65bb`, read architecture/security/testing/roadmap/history and

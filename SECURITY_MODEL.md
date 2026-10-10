@@ -1,7 +1,14 @@
 # Security model
 
-0.5.0 research stays offline. Tree-sitter/Python AST parse imported source as data; native parsers
-are trusted and not process-sandboxed. Structural deadlines/budgets do not enforce OS RSS quotas.
+0.5.1 research stays offline. Tree-sitter/Python AST parse imported source as data in a separate
+killable worker. Per-file wall deadlines, cancellation and bounded JSON are parent-enforced.
+On Windows the worker joins a private Job Object before receiving source, with committed-memory
+ceiling and kill-on-close cleanup. The ceiling covers committed virtual memory, not RSS, GPU or
+the parent application; startup precedes attachment. Failure to apply it fails the run. This uses
+the documented [Windows job memory limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information)
+and [process assignment semantics](https://learn.microsoft.com/en-us/windows/win32/api/jobapi2/nf-jobapi2-assignprocesstojobobject).
+Workers retain the user's filesystem/network privileges: process fault isolation is not an OS
+security sandbox against a compromised parser. Non-Windows workers have no equivalent memory quota.
 Paths are syntax observations and absent controls remain hypotheses. Typed AI queries permit
 bounded reads by recorded evidence ID with excerpt hashes and consulted-citation checks; schema
 does not prove prose truth. AI cannot execute commands, refresh networks or change findings.

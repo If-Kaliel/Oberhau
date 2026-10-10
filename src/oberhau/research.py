@@ -11,13 +11,14 @@ from pathlib import PurePosixPath
 from threading import Event
 
 from oberhau.core import Cancelled, Finding, OberhauError, Status, now
-from oberhau.framework_analysis import EXTENSIONS, PARSER_VERSION, checkpoint, parse_file
+from oberhau.framework_analysis import EXTENSIONS, PARSER_VERSION, checkpoint
+from oberhau.parser_isolation import ParserSession
 from oberhau.research_models import FileSummary, GraphBuilder, Hypothesis, ResearchLimits
 from oberhau.security import confined, sanitize
 
 LIMITATIONS = [
     "Syntax observations do not prove runtime bindings, dominance, reachability or attacker control",
-    "Only unique same-file direct calls and relative named JavaScript imports are followed",
+    "Only unique same-file direct calls and relative named/default/namespace JavaScript imports to indexed exports are followed",
     "Dynamic dispatch, dependency implementations and Java/C# service receiver bindings are unresolved",
     "Global middleware, filters, inherited policies and infrastructure may supply additional protections",
     "Absence of visible controls is a research question, never a vulnerability verdict",
@@ -32,13 +33,18 @@ CONFIRMATION = [
 
 def resolve_call(symbol, call, files, by_name):
     name = call["name"]
-    if name in symbol.parameters or any(
-        t["target"] == name and t["line"] <= call["line"] for t in symbol.transformations
+    root_name = name.split(".")[0]
+    if root_name in symbol.parameters or any(
+        t["target"] == root_name and t["line"] <= call["line"] for t in symbol.transformations
     ):
         return None
-    if re.fullmatch(r"[A-Za-z_]\w*", name):
-        imported = files[symbol.path].imports.get(name)
+    if re.fullmatch(r"[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)?", name):
+        imported = files[symbol.path].imports.get(root_name)
         if imported and imported["module"].startswith("."):
+            namespace = imported["name"] == "*"
+            if ("." in name) != namespace:
+                return None
+            export_name = name.split(".")[-1] if namespace else imported["name"]
             base = posixpath.normpath(
                 posixpath.join(posixpath.dirname(symbol.path), imported["module"])
             )
@@ -48,8 +54,16 @@ def resolve_call(symbol, call, files, by_name):
                 base + "/index.ts",
                 base + "/index.js",
             ]
-            matches = [s for s in by_name.get(imported["name"], []) if s.path in candidates]
+            matches = [
+                s
+                for candidate in candidates
+                if candidate in files
+                for s in by_name.get(files[candidate].exports.get(export_name, ""), [])
+                if s.path == candidate and not s.owner
+            ]
         else:
+            if imported or "." in name:
+                return None
             matches = [s for s in by_name.get(name, []) if s.path == symbol.path and not s.owner]
         return matches[0] if len(matches) == 1 else None
     return None
@@ -87,14 +101,15 @@ def analyze(
             graph.link(file_id, cid, "possible-external-protection")
     for symbol in symbols:
         by_name.setdefault(symbol.name, []).append(symbol)
+        qualified = f"{symbol.owner}.{symbol.name}" if symbol.owner else symbol.name
         sid = graph.add(
             "endpoint" if symbol.endpoint else "function",
-            symbol.endpoint or symbol.name,
+            f"{symbol.endpoint} | {qualified}" if symbol.endpoint else qualified,
             symbol.path,
             symbol.line,
             files[symbol.path].sha256,
         )
-        symbol_ids[(symbol.path, symbol.line)] = sid
+        symbol_ids[(symbol.path, symbol.line, symbol.name, symbol.owner)] = sid
         graph.link(file_ids[symbol.path], sid, "defines")
     paths = []
     for endpoint in [s for s in symbols if s.endpoint]:
@@ -105,7 +120,7 @@ def analyze(
             nonlocal visited
             checkpoint(cancel, deadline)
             visited += 1
-            sid = symbol_ids[(symbol.path, symbol.line)]
+            sid = symbol_ids[(symbol.path, symbol.line, symbol.name, symbol.owner)]
             if visited > limits.max_visits or depth > limits.max_depth or sid in stack:
                 gap = graph.add(
                     "gap",
@@ -191,7 +206,7 @@ def analyze(
                     )
                 target = resolve_call(symbol, call, files, by_name)
                 if target:
-                    tid = symbol_ids[(target.path, target.line)]
+                    tid = symbol_ids[(target.path, target.line, target.name, target.owner)]
                     graph.link(sid, tid, "unique-syntactic-call-target")
                     arguments = call.get("argument_identifiers", [])
                     bound = {
@@ -213,7 +228,7 @@ def analyze(
 
         visit(
             endpoint,
-            [symbol_ids[(endpoint.path, endpoint.line)]],
+            [symbol_ids[(endpoint.path, endpoint.line, endpoint.name, endpoint.owner)]],
             [],
             (),
             0,
@@ -392,6 +407,9 @@ def run_research(
         (scan_id, now()),
     )
     parsed, reused, size = 0, 0, 0
+    parser = ParserSession(
+        cancel, deadline, limits.parser_timeout_seconds, limits.parser_memory_mib
+    )
     try:
         files = {}
         for path, digest in manifest.items():
@@ -414,7 +432,7 @@ def run_research(
                 reused += 1
             else:
                 progress("Contextual indexing: " + path)
-                summary = parse_file(path, digest, content, cancel, deadline)
+                summary = parser.parse(path, digest, content)
                 # Cache contains redacted observations, no executable trees or raw source.
                 summary = FileSummary.model_validate(sanitize(summary.model_dump()))
                 parsed += 1
@@ -426,6 +444,8 @@ def run_research(
             if size > limits.max_index_bytes:
                 raise OberhauError("Research serialized index budget exceeded")
             files[path] = summary
+        parser_memory = parser.memory_metrics()
+        parser.close()
         result = analyze(
             files, limits, cancel, deadline, str(project["id"]), metadata.get("commit", "")
         )
@@ -434,6 +454,9 @@ def run_research(
             "reused": reused,
             "bytes": size,
             "version": PARSER_VERSION,
+            "parser_isolation": "separate process; bounded JSON; no imported-code execution",
+            "parser_timeout_seconds": limits.parser_timeout_seconds,
+            "parser_memory": parser_memory,
         }
         result["coverage"] = {
             path: {"parser": file.parser, "limitations": file.limitations}
@@ -566,6 +589,8 @@ def run_research(
             (status, now(), errors, scanner_id),
         )
         raise
+    finally:
+        parser.close()
 
 
 def research_queue(db, project_id: int | None = None) -> list[dict]:

@@ -16,7 +16,7 @@ from oberhau.core import Cancelled, OberhauError
 from oberhau.research_models import FileSummary, Symbol
 from oberhau.security import redact_source
 
-PARSER_VERSION = "contextual-1"
+PARSER_VERSION = "contextual-2"
 EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".java", ".cs", ".py"}
 FUNCTIONS = {
     "function_declaration",
@@ -130,7 +130,7 @@ def parse_file(
 ) -> FileSummary:
     checkpoint(cancel, deadline)
     if PurePosixPath(path).suffix == ".py":
-        return parse_python(path, digest, content)
+        return parse_python(path, digest, content, cancel, deadline)
     import tree_sitter_c_sharp
     import tree_sitter_java
     import tree_sitter_javascript
@@ -208,14 +208,60 @@ def parse_file(
         # Never manufacture complete paths through error-recovered syntax.
         result.limitations.append("Syntax errors: file excluded from contextual paths")
         return result
+    server_actions = False
+    for statement in tree.root_node.named_children:
+        if statement.type == "comment":
+            continue
+        if (
+            statement.type != "expression_statement"
+            or not statement.named_children
+            or statement.named_children[0].type != "string"
+        ):
+            break
+        if text(statement.named_children[0]) in {"'use server'", '"use server"'}:
+            server_actions = True
     for node in nodes:
         if node.type == "import_statement":
+            if any(c.type == "type" for c in node.children):
+                continue
             source = text(node.child_by_field_name("source")).strip("\"'")
             for item in walk(node, cancel, deadline):
                 if item.type == "import_specifier":
+                    if any(c.type == "type" for c in item.children):
+                        continue
                     name = text(item.child_by_field_name("name"))
                     alias = text(item.child_by_field_name("alias")) or name
                     result.imports[alias] = {"module": source, "name": name}
+                elif item.type == "namespace_import":
+                    alias = next(
+                        (text(c) for c in item.named_children if c.type == "identifier"), ""
+                    )
+                    if alias:
+                        result.imports[alias] = {"module": source, "name": "*"}
+                elif item.type == "identifier" and item.parent.type == "import_clause":
+                    result.imports[text(item)] = {"module": source, "name": "default"}
+        if node.type == "export_statement":
+            if any(c.type == "type" for c in node.children):
+                continue
+            if node.child_by_field_name("source") is not None:
+                result.limitations.append("JavaScript re-exports are unresolved")
+                continue
+            value = node.child_by_field_name("value")
+            if (
+                value
+                and value.type == "identifier"
+                and any(c.type == "default" for c in node.children)
+            ):
+                result.exports["default"] = text(value)
+            for item in node.named_children:
+                if item.type == "export_clause":
+                    for specifier in item.named_children:
+                        if any(c.type == "type" for c in specifier.children):
+                            continue
+                        name = text(specifier.child_by_field_name("name"))
+                        alias = text(specifier.child_by_field_name("alias")) or name
+                        if name:
+                            result.exports[alias] = name
         if node.type in CALLS:
             name = call_name(node)
             if name.endswith(
@@ -253,8 +299,29 @@ def parse_file(
         if body is None:
             continue
         name = text(node.child_by_field_name("name"))
-        if not name and node.parent.type == "variable_declarator":
-            name = text(node.parent.child_by_field_name("name"))
+        variable = node.parent if node.parent.type == "variable_declarator" else None
+        if variable and variable.child_by_field_name("value") == node:
+            binding = variable.child_by_field_name("name")
+            name = text(binding) if binding and binding.type == "identifier" else ""
+        export_node = next((p for p in parents if p.type == "export_statement"), None)
+        direct_export = export_node is not None and (
+            node == export_node.child_by_field_name("declaration")
+            or node == export_node.child_by_field_name("value")
+            or variable is not None
+            and variable.parent == export_node.child_by_field_name("declaration")
+        )
+        default_export = direct_export and any(c.type == "default" for c in export_node.children)
+        if (
+            framework == "next-node"
+            and node.type in {"arrow_function", "function_expression"}
+            and variable is None
+            and not direct_export
+        ):
+            # A callback passed to an exported wrapper is not itself the exported
+            # function. Its binding/authorization behavior remains unresolved.
+            continue
+        if not name and default_export and framework == "next-node":
+            name = f"default@{node.start_point.row + 1}"
         owner_node = next((p for p in parents if p.type == "class_declaration"), None)
         owner = text(owner_node.child_by_field_name("name")) if owner_node else ""
         parameters = node.child_by_field_name("parameters")
@@ -287,14 +354,16 @@ def parse_file(
         }
         own_names = {text(item.child_by_field_name("name")).split(".")[-1] for item in own_metadata}
         endpoint = ""
-        exported = any(p.type == "export_statement" for p in parents)
+        if framework == "next-node" and direct_export and not owner and name:
+            result.exports["default" if default_export else name] = name
+        exported = name in result.exports.values() if framework == "next-node" else False
         if framework == "next-node" and exported:
             if (
                 name in {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
                 and PurePosixPath(path).stem == "route"
             ):
                 endpoint = f"{name} {PurePosixPath(path).parent}"
-            elif re.match(r"\s*['\"]use server['\"]", content.decode("utf-8", errors="replace")):
+            elif server_actions:
                 endpoint = f"Server Action {name}"
         elif framework == "spring":
             routes = [
@@ -524,7 +593,9 @@ def parse_file(
     return result
 
 
-def parse_python(path: str, digest: str, content: bytes) -> FileSummary:
+def parse_python(
+    path: str, digest: str, content: bytes, cancel: Event, deadline: float
+) -> FileSummary:
     from oberhau.python_analysis import name_of
 
     result = FileSummary(path=path, sha256=digest, parser="python:ast")
@@ -547,7 +618,18 @@ def parse_python(path: str, digest: str, content: bytes) -> FileSummary:
                 a.arg for a in [*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs]
             ],
         )
-        for item in ast.walk(node):
+        stack = list(reversed(node.body))
+        visited = 0
+        while stack:
+            item = stack.pop()
+            visited += 1
+            if visited % 128 == 0:
+                checkpoint(cancel, deadline)
+            if visited > 200000:
+                raise OberhauError("Python file syntax node budget exceeded")
+            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                continue
+            stack.extend(reversed(list(ast.iter_child_nodes(item))))
             if isinstance(item, ast.Call):
                 name = name_of(item.func)
                 symbol.calls.append(

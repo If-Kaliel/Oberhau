@@ -93,6 +93,122 @@ def test_relative_alias_calls_keep_intermediate_evidence_and_gaps():
     } == {"service.ts", "app/users/route.ts"}
 
 
+@pytest.mark.parametrize(
+    "import_line,call,service",
+    [
+        (
+            'import read from "../../service";',
+            "read(params.id)",
+            "export default function lookup(id: string) { return db.user.findUnique({where:{id}}); }",
+        ),
+        (
+            'import * as api from "../../service";',
+            "api.read(params.id)",
+            "function lookup(id: string) { return db.user.findUnique({where:{id}}); } export {lookup as read};",
+        ),
+        (
+            'import read from "../../service";',
+            "read(params.id)",
+            "const lookup = (id:string) => db.user.findUnique({where:{id}}); export default lookup;",
+        ),
+        (
+            'import read from "../../service";',
+            "read(params.id)",
+            "export default (id:string) => db.user.findUnique({where:{id}});",
+        ),
+    ],
+)
+def test_default_namespace_and_export_alias_paths_preserve_both_files(import_line, call, service):
+    result = analysis(
+        {
+            "app/users/route.ts": f"{import_line} export function GET(req: Request, params: any) {{ return {call}; }}",
+            "service.ts": service,
+        }
+    )
+    hypothesis = result["hypotheses"][0]
+    assert len(hypothesis["execution_path"]) == 3
+    assert {
+        n["path"] for n in result["graph"]["nodes"] if n["id"] in hypothesis["evidence_ids"]
+    } == {"service.ts", "app/users/route.ts"}
+
+
+@pytest.mark.parametrize(
+    "case", ["private", "ambiguous", "shadowed", "reexport", "type-only", "constant"]
+)
+def test_import_resolution_does_not_invent_executable_paths(case):
+    sources = {
+        "app/users/route.ts": 'import * as api from "../../service"; export function GET(req: Request, params: any) { return api.lookup(params.id); }',
+        "service.ts": "export function lookup(id: string) { return db.user.findUnique({where:{id}}); }",
+    }
+    if case == "private":
+        sources["service.ts"] = sources["service.ts"].replace("export ", "")
+    elif case == "ambiguous":
+        sources["service.js"] = (
+            "export function lookup(id) { return db.user.findUnique({where:{id}}); }"
+        )
+    elif case == "shadowed":
+        sources["app/users/route.ts"] = sources["app/users/route.ts"].replace(
+            "params: any", "api: any"
+        )
+    elif case == "reexport":
+        sources["other.ts"] = sources["service.ts"]
+        sources["service.ts"] = 'export {lookup} from "./other";'
+    elif case == "type-only":
+        sources["app/users/route.ts"] = sources["app/users/route.ts"].replace(
+            "import *", "import type *"
+        )
+    elif case == "constant":
+        sources["app/users/route.ts"] = sources["app/users/route.ts"].replace(
+            "params.id", '"constant-id"'
+        )
+    result = analysis(sources)
+    assert not result["hypotheses"]
+    if case != "constant":
+        assert any(
+            n["kind"] == "gap" and "api.lookup" in n["label"] for n in result["graph"]["nodes"]
+        )
+
+
+def test_server_action_directive_after_comments_and_alias_export():
+    result = analysis(
+        {
+            "action.ts": '// trusted header\n"use server"; function load(id:string) { return db.user.findUnique({where:{id}}); } export {load as read};'
+        }
+    )
+    assert result["endpoints"] == 1
+    assert result["hypotheses"][0]["endpoint"] == "Server Action load"
+    assert not analysis(
+        {
+            "action.ts": 'const mode = "use server"; export function load(id:string) { return db.user.findUnique({where:{id}}); }'
+        }
+    )["endpoints"]
+
+
+def test_default_wrapper_callbacks_are_not_exported_and_named_expressions_use_the_variable_binding():
+    sources = {
+        "app/users/route.ts": 'import read from "../../service"; export function GET(req: Request, params: any) { return read(params.id); }',
+        "service.ts": "export default withAuth(function internal(id:string) { return db.user.findUnique({where:{id}}); });",
+    }
+    result = analysis(sources)
+    assert not result["hypotheses"]
+    assert any(n["kind"] == "gap" and "read" in n["label"] for n in result["graph"]["nodes"])
+    sources["service.ts"] = (
+        "export const lookup = function internal(id:string) { return db.user.findUnique({where:{id}}); }; export default lookup;"
+    )
+    assert len(analysis(sources)["hypotheses"]) == 1
+
+
+def test_python_nested_functions_classes_and_lambdas_are_not_outer_calls():
+    summary = parse_file(
+        "nested.py",
+        "a" * 64,
+        b"def outer(value):\n def inner():\n  eval(value)\n class Local:\n  def method(self):\n   exec(value)\n deferred = lambda: open(value)\n print(value)\n",
+        Event(),
+        time.monotonic() + 5,
+    )
+    assert [call["name"] for call in summary.symbols[0].calls] == ["print"]
+
+
 def test_inconsistent_route_policy_compares_same_operation_not_arbitrary_endpoints():
     result = analysis(
         {
@@ -126,6 +242,22 @@ def test_minimal_api_authorization_is_indexed():
     endpoint = next(n for n in result["graph"]["nodes"] if n["kind"] == "endpoint")
     assert "MapGet" in endpoint["label"]
     assert any(n["kind"] == "control" for n in result["graph"]["nodes"])
+
+
+def test_multiple_routes_on_one_line_keep_distinct_execution_endpoint_nodes():
+    result = analysis(
+        {
+            "app/users/route.ts": "export function GET(req: Request, params: any) { return db.user.findUnique({where:{id:params.id}}); } export function POST(req: Request, params: any) { return db.user.findUnique({where:{id:params.id}}); }"
+        }
+    )
+    nodes = {node["id"]: node for node in result["graph"]["nodes"]}
+    assert len(result["hypotheses"]) == 2
+    for hypothesis in result["hypotheses"]:
+        entry = nodes[hypothesis["execution_path"][0]]
+        assert entry["kind"] == "endpoint" and entry["label"].startswith(
+            hypothesis["endpoint"] + " | "
+        )
+    assert len({h["execution_path"][0] for h in result["hypotheses"]}) == 2
 
 
 def test_real_pipeline_cache_history_review_and_portable_graph(engine, tmp_path):

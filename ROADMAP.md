@@ -1,12 +1,12 @@
 # Roadmap against the master specification
 
-Directive 002 on `testes` reaches 0.5.0: selected framework syntax profiles, evidence graph,
+Directive 002 on `testes` reaches 0.5.1: selected framework syntax profiles, evidence graph,
 provisional authorization research, direct-call dependencies, queue, typed Qwen/fallback, retained
 security deltas, two HTTP labs, a 12-case evaluation and a backend-connected Research page.
 [RESEARCH.md](RESEARCH.md) records exact subsets and acceptance status. Broad capabilities below
 remain pending; general automatic auth/IDOR detection is broader than the narrow new review signals.
 Next: Java/C# service/DI bindings, global policy applicability, stronger identity/filter/branch analysis,
-externally curated evaluation, native parser isolation, cache retention, OS quotas, checkpoints,
+externally curated evaluation, cache retention, global OS quotas, checkpoints,
 optional source monitoring and notifications. No active target executor/disclosure was introduced.
 
 Version 0.4.0 delivers a usable native workbench for authorized source research. The roadmap

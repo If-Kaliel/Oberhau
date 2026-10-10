@@ -106,6 +106,8 @@ class ResearchPage(QWidget):
             ("max_depth", 1, 8),
             ("max_visits", 1, 256),
             ("max_index_bytes", 1000, 100000000),
+            ("parser_timeout_seconds", 1, 60),
+            ("parser_memory_mib", 128, 2048),
         ]:
             spin = QSpinBox()
             spin.setRange(minimum, maximum)
@@ -182,7 +184,7 @@ class ResearchPage(QWidget):
                 "scanner_limits": self.engine.limits.model_dump(),
                 "research_limits": self.engine.db.setting("research_limits", {}),
                 "schedules_enabled": self.engine.db.setting("schedules_enabled", False),
-                "limits_note": "Index/graph budgets and deadlines are cooperative; OS memory quotas and GPU auto-pause are pending",
+                "limits_note": "Parser runs in a separate process with a per-file deadline and a Windows committed-memory ceiling. Parent graph budgets are cooperative; global CPU/RAM quotas and GPU auto-pause are pending",
             },
         )
 

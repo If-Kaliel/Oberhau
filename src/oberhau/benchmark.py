@@ -9,7 +9,8 @@ import tracemalloc
 from pathlib import Path
 from threading import Event, Lock
 
-from oberhau.framework_analysis import checkpoint, parse_file
+from oberhau.framework_analysis import checkpoint
+from oberhau.parser_isolation import ParserSession
 from oberhau.research import analyze
 from oberhau.research_models import ResearchLimits
 from oberhau.resources import process_memory
@@ -25,12 +26,14 @@ def evaluate(cancel: Event | None = None) -> dict:
     if not BENCHMARK_LOCK.acquire(blocking=False):
         raise OberhauError("A benchmark is already running")
     tracing = tracemalloc.is_tracing()
+    parser = None
     try:
         raw = DATASET.read_bytes()
         dataset = json.loads(raw)
         results = []
         started = time.monotonic()
         deadline = started + 60
+        parser = ParserSession(cancel, deadline)
         if not tracing:
             tracemalloc.start()
         for case in dataset["cases"]:
@@ -39,9 +42,7 @@ def evaluate(cancel: Event | None = None) -> dict:
             summaries = {}
             for path, text in case["sources"].items():
                 code = text.encode()
-                summaries[path] = parse_file(
-                    path, hashlib.sha256(code).hexdigest(), code, cancel, deadline
-                )
+                summaries[path] = parser.parse(path, hashlib.sha256(code).hexdigest(), code)
             found = analyze(summaries, ResearchLimits(), cancel, deadline)
             # Count individual signals, including duplicate-rule predictions as extra positives.
             expected = list(case["expected"])
@@ -83,11 +84,14 @@ def evaluate(cancel: Event | None = None) -> dict:
             "seconds": time.monotonic() - started,
             "peak_python_bytes": peak,
             "process_memory": process_memory(),
-            "memory_limitations": "tracemalloc observes Python allocations; native Tree-sitter allocations, RSS and GPU memory are not measured. A pre-existing tracer includes prior/concurrent activity.",
+            "parser_memory": parser.memory_metrics(),
+            "memory_limitations": "tracemalloc and process_memory observe the parent only. parser_memory measures separate Windows job committed memory, not parser RSS or GPU. A pre-existing tracer includes prior/concurrent activity.",
             "categories": sorted({rule for case in dataset["cases"] for rule in case["expected"]}),
             "limitations": dataset["limitations"],
         }
     finally:
+        if parser is not None:
+            parser.close()
         if not tracing and tracemalloc.is_tracing():
             tracemalloc.stop()
         BENCHMARK_LOCK.release()

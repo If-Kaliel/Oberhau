@@ -28,7 +28,7 @@ Use Windows x64, Python 3.12 and the project virtual environment:
 
 The build script compiles two entry points from `packaging/Oberhau.spec` with PyInstaller 6.22.3,
 downloads three fixed-checksum official Qt/PySide source archives, gathers their notices and
-the Python dependency licenses, and writes `artifacts/Oberhau-0.4.0-windows-x64.zip` plus `.sha256`.
+the Python dependency licenses, and writes `artifacts/Oberhau-0.5.1-windows-x64.zip` plus `.sha256`.
 The bundle includes a per-file `MANIFEST.json`. Builds are version-pinned, not bit-for-bit reproducible.
 `--skip-freeze` only refreshes documents/notices and the ZIP after an existing compilation; do not
 use it after changing application code. Build downloads occur only during this explicit developer step.
@@ -42,6 +42,20 @@ Validate the frozen entry points with an isolated data directory:
 
 `--smoke` explicitly imports a labeled demonstration, runs Quick, saves a real Qt screenshot and
 metrics, then exits. Use a fresh data directory for the six-finding expectation.
+
+0.5.1 derives multi-size Windows executable icons directly from the SVG skull/sword using
+`scripts/render_brand.py`. Research workers use the hidden sibling CLI entry for bounded pipes.
+`--smoke-research artifacts/research.png` runs the bundled labeled contextual fixture through
+the frozen GUI, checks completion/worker memory enforcement and captures its Research page.
+For the broader native check, run:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\verify_windows.py
+```
+
+This uses fresh owned data and a system-only PATH: frozen default-import research, worker memory
+metrics, deterministic assistant, unchanged benchmark, both trusted HTTP recipes, portable
+backup/restore and both native GUI smoke modes. It downloads nothing and installs no service.
 
 ## Qt source and replacement rights
 

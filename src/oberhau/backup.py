@@ -58,6 +58,27 @@ def check_cancel(cancel: Event) -> None:
         raise Cancelled()
 
 
+def publish_restore(stage: Path, destination: Path, cancel: Event) -> None:
+    """Retry short Windows sharing/access contention without replacing another directory."""
+    for attempt in range(10):
+        check_cancel(cancel)
+        if destination.exists() or destination.is_symlink():
+            raise OberhauError("Restore destination appeared during operation")
+        try:
+            stage.rename(destination)
+            return
+        except PermissionError as error:
+            if (
+                os.name != "nt"
+                or getattr(error, "winerror", None) not in {5, 32, 33}
+                or attempt == 9
+            ):
+                raise
+            # Keep the wait bounded and interruptible. Genuine permission failures
+            # still propagate; verification is not repeated or bypassed.
+            cancel.wait(min(0.05 * (attempt + 1), 0.25))
+
+
 def validate_database(connection: sqlite3.Connection) -> int:
     connection.execute("PRAGMA trusted_schema=OFF")
     version = connection.execute("PRAGMA user_version").fetchone()[0]
@@ -506,7 +527,7 @@ def restore_backup(
             check_cancel(cancel)
             if destination.exists() or destination.is_symlink():
                 raise OberhauError("Restore destination was created by another operation")
-            stage.rename(destination)
+            publish_restore(stage, destination, cancel)
         except (zipfile.BadZipFile, sqlite3.Error, ValueError, KeyError, TypeError) as error:
             raise OberhauError(f"Invalid research backup: {error}") from error
     progress("Research backup restored; schedules paused and original source links require review")

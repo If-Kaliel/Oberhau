@@ -1,5 +1,12 @@
 # Verification
 
+Parser regressions use real owned child processes to verify worker reuse, non-execution of source,
+crash containment, cancellation during a blocked large pipe write, malformed/identity-mismatched
+protocol responses, failed-run publication and Windows allocation denial above the memory ceiling.
+Framework controls cover default/namespace/export aliases and negative private/ambiguous/type-only/
+re-export/shadowed/constant-input calls. Historical symbol reads use the recorded analyzer version.
+The unchanged 12-case benchmark remains separate from these regression fixtures.
+
 Directive 002 adds contextual, assistant and validation/GUI regressions: framework positive/negative
 controls, intermediate/constant arguments, cache/history/backup, comment metadata, Python branch/
 sanitizer uncertainty, cross-file report integrity, typed-query/citation rejection/fallback and Qt

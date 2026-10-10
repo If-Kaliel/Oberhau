@@ -154,7 +154,12 @@ class ResearchTools:
 
         rows = self.engine.db.query(
             "SELECT data FROM research_files WHERE project_id=? AND path=? AND sha256=? AND version=?",
-            (self.run["project_id"], path, self.manifest[path], PARSER_VERSION),
+            (
+                self.run["project_id"],
+                path,
+                self.manifest[path],
+                self.data.get("index", {}).get("version", PARSER_VERSION),
+            ),
         )
         if not rows:
             raise OberhauError("Indexed symbol record is unavailable")

@@ -2,11 +2,14 @@
 
 **Security Research Workbench · Windows · local-first · no paid runtime services**
 
-Development on `testes` is **0.5.0**: [contextual research](RESEARCH.md) adds selected framework
+Development on `testes` is **0.5.1**: [contextual research](RESEARCH.md) adds selected framework
 syntax profiles, evidence graphs, provisional authorization hypotheses, review queue, typed local
 Qwen investigation, security deltas, synthetic HTTP labs and a small measured detection benchmark.
 Select **Pesquisa contextual / Research** or use `scan ID --profile research`. The stable 0.4.0
 release and `main` are preserved; the complete Directive 002 remains broader than this milestone.
+
+0.5.1 adds a recognizable black skull/sword emblem, killable parser workers with Windows memory
+ceilings and relative default/namespace JS imports with explicit export checks.
 
 Oberhau 0.4.0 is a working native desktop and CLI for authorized offline source research.
 Import a folder, source file, ZIP or public HTTPS Git repository; scan a managed snapshot; investigate normalized warnings;
@@ -32,7 +35,7 @@ Normal storage is `%LOCALAPPDATA%\Oberhau`; `OBERHAU_HOME` or `--home` changes i
 
 | Capability | Actual status |
 |---|---|
-| Native PySide6 dark desktop, SVG emblem, 11 pages | Implemented; navigation and worker smoke tested |
+| Native PySide6 dark desktop, SVG emblem, 12 pages | Implemented; navigation and worker smoke tested |
 | Projects, policy records, local/ZIP/Git snapshots, SHA-256 provenance | Implemented; raw Git blobs verified without checkout/hooks; refresh and redacted file comparison |
 | Python AST + literal secrets + debug/privilege heuristics | Implemented; six fixture alerts, zero on corrected control |
 | Semgrep CE, ten explicit bundled rules | Real Windows execution verified; JS/TS request flows, Servlet/ASP.NET SQL; eight positive alerts and zero corrected-control alerts |

@@ -64,6 +64,24 @@ def test_unknown_evidence_cannot_read_files(engine, contextual):
         ResearchTools(engine, 999999)
 
 
+def test_historical_symbol_cache_uses_the_recorded_analyzer_version(engine, contextual):
+    tools = ResearchTools(engine, contextual[1])
+    tools.data["index"]["version"] = "retained-old-version"
+    engine.db.execute("UPDATE research_files SET version='retained-old-version'")
+    assert tools.symbols_for_file("service.ts").symbols[0].name == "lookup"
+
+
+def test_scan_cli_keeps_progress_on_stderr_and_stdout_as_a_complete_json_record(
+    engine, contextual, capsys
+):
+    assert (
+        main(["--home", str(engine.home), "scan", str(contextual[0]), "--profile", "research"]) == 0
+    )
+    result = capsys.readouterr()
+    assert json.loads(result.out)["status"] == "completed"
+    assert "Contextual research" in result.err
+
+
 class FakeModel:
     model = "qwen3.5:4b"
 

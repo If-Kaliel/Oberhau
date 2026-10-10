@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
- <path fill="#e8e7e3" d="M30 2h4v12h9v4h-9v34l-2 10-2-10V18h-9v-4h9z"/>
- <path fill="#e8e7e3" d="M26 20C13 20 7 28 7 38c0 7 3 12 8 15v7h11V46H16v-8h10zm12 0c13 0 19 8 19 18 0 7-3 12-8 15v7H38V46h10v-8H38z"/>
- <path fill="#141518" d="M17 30h9v7h-9zm21 0h9v7h-9zM19 53h3v7h-3zm23 0h3v7h-3z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+ <title>Oberhau — skull and descending sword</title>
+ <!-- A black skull on a pale disc remains legible on the graphite desktop. -->
+ <circle cx="48" cy="48" r="46" fill="#e8e7e3"/>
+ <path fill="#111215" d="M48 22C28 22 18 35 18 51v9l8 9 5 2v11l9 5h16l9-5V71l5-2 8-9v-9C78 35 68 22 48 22Z"/>
+ <!-- Broad sockets, a nasal cavity and a toothed jaw preserve the skull silhouette. -->
+ <path fill="#e8e7e3" d="m26 47 15 3 1 10-10 3-6-7Zm44 0-15 3-1 10 10 3 6-7ZM48 61l-5 10h10ZM37 77h5v8h-5Zm9 0h4v8h-4Zm8 0h5v8h-5Z"/>
+ <path fill="none" stroke="#e8e7e3" stroke-width="2" d="m21 41 5-6h7m42 6-5-6h-7"/>
+ <!-- The hilt is above the cranium; separation keeps the blade readable. -->
+ <path fill="#111215" stroke="#e8e7e3" stroke-width="2" stroke-linejoin="round" d="M44 5h8v10h10v5H51v31l-3 9-3-9V20H34v-5h10Z"/>
 </svg>

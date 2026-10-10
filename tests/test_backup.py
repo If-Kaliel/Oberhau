@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import shutil
 import sqlite3
 import stat
@@ -335,6 +336,46 @@ def test_resource_limits_reject_backup_and_restore(engine, bundle, tmp_path):
         restore_backup(bundle, tmp_path / "small", limits=BackupLimits(max_source_bytes=10))
     assert not (tmp_path / "small.zip").exists()
     assert not (tmp_path / "small").exists()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows transient sharing/access errors")
+@pytest.mark.parametrize("mode", ["temporary", "destination-race", "cancel"])
+def test_restore_publication_retry_preserves_verification_destination_and_cancellation(
+    bundle, tmp_path, monkeypatch, mode
+):
+    destination = tmp_path / "recovered"
+    original = Path.rename
+    cancel = Event()
+    attempts = []
+
+    def contended_rename(stage, target):
+        if stage.name == "data" and target == destination:
+            attempts.append(stage)
+            if len(attempts) == 1:
+                if mode == "destination-race":
+                    destination.mkdir()
+                    (destination / "keep.txt").write_text("existing user data")
+                elif mode == "cancel":
+                    cancel.set()
+                error = PermissionError("Simulated transient Windows directory handle")
+                error.winerror = 5
+                raise error
+        return original(stage, target)
+
+    monkeypatch.setattr(Path, "rename", contended_rename)
+    if mode == "temporary":
+        restore_backup(bundle, destination, cancel)
+        assert len(attempts) == 2
+        assert Engine(destination).db.query("SELECT id FROM findings")
+    elif mode == "destination-race":
+        with pytest.raises(OberhauError, match="appeared"):
+            restore_backup(bundle, destination, cancel)
+        assert (destination / "keep.txt").read_text() == "existing user data"
+        assert not (destination / "oberhau.sqlite3").exists()
+    else:
+        with pytest.raises(Cancelled):
+            restore_backup(bundle, destination, cancel)
+        assert not destination.exists()
 
 
 def test_recovery_handles_large_history_and_interrupted_scan(engine, scanned, tmp_path):

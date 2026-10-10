@@ -1,12 +1,19 @@
 # Architecture
 
-0.5.0 adds the domain-only [research subsystem](RESEARCH.md): `framework_analysis` indexes
+0.5.1 extends the domain-only [research subsystem](RESEARCH.md): `framework_analysis` indexes
 Tree-sitter/Python syntax, `research_models` validates bounded evidence and `research` constructs
 graphs/hypotheses, reuses per-file cache and ranks the queue. `git_intelligence` compares retained
 observations; `research_assistant` exposes typed read tools to existing Ollama. `local_validation`
 owns disposable synthetic HTTP recipes and `benchmark` evaluates a separate dataset. Schema 4
 stores runs/caches/assistance and reuses findings/reviews/scans. Graph/finding publication is atomic.
 The new `desktop/research_page.py` renders real records without moving existing page behavior.
+
+`parser_isolation` owns a lazy worker per job. `parser_worker` parses bounded JSON source-byte
+requests and returns redacted validated summaries, without loading imported modules. A background
+pipe transport keeps cancellation responsive during writes and reads. Native crashes/timeouts fail
+the job and reap the worker; completed cache entries survive. `parser_job` applies Windows worker
+committed-memory limits and parent-exit cleanup. Frozen GUI/CLI use the hidden sibling CLI entry
+for pipes; development uses isolated Python with only the trusted Oberhau source path added.
 
 The GUI and CLI invoke `Engine`, `Ingestion`, `Database`, and reporting services directly.
 Domain modules have no Qt imports. Python 3.12+, Pydantic v2 and PySide6 Essentials provide the

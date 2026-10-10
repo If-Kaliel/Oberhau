@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools==82.0.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oberhau"
+version = "0.1.0"
+description = "Local-first security research workbench"
+requires-python = ">=3.12"
+dependencies = ["PySide6-Essentials==6.10.2", "pydantic==2.12.5"]
+
+[project.optional-dependencies]
+dev = ["pytest==9.0.2", "pytest-cov==7.0.0", "ruff==0.15.6"]
+
+[project.scripts]
+oberhau = "oberhau.cli:main"
+oberhau-desktop = "oberhau.desktop.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+oberhau = ["assets/*", "assets/demo/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"] # Formatter controls code width; long SQL, CSS and prose are intentional.
+

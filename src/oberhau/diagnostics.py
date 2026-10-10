@@ -1,0 +1,41 @@
+from __future__ import annotations
+
+import importlib.metadata
+import platform
+import shutil
+import sys
+from pathlib import Path
+
+from oberhau.core import Limits, OberhauError, now
+from oberhau.ollama import Ollama
+from oberhau.scanners.external import capabilities
+from oberhau.security import ProcessRunner
+
+
+def collect(limits: Limits | None = None) -> dict:
+    result = {
+        "checked": now(),
+        "python": sys.version,
+        "executable": sys.executable,
+        "platform": platform.platform(),
+        "cpu_logical": __import__("os").cpu_count(),
+        "git": shutil.which("git"),
+        "ollama_executable": shutil.which("ollama"),
+        "scanners": capabilities(ProcessRunner(limits or Limits(timeout=10))),
+        "packages": {},
+    }
+    for name in ("PySide6-Essentials", "pydantic"):
+        try:
+            result["packages"][name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            result["packages"][name] = "missing"
+    try:
+        result["ollama_models"] = Ollama(timeout=3).models()
+        result["qwen_available"] = "qwen3.5:4b" in result["ollama_models"]
+    except OberhauError as error:
+        result["ollama_error"] = str(error)
+        result["qwen_available"] = False
+    result["gpu_probe"] = "Ollama manages GPU offloading; dedicated GPU telemetry not implemented."
+    if Path(sys.executable).is_file():
+        result["runtime"] = "operational"
+    return result

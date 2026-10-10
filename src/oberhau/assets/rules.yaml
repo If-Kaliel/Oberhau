@@ -1,0 +1,29 @@
+rules:
+  - id: oberhau-python-eval
+    languages: [python]
+    severity: ERROR
+    message: Dynamic evaluation needs input-provenance and reachability review (CWE-95).
+    pattern: eval(...)
+    metadata:
+      cwe: [CWE-95]
+  - id: oberhau-js-eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Dynamic evaluation needs input-provenance and reachability review (CWE-95).
+    pattern: eval(...)
+    metadata:
+      cwe: [CWE-95]
+  - id: oberhau-java-process
+    languages: [java]
+    severity: WARNING
+    message: Process execution boundary requires argument provenance review (CWE-78).
+    pattern: Runtime.getRuntime().exec(...)
+    metadata:
+      cwe: [CWE-78]
+  - id: oberhau-csharp-process
+    languages: [csharp]
+    severity: WARNING
+    message: Process execution boundary requires argument provenance review (CWE-78).
+    pattern: Process.Start(...)
+    metadata:
+      cwe: [CWE-78]

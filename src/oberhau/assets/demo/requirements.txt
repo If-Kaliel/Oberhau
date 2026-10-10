@@ -1,0 +1,2 @@
+# LABORATORY MATERIAL: intentionally old version; matching requires an advisory database.
+Django==2.2.0

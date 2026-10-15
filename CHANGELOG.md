@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Parallel scanner jobs no longer race when saving equivalent findings: `save_finding` takes the SQLite write lock before its existence check. Previously, builtin/Semgrep equivalent rules could fail the second scanner run with a UNIQUE violation and lose its remaining findings, and concurrent OSV/Trivy advisories could be stored as duplicates instead of being correlated.
+- Wrongly typed nested scanner JSON is reported as malformed output instead of an unclassified `AttributeError`.
+- SARIF export includes `level` (from scanner severity) and `endLine`, so code-scanning consumers keep the severity instead of treating every result as a warning.
+
 ## 1.0.0 — scoped offline investigation workbench
 
 - Explicit release scope and acceptance evidence in RELEASE_1_0.md; Directive 002 remains broader.

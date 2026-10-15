@@ -172,7 +172,12 @@ class Database:
         observation_data = finding.model_dump_json()
         fingerprint = finding.fingerprint(project_id)
         scope = dependency_scope(finding)
+        owned = connection is None
         with nullcontext(connection) if connection is not None else self.connect() as connection:
+            if owned:
+                # Parallel scanner jobs can emit equivalent findings; take the write lock before
+                # the existence check so correlation and the fingerprint UNIQUE insert cannot race.
+                connection.execute("BEGIN IMMEDIATE")
             aliases = advisory_aliases(finding) if scope else set()
             related = set()
             for alias in aliases:

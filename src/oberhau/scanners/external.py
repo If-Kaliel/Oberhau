@@ -183,7 +183,7 @@ def parse(tool: str, payload: str, root: Path) -> list[Finding]:
         else:
             raise ValueError("Unsupported scanner")
         return findings
-    except (ValueError, TypeError, KeyError) as error:
+    except (ValueError, TypeError, KeyError, AttributeError) as error:
         raise OberhauError(f"{tool}: malformed or unsupported JSON: {error}") from error
 
 

@@ -234,12 +234,21 @@ def export(db: Database, report_id: int, destination: Path, content: str | None 
                         "results": [
                             {
                                 "ruleId": finding.rule,
+                                # Consumers such as code scanning default to "warning" without a level.
+                                "level": {
+                                    "critical": "error",
+                                    "high": "error",
+                                    "medium": "warning",
+                                }.get(finding.severity, "note"),
                                 "message": {"text": finding.title},
                                 "locations": [
                                     {
                                         "physicalLocation": {
                                             "artifactLocation": {"uri": quote(finding.path)},
-                                            "region": {"startLine": finding.line},
+                                            "region": {
+                                                "startLine": finding.line,
+                                                "endLine": max(finding.line, finding.end_line),
+                                            },
                                         }
                                     }
                                 ],

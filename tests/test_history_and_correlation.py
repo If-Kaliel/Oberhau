@@ -1,5 +1,7 @@
 import json
 import sqlite3
+import threading
+from contextlib import contextmanager
 from threading import Event
 
 import pytest
@@ -111,6 +113,70 @@ def test_dependency_boundaries_prevent_false_correlation(engine, project, differ
     assert engine.db.save_finding(project, scan, first) != engine.db.save_finding(
         project, scan, second
     )
+
+
+@pytest.mark.parametrize("case", ["equivalent-rule", "advisory-alias"])
+def test_parallel_scanners_correlate_without_racing(engine, project, case):
+    # Scanner jobs run in parallel threads; pause both after the existence check to force the race.
+    scan = engine.db.execute(
+        "INSERT INTO scans(project_id,profile,status,started) VALUES(?,'deep','running',?)",
+        (project, now()),
+    )
+    if case == "equivalent-rule":
+        first = Finding(
+            scanner="builtin",
+            rule="python-dynamic-code",
+            category="unsafe-code",
+            title="Dynamic code evaluation",
+            path="vulnerable.py",
+            line=3,
+        )
+        second = first.model_copy(update={"scanner": "semgrep", "rule": "oberhau-python-eval"})
+        assert first.fingerprint(project) == second.fingerprint(project)
+    else:
+        first, second = dependency(), dependency("trivy", aliases=["CVE-2020-0001"])
+    barrier = threading.Barrier(2, timeout=0.5)
+    original = engine.db.connect
+
+    class Pausing:
+        def __init__(self, connection):
+            self.connection = connection
+
+        def __getattr__(self, name):
+            return getattr(self.connection, name)
+
+        def execute(self, sql, *args):
+            cursor = self.connection.execute(sql, *args)
+            if sql.startswith("SELECT id,status,last_scan,data FROM findings"):
+                try:
+                    barrier.wait()
+                except threading.BrokenBarrierError:
+                    pass
+            return cursor
+
+    @contextmanager
+    def connect():
+        with original() as connection:
+            yield Pausing(connection)
+
+    engine.db.connect = connect
+    errors = []
+
+    def save(finding):
+        try:
+            engine.db.save_finding(project, scan, finding)
+        except Exception as error:
+            errors.append(error)
+
+    threads = [threading.Thread(target=save, args=(f,)) for f in (first, second)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(30)
+    engine.db.connect = original
+    assert not errors
+    assert len(engine.db.query("SELECT * FROM findings")) == 1
+    assert len(engine.db.query("SELECT * FROM observations")) == 2
 
 
 def test_identical_advisory_for_two_packages_does_not_collide(engine, project):

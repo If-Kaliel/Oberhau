@@ -36,6 +36,12 @@ def test_real_pipeline_with_negative_control(engine, scanned, tmp_path):
         assert target.stat().st_size > 100
         if extension in {"json", "sarif"}:
             json.loads(target.read_text())
+    result = json.loads((tmp_path / "report.sarif").read_text())["runs"][0]["results"][0]
+    finding = engine.db.finding(sql["id"])["finding"]
+    levels = {"critical": "error", "high": "error", "medium": "warning"}
+    assert result["level"] == levels.get(finding.severity, "note")
+    region = result["locations"][0]["physicalLocation"]["region"]
+    assert region == {"startLine": finding.line, "endLine": finding.end_line}
 
 
 def test_deduplication_history_and_review_survival(engine, scanned):

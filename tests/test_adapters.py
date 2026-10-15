@@ -16,6 +16,44 @@ def test_corrupt_tool_output(tool, payload, tmp_path):
         parse(tool, payload, tmp_path)
 
 
+@pytest.mark.parametrize(
+    ("tool", "payload"),
+    [
+        (
+            "semgrep",
+            {
+                "results": [
+                    {
+                        "check_id": "rule",
+                        "path": "a.py",
+                        "start": {"line": 1},
+                        "end": {"line": 1},
+                        "extra": "not an object",
+                    }
+                ]
+            },
+        ),
+        (
+            "trivy",
+            {
+                "SchemaVersion": 2,
+                "Results": [
+                    {
+                        "Target": "main.tf",
+                        "Misconfigurations": [
+                            {"ID": "AVD-1", "Title": "Title", "CauseMetadata": "not an object"}
+                        ],
+                    }
+                ],
+            },
+        ),
+    ],
+)
+def test_wrongly_typed_tool_output_is_reported_as_malformed(tool, payload, tmp_path):
+    with pytest.raises(OberhauError, match="malformed"):
+        parse(tool, json.dumps(payload), tmp_path)
+
+
 def test_semgrep_normalization(tmp_path):
     result = {
         "results": [

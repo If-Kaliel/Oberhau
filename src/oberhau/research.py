@@ -12,7 +12,7 @@ from threading import Event
 
 from oberhau.core import Cancelled, Finding, OberhauError, Status, now
 from oberhau.framework_analysis import EXTENSIONS, PARSER_VERSION, checkpoint
-from oberhau.parser_isolation import ParserSession
+from oberhau.parser_isolation import ParserFileError, ParserSession
 from oberhau.research_models import FileSummary, GraphBuilder, Hypothesis, ResearchLimits
 from oberhau.security import confined, sanitize
 
@@ -23,6 +23,7 @@ LIMITATIONS = [
     "Global middleware, filters, inherited policies and infrastructure may supply additional protections",
     "Absence of visible controls is a research question, never a vulnerability verdict",
 ]
+PARSER_CONTROL = "oberhau-parser-control.py"
 CONFIRMATION = [
     "Resolve middleware/filter/security configuration and policy activation",
     "Establish trusted identity and intended resource access policy",
@@ -349,7 +350,9 @@ def hypothesis_key(hypothesis: dict) -> str:
     return "|".join(hypothesis[k] for k in ("rule", "path", "endpoint", "operation"))
 
 
-def compare_runs(previous: dict, current: dict, old_manifest: dict, manifest: dict) -> list[dict]:
+def compare_runs(
+    previous: dict, current: dict, old_manifest: dict, manifest: dict, gaps=frozenset()
+) -> list[dict]:
     old = {hypothesis_key(h): h for h in previous.get("hypotheses", [])}
     new = {hypothesis_key(h): h for h in current.get("hypotheses", [])}
     changes = []
@@ -367,6 +370,8 @@ def compare_runs(previous: dict, current: dict, old_manifest: dict, manifest: di
         state = (
             "previously-observed"
             if key in old and key in new
+            else "unobserved-coverage-gap"
+            if key not in new and (referenced_paths | {item["path"]}) & set(gaps)
             else "new-warning-in-changed-file"
             if key in new and changed
             else "new-review-signal"
@@ -410,9 +415,30 @@ def run_research(
         (scan_id, now()),
     )
     parsed, reused, size = 0, 0, 0
-    parser = ParserSession(
-        cancel, deadline, limits.parser_timeout_seconds, limits.parser_memory_mib
-    )
+    gaps: dict[str, str] = {}
+    sessions: list[ParserSession] = []
+
+    def parser() -> ParserSession:
+        # A per-file failure closes its worker; the following files get a fresh one.
+        if not sessions or sessions[-1].closed:
+            sessions.append(
+                ParserSession(
+                    cancel, deadline, limits.parser_timeout_seconds, limits.parser_memory_mib
+                )
+            )
+        return sessions[-1]
+
+    def verify_parser() -> None:
+        # A gap is per-file only while a fresh worker still completes a trivial control file;
+        # otherwise a broken parser environment would pass as a clean, incomplete run.
+        try:
+            parser().parse(PARSER_CONTROL, hashlib.sha256(b"").hexdigest(), b"")
+        except ParserFileError:
+            raise OberhauError(
+                "Isolated parser could not complete its built-in control file"
+            ) from None
+
+    verified = False
     try:
         files = {}
         for path, digest in manifest.items():
@@ -435,7 +461,17 @@ def run_research(
                 reused += 1
             else:
                 progress("Contextual indexing: " + path)
-                summary = parser.parse(path, digest, content)
+                try:
+                    summary = parser().parse(path, digest, content)
+                except ParserFileError as error:
+                    # Cancellation and the run deadline are never a per-file coverage gap.
+                    checkpoint(cancel, deadline)
+                    gaps[path] = str(error)
+                    if not verified:
+                        verify_parser()
+                        verified = True
+                    continue
+                verified = True
                 # Cache contains redacted observations, no executable trees or raw source.
                 summary = FileSummary.model_validate(sanitize(summary.model_dump()))
                 parsed += 1
@@ -448,14 +484,25 @@ def run_research(
             if size > limits.max_index_bytes:
                 raise OberhauError("Research serialized index budget exceeded")
             files[path] = summary
-        parser_memory = parser.memory_metrics()
-        parser.close()
+        parser_memory = combined_memory(sessions)
+        for session in sessions:
+            session.close()
         result = analyze(
             files, limits, cancel, deadline, str(project["id"]), metadata.get("commit", "")
         )
+        if gaps:
+            # Excluded files may hold the controls or call targets these hypotheses lack.
+            gap_note = (
+                f"Parser coverage gaps: {len(gaps)} file(s) excluded; their controls, "
+                "exports and call targets are unobserved"
+            )
+            result["limitations"] = [*result["limitations"], gap_note]
+            for hypothesis in result["hypotheses"]:
+                hypothesis["limitations"].append(gap_note)
         result["index"] = {
             "parsed": parsed,
             "reused": reused,
+            "parser_gaps": len(gaps),
             "bytes": size,
             "version": PARSER_VERSION,
             "parser_isolation": "separate process; bounded JSON; no imported-code execution",
@@ -463,8 +510,16 @@ def run_research(
             "parser_memory": parser_memory,
         }
         result["coverage"] = {
-            path: {"parser": file.parser, "limitations": file.limitations}
-            for path, file in files.items()
+            path: {"parser": files[path].parser, "limitations": files[path].limitations}
+            if path in files
+            else {
+                "parser": "unavailable",
+                "limitations": [
+                    f"Parser coverage gap: {gaps[path]}; file excluded from contextual paths"
+                ],
+            }
+            for path in manifest
+            if path in files or path in gaps
         }
         result["snapshot"] = root.relative_to(engine.home).as_posix()
         previous_data = json.loads(previous[0]["data"]) if previous else {}
@@ -474,10 +529,13 @@ def run_research(
             result,
             previous_manifest,
             manifest,
+            gaps,
         )
         from oberhau.git_intelligence import changes
 
-        result["git_intelligence"] = changes(previous_data, result, previous_manifest, manifest)
+        result["git_intelligence"] = changes(
+            previous_data, result, previous_manifest, manifest, gaps
+        )
         history = db.query(
             "SELECT data FROM research_runs WHERE project_id=? AND status='completed' ORDER BY id DESC LIMIT 20",
             (project["id"],),
@@ -573,13 +631,19 @@ def run_research(
                     time.monotonic() - started,
                     len(findings),
                     json.dumps(
-                        {"version": PARSER_VERSION, "offline": True, "limits": limits.model_dump()}
+                        {
+                            "version": PARSER_VERSION,
+                            "offline": True,
+                            "limits": limits.model_dump(),
+                            "parser_gaps": sorted(gaps),
+                        }
                     ),
                     scanner_id,
                 ),
             )
         progress(
             f"Contextual research #{run_id}: {len(findings)} hypotheses; {parsed} parsed, {reused} cached"
+            + (f", {len(gaps)} parser coverage gaps" if gaps else "")
         )
         return run_id
     except BaseException as error:
@@ -595,7 +659,22 @@ def run_research(
         )
         raise
     finally:
-        parser.close()
+        for session in sessions:
+            session.close()
+
+
+def combined_memory(sessions: list[ParserSession]) -> dict:
+    metrics = [session.memory_metrics() for session in sessions if session.process is not None]
+    if not metrics:
+        return {"enforced": False, "reason": "No Windows parser job was started"}
+    combined = dict(metrics[-1])
+    if "peak_committed_bytes" in combined:
+        combined["peak_committed_bytes"] = max(
+            (m["peak_committed_bytes"] for m in metrics if m.get("peak_committed_bytes")),
+            default=None,
+        )
+    combined["workers"] = len(metrics)
+    return combined
 
 
 def research_queue(db, project_id: int | None = None) -> list[dict]:

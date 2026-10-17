@@ -8,11 +8,23 @@ import sys
 import time
 from threading import Event
 
+from oberhau.core import OberhauError
 from oberhau.framework_analysis import parse_file
 from oberhau.security import sanitize
 
 MAX_REQUEST_BYTES = 28_000_000  # Existing 20 MB source-file ceiling after base64.
 MAX_RESPONSE_BYTES = 8_000_000
+FAILED = "Parser could not complete the file"
+RESPONSE_BUDGET = "Parser response budget exceeded"
+# Fixed analyzer messages mapped to fixed reasons; any other text is never transported.
+REASONS = {
+    "File syntax node budget exceeded": "File syntax node budget exceeded",
+    "Python file syntax node budget exceeded": "File syntax node budget exceeded",
+    "Function syntax budget exceeded": "Function syntax budget exceeded",
+    "Native parser exceeded the investigation deadline": "Parser file deadline exceeded",
+    "Contextual investigation deadline exceeded": "Parser file deadline exceeded",
+}
+ERRORS = {FAILED, RESPONSE_BUDGET, *REASONS.values()}
 
 
 def main() -> int:
@@ -34,12 +46,13 @@ def main() -> int:
                 request["path"], request["sha256"], content, Event(), time.monotonic() + seconds
             )
             payload = {"summary": sanitize(summary.model_dump())}
-        except Exception:
-            # Exception messages may contain source fragments; do not transport them.
-            payload = {"error": "Parser could not complete the file"}
+        except Exception as error:
+            # Exception messages may contain source fragments; only fixed reasons are sent.
+            reason = REASONS.get(str(error), FAILED) if isinstance(error, OberhauError) else FAILED
+            payload = {"error": reason}
         response = json.dumps(payload, ensure_ascii=True).encode() + b"\n"
         if len(response) > MAX_RESPONSE_BYTES:
-            response = b'{"error":"Parser response budget exceeded"}\n'
+            response = json.dumps({"error": RESPONSE_BUDGET}).encode() + b"\n"
         target.write(response)
         target.flush()
     return 0

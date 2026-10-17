@@ -18,6 +18,9 @@ in a restricted fresh environment on the current host. A clean OS/VM is not clai
 Parser regressions use real owned child processes to verify worker reuse, non-execution of source,
 crash containment, cancellation during a blocked large pipe write, malformed/identity-mismatched
 protocol responses, failed-run publication and Windows allocation denial above the memory ceiling.
+Run-level parser gap tests cover a real node-budget refusal, scripted crash/deadline/error replies,
+unobserved hypotheses, a broken worker environment, and still-fatal protocol, cancellation,
+deadline and quota-attachment failures.
 Framework controls cover default/namespace/export aliases and negative private/ambiguous/type-only/
 re-export/shadowed/constant-input calls. Historical symbol reads use the recorded analyzer version.
 The unchanged 12-case benchmark remains separate from these regression fixtures.

@@ -14,8 +14,16 @@ from threading import Event, Thread
 
 from oberhau.core import OberhauError
 from oberhau.framework_analysis import checkpoint
-from oberhau.parser_worker import MAX_REQUEST_BYTES, MAX_RESPONSE_BYTES
+from oberhau.parser_worker import ERRORS, FAILED, MAX_REQUEST_BYTES, MAX_RESPONSE_BYTES
 from oberhau.research_models import FileSummary
+
+
+class ParserFileError(OberhauError):
+    """The worker could not complete one file: a fixed reason, never child text or source.
+
+    Protocol violations, quota setup failures, cancellation and the investigation deadline
+    remain plain errors because they say nothing about one file.
+    """
 
 
 def worker_command() -> list[str]:
@@ -46,6 +54,7 @@ class ParserSession:
         self.process: subprocess.Popen | None = None
         self.transport: Thread | None = None
         self.closed = False
+        self.final_metrics: dict | None = None
 
     def __enter__(self):
         return self
@@ -59,7 +68,7 @@ class ParserSession:
             raise OberhauError("Parser session is closed")
         expires = min(self.deadline, time.monotonic() + self.file_timeout)
         if len(content) > 20_000_000:
-            raise OberhauError("Parser request budget exceeded")
+            raise ParserFileError("Parser request budget exceeded")
         request = (
             json.dumps(
                 {
@@ -73,7 +82,7 @@ class ParserSession:
             + b"\n"
         )
         if len(request) > MAX_REQUEST_BYTES:
-            raise OberhauError("Parser request budget exceeded")
+            raise ParserFileError("Parser request budget exceeded")
         try:
             if self.process is None:
                 self.process = subprocess.Popen(
@@ -111,19 +120,27 @@ class ParserSession:
             while True:
                 checkpoint(self.cancel, self.deadline)
                 if time.monotonic() >= expires:
-                    raise OberhauError("Isolated parser file deadline exceeded")
+                    raise ParserFileError("Isolated parser file deadline exceeded")
                 try:
                     raw = received.get(timeout=min(0.05, max(0.001, expires - time.monotonic())))
                     break
                 except Empty:
                     if process.poll() is not None:
-                        raise OberhauError("Isolated parser exited unexpectedly") from None
+                        raise ParserFileError("Isolated parser exited unexpectedly") from None
             self.transport.join(timeout=1)
-            if not raw or len(raw) > MAX_RESPONSE_BYTES or not raw.endswith(b"\n"):
-                raise OberhauError("Isolated parser failed or exceeded its response budget")
+            if raw and len(raw) > MAX_RESPONSE_BYTES:
+                raise OberhauError("Isolated parser exceeded its response budget")
+            if not raw or not raw.endswith(b"\n"):
+                # Closed pipes or a truncated final line: the worker died (crash or quota kill).
+                raise ParserFileError("Isolated parser exited unexpectedly")
             payload = json.loads(raw)
+            if isinstance(payload, dict) and set(payload) == {"error"}:
+                reason = payload["error"]
+                raise ParserFileError(
+                    reason if isinstance(reason, str) and reason in ERRORS else FAILED
+                )
             if not isinstance(payload, dict) or set(payload) != {"summary"}:
-                raise OberhauError("Isolated parser could not complete the file")
+                raise OberhauError("Isolated parser returned an invalid response")
             summary = FileSummary.model_validate(payload["summary"])
             if summary.path != path or summary.sha256 != digest:
                 raise OberhauError("Isolated parser returned mismatched source identity")
@@ -136,6 +153,8 @@ class ParserSession:
             raise
 
     def memory_metrics(self) -> dict:
+        if self.final_metrics is not None:
+            return self.final_metrics
         return (
             self.job.metrics()
             if self.job
@@ -148,6 +167,9 @@ class ParserSession:
         if process is None:
             return
         if self.job is not None:
+            if self.final_metrics is None:
+                # Job peak usage is only queryable while its handle is open.
+                self.final_metrics = self.job.metrics()
             self.job.close()
         # Kill before closing pipes: another thread may be blocked in a pipe write.
         if process.poll() is None:

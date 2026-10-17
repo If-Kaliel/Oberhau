@@ -17,8 +17,10 @@ The new `desktop/research_page.py` renders real records without moving existing 
 
 `parser_isolation` owns a lazy worker per job. `parser_worker` parses bounded JSON source-byte
 requests and returns redacted validated summaries, without loading imported modules. A background
-pipe transport keeps cancellation responsive during writes and reads. Native crashes/timeouts fail
-the job and reap the worker; completed cache entries survive. `parser_job` applies Windows worker
+pipe transport keeps cancellation responsive during writes and reads. Per-file refusals, timeouts
+and crashes raise `ParserFileError` and reap the worker; research records a coverage gap and starts a
+fresh worker, after checking a built-in control file once. Protocol violations, cancellation and
+the investigation deadline fail the job; completed cache entries survive. `parser_job` applies Windows worker
 committed-memory limits and parent-exit cleanup. Frozen GUI/CLI use the hidden sibling CLI entry
 for pipes; development uses isolated Python with only the trusted Oberhau source path added.
 

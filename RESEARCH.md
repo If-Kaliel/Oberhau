@@ -43,9 +43,19 @@ uses its standard AST. Syntax errors exclude a file and appear in coverage limit
 Windows 0.25.2 callback parser crashed during verification; the supported native timeout API avoids
 that path. Research and benchmarks now parse in a separate trusted worker process, including Python
 AST parsing. The parent enforces cancellation and a per-file wall deadline (10 s default, configurable
-1–60 s) while the worker performs syntax traversal. Crashes, invalid/oversized responses and timeouts
-fail the run; no partial contextual findings are published. Cached summaries can be reused without
-starting a worker. The private protocol accepts source bytes and identity, never commands or modules.
+1–60 s) while the worker performs syntax traversal. A file the worker cannot complete (node or
+function budget, per-file deadline, crash or memory-ceiling kill) becomes an explicit coverage gap:
+its path and a fixed reason appear in coverage, run and hypothesis limitations and scanner
+provenance, no summary is cached, and a fresh worker parses the following files. Excluded files may
+hold controls or call targets, so hypotheses from that run carry the gap; hypotheses that were only
+in an excluded file are reported as unobserved, not resolved. Gaps are retried on the next run.
+The first gap in a run with no completed file is followed by a built-in control parse in a fresh
+worker; if that fails too, the parser environment is broken and the run fails. Cancellation, the
+investigation deadline, protocol violations (malformed, oversized or identity-mismatched responses),
+quota attachment failure, source-integrity mismatches and storage budgets still fail the run without
+partial contextual findings. Benchmarks remain fail-closed on any parser failure. Cached summaries
+can be reused without starting a worker. The private protocol accepts source bytes and identity,
+never commands or modules, and returns only fixed failure reasons, never exception text.
 
 | Profile | Implemented syntax coverage |
 |---|---|

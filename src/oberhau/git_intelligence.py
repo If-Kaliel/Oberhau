@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import PurePosixPath
 
 
-def changes(previous: dict, current: dict, before: dict, after: dict) -> dict:
+def changes(previous: dict, current: dict, before: dict, after: dict, gaps=frozenset()) -> dict:
     modified = sorted(
         path for path in before.keys() | after.keys() if before.get(path) != after.get(path)
     )
@@ -44,7 +44,15 @@ def changes(previous: dict, current: dict, before: dict, after: dict) -> dict:
             {"path": p, "control": label} for p, label in sorted(new_controls - old_controls)
         ],
         "controls_removed": [
-            {"path": p, "control": label} for p, label in sorted(old_controls - new_controls)
+            {"path": p, "control": label}
+            for p, label in sorted(old_controls - new_controls)
+            if p not in gaps
+        ],
+        # Controls in files the parser could not complete this run are unknown, not removed.
+        "controls_unobserved": [
+            {"path": p, "control": label}
+            for p, label in sorted(old_controls - new_controls)
+            if p in gaps
         ],
         "dependency_files": [
             p

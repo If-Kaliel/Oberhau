@@ -16,6 +16,8 @@ from oberhau.security import (
     redact,
     redact_source,
     sanitize,
+    source_lines,
+    split_source,
 )
 
 
@@ -136,6 +138,37 @@ def test_private_key_excerpts_preserve_lines_and_withhold_material():
     redacted = redact_source(source)
     assert len(source.splitlines()) == len(redacted.splitlines())
     assert "privatebody" not in redacted
+
+
+@pytest.mark.parametrize(
+    ("source", "python", "expected"),
+    [
+        ('a = " \x85"\nb\n', False, ['a = " \x85"', "b"]),
+        ("a\r\nb\r\n", False, ["a", "b"]),
+        ("a\rb\rc", True, ["a", "b", "c"]),
+        ("a\rb\nc", False, ["ab", "c"]),
+        ("", False, []),
+    ],
+)
+def test_source_lines_follow_parser_line_numbering(source, python, expected):
+    assert source_lines(source, python) == expected
+    assert len(split_source(source, python)) == len(expected)
+
+
+def test_source_lines_redact_private_keys_without_moving_lines():
+    source = "a\n-----BEGIN PRIVATE KEY-----\rbody\r\n-----END PRIVATE KEY-----\nlast"
+    lines = source_lines(source)
+    assert len(lines) == len(split_source(source)) == 4
+    assert lines[-1] == "last" and "body" not in "".join(lines)
+
+
+def test_builtin_line_numbers_ignore_unicode_separators(engine, tmp_path):
+    source = tmp_path / "settings.py"
+    source.write_text('LABEL = "a b"\nDEBUG = True\n', encoding="utf-8")
+    engine.scan(engine.ingestion.add(source, "Separators"), "quick")
+    row = engine.db.query("SELECT id FROM findings")[0]
+    assert engine.db.finding(row["id"])["finding"].line == 2
+    assert "    2  DEBUG = True" in engine.investigate(row["id"])["context"]
 
 
 def test_process_allowlist_and_no_shell(tmp_path):

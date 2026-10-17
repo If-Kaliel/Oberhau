@@ -209,6 +209,24 @@ def test_python_nested_functions_classes_and_lambdas_are_not_outer_calls():
     assert [call["name"] for call in summary.symbols[0].calls] == ["print"]
 
 
+@pytest.mark.parametrize(
+    ("path", "source", "line", "code"),
+    [
+        (
+            "separator.js",
+            'const s = "a b";\nexport async function GET(req) {\n  return fetch(req.url);\n}\n',
+            3,
+            "  return fetch(req.url);",
+        ),
+        ("classic.py", "x = 1\rdef handler(request):\r    open(request)\r", 3, "    open(request)"),
+    ],
+)
+def test_call_excerpts_use_the_parser_line_numbering(path, source, line, code):
+    summary = parse_file(path, "a" * 64, source.encode(), Event(), time.monotonic() + 5)
+    calls = [call for symbol in summary.symbols for call in symbol.calls]
+    assert [(call["line"], call["code"]) for call in calls] == [(line, code)]
+
+
 def test_inconsistent_route_policy_compares_same_operation_not_arbitrary_endpoints():
     result = analysis(
         {

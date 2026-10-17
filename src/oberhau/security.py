@@ -52,12 +52,29 @@ def sanitize(value: Any) -> Any:
 
 
 def redact_source(text: str) -> str:
-    """Redact before selecting excerpts while preserving source line numbering."""
+    """Redact before selecting excerpts while preserving every LF line break."""
     text = SECRET_PATTERNS[3].sub(
-        lambda match: "\n".join("[REDACTED PRIVATE KEY]" for _ in match.group(0).splitlines()),
+        lambda match: "\n".join("[REDACTED PRIVATE KEY]" for _ in match.group(0).split("\n")),
         text,
     )
     return redact(text)
+
+
+def split_source(text: str, python: bool = False) -> list[str]:
+    """Split lines as parsers number them: LF only, plus a lone CR for Python source.
+
+    str.splitlines() also breaks on U+2028, U+0085 and form feeds, which shifts excerpts.
+    """
+    text = text.replace("\r\n", "\n")
+    if python:
+        text = text.replace("\r", "\n")
+    return text.removesuffix("\n").split("\n") if text else []
+
+
+def source_lines(text: str, python: bool = False) -> list[str]:
+    """Redacted lines numbered exactly like split_source()."""
+    lines = split_source(text, python)
+    return redact_source("\n".join(lines)).split("\n") if lines else []
 
 
 def confined(root: Path, relative: str) -> Path:

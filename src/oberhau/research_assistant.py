@@ -15,7 +15,7 @@ from oberhau.core import DraftText, OberhauError, now
 from oberhau.framework_analysis import checkpoint
 from oberhau.ollama import Ollama, generation_lock, validate_claims
 from oberhau.research_models import EvidenceGraph, FileSummary
-from oberhau.security import confined, redact_source, sanitize
+from oberhau.security import confined, sanitize, source_lines
 from oberhau.storage import storage_operation
 
 
@@ -103,7 +103,9 @@ class ResearchTools:
                 or node.sha256 != self.manifest[node.path]
             ):
                 raise OberhauError("Research excerpt source integrity failed")
-            lines = redact_source(content.decode("utf-8", errors="replace")).splitlines()
+            lines = source_lines(
+                content.decode("utf-8", errors="replace"), node.path.endswith(".py")
+            )
             excerpt = "\n".join(
                 f"{i + 1}: {lines[i][:300]}"
                 for i in range(max(0, node.line - 5), min(len(lines), node.line + 8))

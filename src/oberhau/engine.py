@@ -18,7 +18,7 @@ from oberhau.plugins import Registry
 from oberhau.repositories import GitRepositories
 from oberhau.scanners.builtin import BuiltinScanner
 from oberhau.scanners.external import ExternalScanner
-from oberhau.security import ProcessRunner, confined, redact, redact_source
+from oberhau.security import ProcessRunner, confined, redact, redact_source, source_lines
 from oberhau.storage import storage_operation, store_lock
 
 ASSETS = Path(__file__).parent / "assets"
@@ -377,7 +377,7 @@ class Engine:
         if len(content) > self.limits.max_file_bytes:
             raise OberhauError("Investigation source exceeds configured size limit")
         unchanged = hashlib.sha256(content).hexdigest() == finding.evidence.get("source_sha256")
-        lines = redact_source(content.decode("utf-8", errors="replace")).splitlines()
+        lines = source_lines(content.decode("utf-8", errors="replace"), path.suffix == ".py")
         context = redact(
             "\n".join(
                 f"{i + 1:>5}  {line}"

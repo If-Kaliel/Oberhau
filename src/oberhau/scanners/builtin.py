@@ -9,7 +9,7 @@ from threading import Event
 
 from oberhau import __version__
 from oberhau.core import Cancelled, Finding, Limits
-from oberhau.security import confined, redact, redact_source
+from oberhau.security import confined, redact, source_lines, split_source
 
 
 def call_name(node: ast.AST) -> str:
@@ -66,8 +66,9 @@ class BuiltinScanner:
             if b"\0" in content or len(content) > limits.max_file_bytes:
                 continue
             text = content.decode("utf-8", errors="replace")
-            lines = text.splitlines()
-            safe_lines = redact_source(text).splitlines()
+            # Same numbering as Python AST/editors, so line scans and excerpts stay aligned.
+            lines = split_source(text, path.suffix == ".py")
+            safe_lines = source_lines(text, path.suffix == ".py")
 
             def add(
                 rule: str,

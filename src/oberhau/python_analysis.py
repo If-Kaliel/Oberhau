@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 
-from oberhau.security import redact_source
+from oberhau.security import source_lines
 
 
 def name_of(node: ast.AST) -> str:
@@ -28,7 +28,7 @@ def source_trace(text: str, line: int, rule: str) -> dict:
     ]
     function = min(functions, key=lambda node: node.end_lineno - node.lineno) if functions else None
     scope = function or tree
-    safe_lines = redact_source(text).splitlines()
+    safe_lines = source_lines(text, python=True)
     aliases = {}
     imports = [*tree.body, *(function.body if function else [])]
     for node in imports:

@@ -5,6 +5,7 @@
 - Parallel scanner jobs no longer race when saving equivalent findings: `save_finding` takes the SQLite write lock before its existence check. Previously, builtin/Semgrep equivalent rules could fail the second scanner run with a UNIQUE violation and lose its remaining findings, and concurrent OSV/Trivy advisories could be stored as duplicates instead of being correlated.
 - Wrongly typed nested scanner JSON is reported as malformed output instead of an unclassified `AttributeError`.
 - SARIF export includes `level` (from scanner severity) and `endLine`, so code-scanning consumers keep the severity instead of treating every result as a warning.
+- Source excerpts use the parser's line numbering (LF, plus a lone CR for Python) instead of `str.splitlines()`. U+2028/U+0085 in JavaScript or Python strings no longer shift contextual, builtin, investigation and assistant excerpts to the wrong line, and a Python file with classic-Mac CR line endings no longer fails the whole contextual research run. The index version advances to contextual-3 so affected cached summaries are rebuilt; historical runs keep their recorded version.
 
 ## 1.0.0 — scoped offline investigation workbench
 

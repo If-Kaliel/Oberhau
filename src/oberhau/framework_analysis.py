@@ -14,9 +14,9 @@ from threading import Event
 
 from oberhau.core import Cancelled, OberhauError
 from oberhau.research_models import FileSummary, Symbol
-from oberhau.security import redact_source
+from oberhau.security import redact_source, source_lines
 
-PARSER_VERSION = "contextual-2"
+PARSER_VERSION = "contextual-3"
 EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".java", ".cs", ".py"}
 FUNCTIONS = {
     "function_declaration",
@@ -160,7 +160,7 @@ def parse_file(
         raise OberhauError("Native parser exceeded the investigation deadline")
     checkpoint(cancel, deadline)
     result = FileSummary(path=path, sha256=digest, parser=f"tree-sitter:{framework}")
-    safe_lines = redact_source(content.decode("utf-8", errors="replace")).splitlines()
+    safe_lines = source_lines(content.decode("utf-8", errors="replace"))
 
     def text(node):
         return (
@@ -604,7 +604,7 @@ def parse_python(
     except (SyntaxError, ValueError, RecursionError):
         result.limitations.append("Python syntax errors: file excluded")
         return result
-    lines = redact_source(content.decode("utf-8", errors="replace")).splitlines()
+    lines = source_lines(content.decode("utf-8", errors="replace"), python=True)
     for node in tree.body:
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
